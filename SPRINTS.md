@@ -16,28 +16,26 @@
 > 29/04 → 04/05 | GitHub, HTML, Models
 
 ### Theo — 6 pts
-- [ ] Criar repo GitHub + subir estrutura Django inicial *(fácil — 1pt)*
-- [ ] HTML: página de Login *(fácil — 1pt)*
-- [ ] CSS: estilizar Login *(média — 2pt)*
+- [ ] Criar o repositório GitHub *(fácil — 1pt)*
+- [ ] Init Django + estrutura inicial do projeto *(média — 2pt)*
+- [ ] Criar README explicando como rodar o projeto *(fácil — 1pt)*
 - [ ] Django: model `Student` + migrações + seed data *(média — 2pt)*
 
 ### Jorge — 6 pts
-- [ ] HTML: listagem de cursos *(fácil — 1pt)*
-- [ ] HTML: detalhe de um curso *(fácil — 1pt)*
-- [ ] CSS: estilizar páginas de curso *(média — 2pt)*
-- [ ] Django: model `Course` + migrações + seed data *(média — 2pt)*
+- [ ] HTML: página de Login *(fácil — 1pt)*
+- [ ] CSS: estilizar Login *(média — 2pt)*
+- [ ] HTML: página de Register *(média — 2pt)*
+- [ ] CSS: estilizar Register *(fácil — 1pt)*
 
 ### Thiago — 6 pts
+- [ ] Django: model `Course` + migrações + seed data *(média — 2pt)*
 - [ ] HTML: dashboard do aluno *(fácil — 1pt)*
-- [ ] HTML: página de horários *(fácil — 1pt)*
-- [ ] CSS: estilizar dashboard e horários *(média — 2pt)*
-- [ ] Django: model `Enrollment` + migrações *(média — 2pt)*
+- [ ] HTML: página inicial (home) *(fácil — 1pt)*
+- [ ] CSS: estilizar dashboard *(média — 2pt)*
 
 ### Matheus — 6 pts
-- [ ] HTML: página de registro de conta *(fácil — 1pt)*
-- [ ] HTML: página de notas *(fácil — 1pt)*
-- [ ] CSS: estilizar registro e notas *(média — 2pt)*
-- [ ] Django: model `Grade` + migrações + seed data *(média — 2pt)*
+- [ ] Criar página do professor no Loveable *(difícil — 4pt)*
+- [ ] Criar tela de listagem de cursos no Loveable *(média — 2pt)*
 
 ---
 
