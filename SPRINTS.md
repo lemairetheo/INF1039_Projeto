@@ -16,10 +16,9 @@
 > 29/04 → 04/05 | GitHub, HTML, Models
 
 ### Theo — 6 pts
-- [ ] Criar o repositório GitHub *(fácil — 1pt)*
-- [ ] Init Django + estrutura inicial do projeto *(média — 2pt)*
+- [ ] Criar o repositório GitHub + Init Django + estrutura inicial do projeto *(média — 2pt)*
 - [ ] Criar README explicando como rodar o projeto *(fácil — 1pt)*
-- [ ] Django: model `Student` + migrações + seed data *(média — 2pt)*
+- [ ] Django: models + migrações + seed data *(média — 3pt)*
 
 ### Jorge — 6 pts
 - [ ] HTML: página de Login *(fácil — 1pt)*
