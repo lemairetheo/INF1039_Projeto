@@ -42,16 +42,17 @@
 > 06/05 → 11/05 | Conectar HTML ao Django
 
 ### Theo — 6 pts
+- [ ] Django: view + URL para listagem de cursos *(fácil — 1pt)*
+- [ ] Django: view + URL para detalhe de curso *(fácil — 1pt)*
+- [ ] Conectar template HTML de cursos ao Django *(média — 2pt)*
+- [ ] Passar dados reais do banco para o template de cursos *(média — 2pt)*
+
+### Jorge — 6 pts
 - [ ] Django: view + URL para Login *(fácil — 1pt)*
 - [ ] Django: view + URL para Registro *(fácil — 1pt)*
 - [ ] Conectar template HTML de Login ao Django *(média — 2pt)*
 - [ ] Passar dados reais do banco para o template de dashboard *(média — 2pt)*
 
-### Jorge — 6 pts
-- [ ] Django: view + URL para listagem de cursos *(fácil — 1pt)*
-- [ ] Django: view + URL para detalhe de curso *(fácil — 1pt)*
-- [ ] Conectar template HTML de cursos ao Django *(média — 2pt)*
-- [ ] Passar dados reais do banco para o template de cursos *(média — 2pt)*
 
 ### Thiago — 6 pts
 - [ ] Django: view + URL para horários *(fácil — 1pt)*
