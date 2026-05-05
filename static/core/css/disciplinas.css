@@ -1,0 +1,200 @@
+html, body {
+    background-color: #f9fAfB;
+    color: #1e293b;
+    line-height: 1.5;
+    padding: 32px 0px;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+}
+
+.cabecalho {
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    color: #111827;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+p {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.botao_solicitar_disciplina {
+    background-color: #ffffff;
+    border: 1.5px solid #1e293b;
+    color: #093696;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.botao_solicitar_disciplina:hover {
+    background-color: #f8fafc;
+    border-color: #334155;
+}
+
+.botao_solicitar_disciplina .icone {
+    position: static;
+    transform: none;
+    color: #093696;
+}
+
+.caixa_busca {
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.icone {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.caixa_busca input {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 12px 12px 40px;
+    width: 100%;
+    color: #64748b;
+    box-sizing: border-box;
+}
+
+.caixa_filtro {
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.caixa_filtro label {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.input_filtro {
+    position: relative;
+    width: fit-content;
+}
+
+.input_filtro input {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 12px 8px 35px;
+    color: #64748b;
+    width: 350px;
+    box-sizing: border-box;
+}
+
+.grade_disciplinas {
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card_disciplina {
+    background-color: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.icone_disciplinas {
+    color: #1e293b;
+    padding-top: 4px;
+}
+
+.card_info {
+    flex: 1;
+}
+
+.card_cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.card_cabecalho h3 {
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.badge_status {
+    background-color: #f0fdf4;
+    color: #22c55e;
+    border: 1px solid #bbf7d0;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.card_detalhes {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.tag_departamento {
+    background-color: #3f51b5;
+    color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.info_extra {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.card_descricao {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
