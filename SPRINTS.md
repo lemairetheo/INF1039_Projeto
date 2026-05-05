@@ -42,28 +42,29 @@
 > 06/05 → 11/05 | Conectar HTML ao Django
 
 ### Theo — 6 pts
-- [ ] Django: view + URL para Login *(fácil — 1pt)*
-- [ ] Django: view + URL para Registro *(fácil — 1pt)*
-- [ ] Conectar template HTML de Login ao Django *(média — 2pt)*
-- [ ] Passar dados reais do banco para o template de dashboard *(média — 2pt)*
-
-### Jorge — 6 pts
 - [ ] Django: view + URL para listagem de cursos *(fácil — 1pt)*
 - [ ] Django: view + URL para detalhe de curso *(fácil — 1pt)*
-- [ ] Conectar template HTML de cursos ao Django *(média — 2pt)*
+- [ ] Make base html(header-footer) *(média — 2pt)*
 - [ ] Passar dados reais do banco para o template de cursos *(média — 2pt)*
+
+### Jorge — 6 pts
+- [ ] Django: view + URL para Login *(fácil — 1pt)*
+- [ ] Django: view + URL para Registro *(fácil — 1pt)*
+- [ ] Implementar HTML para homepage *(media — 2pt)*
+- [ ] Implementar CSS para homepage *(media — 2pt)*
+
 
 ### Thiago — 6 pts
 - [ ] Django: view + URL para horários *(fácil — 1pt)*
 - [ ] Django: view + URL para inscrição em curso *(fácil — 1pt)*
-- [ ] Conectar template HTML de horários ao Django *(média — 2pt)*
-- [ ] Passar dados do banco para o template de horários *(média — 2pt)*
+- [ ] Implementar HTML CSS para horario do dia *(média — 2pt)*
+- [ ] Implementar HTML CSS para cadastrar o curso *(média — 2pt)*
 
 ### Matheus — 6 pts
 - [ ] Django: view + URL para notas *(fácil — 1pt)*
 - [ ] Django: view + URL para perfil do aluno *(fácil — 1pt)*
-- [ ] Conectar template HTML de notas ao Django *(média — 2pt)*
-- [ ] Passar dados de notas do banco para o template *(média — 2pt)*
+- [ ] Implementar HTML CSS para criar nota *(média — 2pt)*
+- [ ] Implementar HTML CSS para perfil do aluno *(média — 2pt)*
 
 ---
 
