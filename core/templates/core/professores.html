@@ -1,136 +1,118 @@
+{% extends 'core/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Disciplinas | Academic Curator</title>
-        <link rel="stylesheet" href="{% static 'core/css/professores.css' %}">
-    </head>
 
-    <body>
-        <header class="cabecalho">
-            <div class="texto_cabecalho">
-                <h1>Professores</h1>
-                <p>Veja os professores e as disciplinas que lecionam</p> 
+{% block title %}Professores | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/professores.css' %}">
+{% endblock %}
+
+{% block content %}
+<header class="cabecalho">
+    <div class="texto_cabecalho">
+        <h1>Professores</h1>
+        <p>Veja os professores e as disciplinas que lecionam</p>
+    </div>
+</header>
+
+<section class="grade_professores">
+    <article class="card_professor">
+        <header class="perfil_cabecalho">
+            <div class="avatar_circulo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                </svg>
+            </div>
+            <div class="nome_professor">
+                <h2>Paula Guaranys</h2>
+                <span>0 disciplina(s)</span>
             </div>
         </header>
+        <div class="avaliacao_estrelas">
+            <span class="estrelas">☆☆☆☆☆</span>
+            <span>Sem avaliação</span>
+        </div>
+        <div class="lista_tags_disciplinas"></div>
+        <div class="acoes_professor">
+            <button class="botao_perfil">Perfil</button>
+            <button class="botao_avaliacoes">Ver Avaliações</button>
+        </div>
+    </article>
 
-        <section class="grade_professores">
-            <article class="card_professor">
-                <header class="perfil_cabecalho">
-                    <div class="avatar_circulo">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-                        </svg>
-                    </div>
+    <article class="card_professor">
+        <header class="perfil_cabecalho">
+            <div class="avatar_circulo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                </svg>
+            </div>
+            <div class="nome_professor">
+                <h2>Waldemar Celes</h2>
+                <span>1 disciplina(s)</span>
+            </div>
+        </header>
+        <div class="avaliacao_estrelas">
+            <span class="estrelas">☆☆☆☆☆</span>
+            <span>Sem avaliação</span>
+        </div>
+        <div class="lista_tags_disciplinas">
+            <span class="tag_disciplina">INF1037 - Programação em C</span>
+        </div>
+        <div class="acoes_professor">
+            <button class="botao_perfil">Perfil</button>
+            <button class="botao_avaliacoes">Ver Avaliações</button>
+        </div>
+    </article>
 
-                    <div class="nome_professor">
-                        <h2>Paula Guaranys</h2>
-                        <span>0 disciplina(s)</span>
-                    </div>
-                </header>
-                
-                <div class="avaliacao_estrelas">
-                    <span class="estrelas">☆☆☆☆☆</span>
-                    <span>Sem avaliação</span>
-                </div>
+    <article class="card_professor">
+        <header class="perfil_cabecalho">
+            <div class="avatar_circulo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                </svg>
+            </div>
+            <div class="nome_professor">
+                <h2>Luís Bicalho</h2>
+                <span>1 disciplina(s)</span>
+            </div>
+        </header>
+        <div class="avaliacao_estrelas">
+            <span class="estrelas">★★★★★</span>
+            <span>Com avaliação</span>
+        </div>
+        <div class="lista_tags_disciplinas">
+            <span class="tag_disciplina">INF1039 - Projetos: Aplica Interativa</span>
+        </div>
+        <div class="acoes_professor">
+            <button class="botao_perfil">Perfil</button>
+            <button class="botao_avaliacoes">Ver Avaliações</button>
+        </div>
+    </article>
 
-                <div class="lista_tags_disciplinas"></div>
-
-                <div class="acoes_professor">
-                    <button class="botao_perfil">Perfil</button>
-                    <button class="botao_avaliacoes">Ver Avaliações</button>
-                </div>
-            </article>
-
-            <article class="card_professor">
-                <header class="perfil_cabecalho">
-                    <div class="avatar_circulo">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-                        </svg>
-                    </div>
-                    
-                    <div class="nome_professor">
-                        <h2>Waldemar Celes</h2>
-                        <span>1 disciplina(s)</span>
-                    </div>
-                </header>
-                
-                <div class="avaliacao_estrelas">
-                    <span class="estrelas">☆☆☆☆☆</span>
-                    <span>Sem avaliação</span>
-                </div>
-
-                <div class="lista_tags_disciplinas">
-                    <span class="tag_disciplina">INF1037 - Programação em C</span>
-                </div>
-
-                <div class="acoes_professor">
-                    <button class="botao_perfil">Perfil</button>
-                    <button class="botao_avaliacoes">Ver Avaliações</button>
-                </div>
-            </article>
-
-            <article class="card_professor">
-                <header class="perfil_cabecalho">
-                    <div class="avatar_circulo">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-                        </svg>
-                    </div>
-                    
-                    <div class="nome_professor">
-                        <h2>Luís Bicalho</h2>
-                        <span>1 disciplina(s)</span>
-                    </div>
-                </header>
-                
-                <div class="avaliacao_estrelas">
-                    <span class="estrelas">★★★★★</span>
-                    <span>Com avaliação</span>
-                </div>
-
-                <div class="lista_tags_disciplinas">
-                    <span class="tag_disciplina">INF1039 - Projetos: Aplica Interativa</span>
-                </div>
-
-                <div class="acoes_professor">
-                    <button class="botao_perfil">Perfil</button>
-                    <button class="botao_avaliacoes">Ver Avaliações</button>
-                </div>
-            </article>
-
-            <article class="card_professor">
-                <header class="perfil_cabecalho">
-                    <div class="avatar_circulo">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-                        </svg>
-                    </div>
-                    
-                    <div class="nome_professor">
-                        <h2>Nicolau Saldanha</h2>
-                        <span>2 disciplina(s)</span>
-                    </div>
-                </header>
-                
-                <div class="avaliacao_estrelas">
-                    <span class="estrelas">☆☆☆☆☆</span>
-                    <span>Com avaliação</span>
-                </div>
-
-                <div class="lista_tags_disciplinas">
-                    <span class="tag_disciplina">MAT4200 - Álgebra Linear I</span>
-                    <span class="tag_disciplina">MAT4161 - Cálculo a uma Variável</span>
-                </div>
-
-                <div class="acoes_professor">
-                    <button class="botao_perfil">Perfil</button>
-                    <button class="botao_avaliacoes">Ver Avaliações</button>
-                </div>
-            </article>
-        </section>
-    </body>
-</html>
+    <article class="card_professor">
+        <header class="perfil_cabecalho">
+            <div class="avatar_circulo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                </svg>
+            </div>
+            <div class="nome_professor">
+                <h2>Nicolau Saldanha</h2>
+                <span>2 disciplina(s)</span>
+            </div>
+        </header>
+        <div class="avaliacao_estrelas">
+            <span class="estrelas">☆☆☆☆☆</span>
+            <span>Com avaliação</span>
+        </div>
+        <div class="lista_tags_disciplinas">
+            <span class="tag_disciplina">MAT4200 - Álgebra Linear I</span>
+            <span class="tag_disciplina">MAT4161 - Cálculo a uma Variável</span>
+        </div>
+        <div class="acoes_professor">
+            <button class="botao_perfil">Perfil</button>
+            <button class="botao_avaliacoes">Ver Avaliações</button>
+        </div>
+    </article>
+</section>
+{% endblock %}

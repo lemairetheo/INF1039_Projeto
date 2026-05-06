@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -8,49 +9,51 @@
 </head>
 <body>
     <div class="container">
-        
-        <!-- Lado Esquerdo: Branding -->
+
         <div class="info-panel">
             <div class="brand">
                 <span>📖</span>
                 <span>Academic Curator</span>
             </div>
-            
             <div class="hero-text">
                 <h1>Sua Inteligência, Curada.</h1>
                 <p>Acesse um ecossistema de scholars e pesquisadores. Educação como uma galeria curada de conhecimento.</p>
             </div>
-
             <div class="trust-badge">
                 Confiado por pesquisadores em todo o mundo.
             </div>
         </div>
 
-        <!-- Lado Direito: Formulário -->
         <div class="form-panel">
             <div class="form-container">
                 <h2>Bem-vindo de Volta</h2>
                 <p class="subtitle">Continue sua jornada intelectual.</p>
 
-                <form>
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                    <div class="form-errors">Usuário ou senha incorretos. Tente novamente.</div>
+                    {% endif %}
+
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" placeholder="seu@email.edu" required>
+                        <label for="id_username">Usuário</label>
+                        <input type="text" name="username" id="id_username" placeholder="seu.usuario" required autofocus>
                     </div>
 
                     <div class="form-group">
                         <div class="label-wrapper">
-                            <label>Senha</label>
-                            <a href="#" class="forgot-link">Esqueceu?</a>
+                            <label for="id_password">Senha</label>
                         </div>
-                        <input type="password" placeholder="••••••••" required>
+                        <input type="password" name="password" id="id_password" placeholder="••••••••" required>
                     </div>
 
+                    <input type="hidden" name="next" value="{{ next }}">
                     <button type="submit" class="btn-submit">Acessar Portal</button>
                 </form>
 
                 <p class="footer-link">
-                    Ainda não tem conta? <a href="register.html">Cadastre-se</a>
+                    Ainda não tem conta? <a href="{% url 'register' %}">Cadastre-se</a>
                 </p>
             </div>
         </div>

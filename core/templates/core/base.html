@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Academic Curator{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="navbar-inner">
+            <a href="{% url 'home' %}" class="navbar-brand">
+                <span class="brand-icon">📖</span>
+                <span class="brand-name">Academic Curator</span>
+            </a>
+
+            <nav class="navbar-links">
+                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Início</a>
+                <a href="{% url 'disciplinas' %}" class="nav-link {% if request.resolver_match.url_name == 'disciplinas' %}active{% endif %}">Disciplinas</a>
+                <a href="{% url 'professores' %}" class="nav-link {% if request.resolver_match.url_name == 'professores' %}active{% endif %}">Professores</a>
+            </nav>
+
+            <div class="navbar-auth">
+                {% if user.is_authenticated %}
+                    <span class="nav-user">{{ user.get_full_name|default:user.username }}</span>
+                    <a href="{% url 'logout' %}" class="btn-nav-outline">Sair</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-nav-outline">Entrar</a>
+                    <a href="{% url 'register' %}" class="btn-nav-primary">Cadastrar</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <span class="footer-brand">📖 Academic Curator</span>
+            <span class="footer-copy">&copy; 2026 — Projetado para a melhor experiência estudantil.</span>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
