@@ -28,14 +28,13 @@ body {
     background-color: var(--bg-main);
     color: var(--text-dark-blue);
     line-height: 1.5;
-    padding-top: 60px; /* Espaço no topo já que a navbar foi removida */
 }
 
 /* Container Principal de Conteúdo */
 .content-wrapper {
     max-width: 900px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 60px 20px 0;
 }
 
 /* --- Hero Section --- */
