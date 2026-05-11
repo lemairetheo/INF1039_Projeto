@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.db.models import Avg
 
 # ── Usuario (Aluno) ────────────────────────────────────────────────────────────
 class Student(models.Model):
@@ -35,24 +35,35 @@ class Professor(models.Model):
 
 # ── Disciplina ─────────────────────────────────────────────────────────────────
 class Disciplina(models.Model):
-    codigo    = models.CharField(max_length=20, unique=True)
-    nome      = models.CharField(max_length=100)
-    creditos  = models.PositiveIntegerField()
-    periodo   = models.PositiveIntegerField()
-    professor = models.ForeignKey(
-        Professor,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='disciplinas'
-    )
+    codigo = models.CharField(max_length=20, unique=True)
+    nome = models.CharField(max_length=100)
+    creditos = models.PositiveIntegerField()
+    periodo = models.PositiveIntegerField()
+    professor = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='disciplinas')
+    quantidade_turmas = models.PositiveIntegerField(default=1)
+
+    @property
+    def nota_media(self):
+        media = self.avaliacoes.aggregate(Avg('nota'))['nota__avg']
+        if media is None:
+            return 0.0
+        return round(float(media), 1)
 
     def __str__(self):
         return f"{self.codigo} - {self.nome}"
 
-    class Meta:
-        verbose_name = 'Disciplina'
-        verbose_name_plural = 'Disciplinas'
-        ordering = ['periodo', 'nome']
+# ── Horario ─────────────────────────────────────────────────────────────────
+class Horario(models.Model):
+    DIAS_CHOICES = [
+        ('2', 'Segunda'), ('3', 'Terça'), ('4', 'Quarta'), ('5', 'Quinta'), ('6', 'Sexta'),
+    ]
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='horarios')
+    dia_semana = models.CharField(max_length=1, choices=DIAS_CHOICES)
+    horario_inicio = models.TimeField()
+    horario_fim = models.TimeField()
+
+    def __str__(self):
+        return f"{self.disciplina.nome} - {self.get_dia_semana_display()} às {self.horario_inicio}"
 
 
 # ── Grade (horário semestral do aluno) ─────────────────────────────────────────

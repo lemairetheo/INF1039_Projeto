@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Professor, Disciplina, Grade, Avaliacao
+from .models import Student, Professor, Disciplina, Grade, Horario, Avaliacao
 
 
 @admin.register(Student)
@@ -22,11 +22,22 @@ class ProfessorAdmin(admin.ModelAdmin):
     search_fields = ('nome', 'departamento')
 
 
+class HorarioInline(admin.TabularInline):
+    model = Horario
+    extra = 2
+
+
 @admin.register(Disciplina)
 class DisciplinaAdmin(admin.ModelAdmin):
     list_display  = ('codigo', 'nome', 'creditos', 'periodo', 'professor')
     list_filter   = ('periodo', 'professor')
     search_fields = ('codigo', 'nome')
+    inlines = [HorarioInline]
+
+
+@admin.register(Horario)
+class HorarioAdmin(admin.ModelAdmin):
+    list_display = ('disciplina', 'dia_semana', 'horario_inicio')
 
 
 @admin.register(Grade)

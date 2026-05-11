@@ -1,0 +1,169 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Matrícula | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/grade.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/matricula.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container_principal">
+    <header class="cabecalho_pagina">
+        <div class="header_flex">
+            <div class="texto_titulo">
+                <h1>Matrícula Online</h1>
+                <p>Selecione as disciplinas para o próximo período</p>
+            </div>
+            <div class="status_creditos">
+                <span><strong>{{ total_creditos_matriculados }}/30</strong> créditos</span>
+                <div class="barra_progresso_bg">
+                    <div class="barra_fill" style="width: {% widthratio total_creditos_matriculados 30 100 %}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filtros_container">
+            <div class="busca_linha_superior">
+                <input type="text" placeholder="Buscar disciplina ou professor..." class="input_busca_full">
+            </div>
+            <div class="filtros_agrupados_inferior">
+                <select class="select_filtro">
+                    <option>Todos os departamentos</option>
+                    <option value="MAT">MAT</option>
+                    <option value="FIS">FIS</option>
+                    <option value="INF">INF</option>
+                    <option value="CTC">CTC</option>
+                </select>
+                <select class="select_filtro">
+                    <option>Todos os horários</option>
+                    <option value="manha">Manhã (7h-11h)</option>
+                    <option value="tarde">Tarde (12h-17h)</option>
+                    <option value="noite">Noite (18h-22h)</option>
+                </select>
+                <select class="select_filtro">
+                    <option>Todos os créditos</option>
+                    <option value="2">2 créditos</option>
+                    <option value="4">4 créditos</option>
+                    <option value="6">6 créditos</option>
+                </select>
+                <select class="select_filtro">
+                    <option>Todas as vagas</option>
+                    <option value="com_vagas">Com vagas</option>
+                    <option value="poucas">Poucas vagas (≤ 5)</option>
+                    <option value="lotada">Lotada</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <section class="secao_grade">
+        <div class="grade_wrapper">
+            <div class="grade_header_info">
+                <span>Minha Grade Semanal ({{ matriculadas_ids|length }} disciplinas)</span>
+                <button class="toggle_grade">^</button>
+            </div>
+
+            {% if horarios %}
+                <div class="grid_header_dias">
+                    <div class="espaco_hora"></div>
+                    <div class="dia_label">SEG</div>
+                    <div class="dia_label">TER</div>
+                    <div class="dia_label">QUA</div>
+                    <div class="dia_label">QUI</div>
+                    <div class="dia_label">SEX</div>
+                </div>
+
+                <div class="grid_corpo">
+                    <div class="coluna_timeline" style="grid-template-rows: repeat({{ horas_range|length }}, 60px);">
+                        {% for h in horas_range %}
+                            <div class="slot_hora">{{ h }}:00</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="grid_cards_disciplinas" style="grid-template-rows: repeat({{ total_rows }}, 30px);">
+                        {% for h in horarios %}
+                            <article class="card_materia dept_{{ h.disciplina.professor.departamento|slugify }} dia_{{ h.dia_semana }}" 
+                                     style="grid-row: calc(({{ h.horario_inicio.hour }} - {{ hora_min }}) * 2 + 1) / span 4;">
+                                <div class="card_content">
+                                    <h3>{{ h.disciplina.nome }}</h3>
+                                    <span class="nome_professor">{{ h.disciplina.professor.nome }}</span>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="grade_vazia">
+                    <div class="vazia_conteudo">
+                        <span class="icon_calendar">📅</span>
+                        <p>Nenhuma disciplina matriculada. Selecione abaixo para montar sua grade.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="badges_container">
+            {% for d in disciplinas %}
+                {% if d.id in matriculadas_ids %}
+                    <span class="badge_pill dept_{{ d.professor.departamento|slugify }}">
+                        {{ d.nome }}
+                    </span>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="footer_grade_acoes">
+            <button class="botao_salvar_grade">Salvar Grade</button>
+        </div>
+    </section>
+
+    <section class="lista_vagas">
+        <table class="tabela_matricula">
+            <thead>
+                <tr>
+                    <th>DISCIPLINA</th>
+                    <th>CRÉD.</th>
+                    <th>TURMAS</th>
+                    <th>NOTA</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in disciplinas %}
+                <tr>
+                    <td>
+                        <div class="td_disc_info">
+                            <span class="disc_nome">
+                                {{ d.nome }}
+                                {% if d.id in matriculadas_ids %}
+                                    <span class="mini_badge_matriculado">MATRICULADO</span>
+                                {% endif %}
+                            </span>
+                            <span class="disc_sub">{{ d.professor.departamento|upper }}</span>
+                        </div>
+                    </td>
+                    <td><span class="box_credito">{{ d.creditos }}</span></td>
+                    
+                    <td>{{ d.quantidade_turmas }} {% if d.quantidade_turmas == 1 %}turma{% else %}turmas{% endif %}</td>
+                    
+                    <td>⭐ {{ d.nota_media }}</td>
+
+                    <td>
+                        {% if d.id in matriculadas_ids %}
+                            <span class="txt_matriculado">Matriculado</span>
+                        {% else %}
+                            <form action="{% url 'inscrever_disciplina' d.id %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn_selecionar_turma">Selecionar turma →</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}
