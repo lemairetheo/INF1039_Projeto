@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nova Avaliação — Academic Curator</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="criar-avaliacao.css" />
+</head>
+<body>
+
+  <div class="page">
+
+    <!-- Cabeçalho da página -->
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Avaliações</h1>
+        <p>Veja avaliações dos estudantes ou compartilhe a sua.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-outline">
+          <i class="ti ti-user"></i> Minhas Avaliações
+        </button>
+        <button class="btn-outline">
+          <i class="ti ti-list"></i> Ver Avaliações
+        </button>
+      </div>
+    </div>
+
+    <!-- Conteúdo principal -->
+    <div class="content">
+
+      <!-- Lado esquerdo -->
+      <div class="left">
+        <span class="label">AVALIAÇÃO DE CURSO</span>
+        <h2>Compartilhe sua Perspectiva</h2>
+      </div>
+
+      <!-- Lado direito (formulário) -->
+      <div class="right">
+
+        <div class="field">
+          <label for="curso">Selecione o Curso</label>
+          <select id="curso" name="curso" class="select-curso">
+            <option value="">Escolha um curso</option>
+          </select>
+        </div>
+
+        <div class="rating-box">
+          <span>Avaliação do Curso</span>
+          <div class="stars">
+            <i class="ti ti-star"></i>
+            <i class="ti ti-star"></i>
+            <i class="ti ti-star"></i>
+            <i class="ti ti-star"></i>
+            <i class="ti ti-star"></i>
+          </div>
+        </div>
+
+        <div class="rating-box">
+          <span>Avaliação do Professor</span>
+          <div class="stars">
+            <i class="ti ti-star"></i>
+            <i class="ti ti-star"></i>
+            <i class="ti ti-star"></i>
+            <i class="ti ti-star"></i>
+            <i class="ti ti-star"></i>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="comentario">Comentário (opcional)</label>
+          <textarea id="comentario" name="comentario" placeholder="Descreva sua experiência com detalhes..."></textarea>
+        </div>
+
+        <button class="btn-primary">Enviar Avaliação</button>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
