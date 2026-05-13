@@ -1,0 +1,114 @@
+:root {
+    --primary: #1e3a8a;
+    --bg: #f8fafc;
+    --text: #334155;
+    --white: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+}
+
+header {
+    background: var(--white);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    font-weight: bold;
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+nav a {
+    text-decoration: none;
+    color: #64748b;
+    margin: 0 10px;
+    font-size: 0.9rem;
+}
+
+nav a.active { color: var(--primary); font-weight: bold; }
+
+.hero-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background: white;
+    border: 1px solid #cbd5e1;
+    padding: 10px 20px;
+    border-radius: 20px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.card {
+    background: white;
+    max-width: 1000px;
+    margin: 1rem auto;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+}
+
+.tag {
+    background: #e2e8f0;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.prof-tag { background: #4f46e5; color: white; }
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 400px;
+}
+
+input, textarea {
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
