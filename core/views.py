@@ -23,6 +23,28 @@ def professores(request):
     return render(request, 'core/professores.html')
 
 
+def erro_404(request, exception=None):
+    return render(request, 'core/erro_404.html', status=404)
+
+
+def perfil(request):
+    if request.user.is_authenticated:
+        student_profile = get_object_or_404(Student, user=request.user)
+        disciplinas_aluno = Disciplina.objects.filter(grades__aluno=student_profile)
+    else:
+        disciplinas_aluno = []
+    return render(request, 'core/perfil.html', {'disciplinas_aluno': disciplinas_aluno})
+
+
+def criar_avaliacao(request):
+    todas_disciplinas = Disciplina.objects.all().order_by('nome')
+    if request.method == 'POST':
+        return redirect('perfil')
+    return render(request, 'core/criar-avaliacao.html', {
+        'disciplinas': todas_disciplinas
+    })
+
+
 def register_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)

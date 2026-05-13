@@ -1,0 +1,22 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Erro 404 | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/erro_404.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="container_erro">
+    <header class="cabecalho">
+        <div class="texto_cabecalho">
+            <h1>ERRO 404!</h1>
+            <h2>Página não encontrada</h2>
+            <p>A página que você está procurando não está disponível</p>
+        </div>
+    </header>
+
+    <a href="{% url 'home' %}" class="botao_retorno">RETORNAR À PÁGINA INICIAL</a>
+</main>
+{% endblock %}

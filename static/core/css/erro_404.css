@@ -1,0 +1,42 @@
+.container_erro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end; 
+    padding-top: 15vh; 
+    min-height: 70vh;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.container_erro::before {
+    content: "🔍";
+    position: absolute;
+    font-size: 15rem;
+    opacity: 0.05; 
+    z-index: -1;
+    top: 35%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.botao_retorno {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 2rem;
+    padding: 8px 24px;
+    background-color: transparent;
+    color: #004494;
+    border: 1.5px solid #2d3748;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+}
+
+.botao_retorno:hover {
+    background-color: #f8fafc;
+    border-color: #004494;
+}

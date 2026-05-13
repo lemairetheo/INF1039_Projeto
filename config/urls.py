@@ -15,4 +15,9 @@ urlpatterns = [
     path('grade/', views.grade_view, name='grade'),
     path('matricula/', views.matricula_view, name='matricula'),
     path('inscrever-turma/<int:disciplina_id>/', views.inscrever_disciplina, name='inscrever_disciplina'),
+    path('erro_404/', views.erro_404, name='erro_404'),
+    path('perfil/', views.perfil, name='perfil'),
+    path('Nova Avaliação/', views.criar_avaliacao, name='Nova Avaliação'),
 ]
+
+handler404 = 'core.views.erro_404'
