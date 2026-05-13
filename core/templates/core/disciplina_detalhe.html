@@ -1,0 +1,128 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ disciplina.codigo }} — {{ disciplina.nome }} | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/disciplina_detalhe.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="{% url 'disciplinas' %}">Disciplinas</a>
+    <span>›</span>
+    <span>{{ disciplina.nome }}</span>
+</div>
+
+<!-- Header -->
+<header class="detalhe_header">
+    <div class="detalhe_header_left">
+        <div class="detalhe_icone">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5-1.95 0-4.05.4-5.5 1.5v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.1-1.5 5.5-1.5 1.45 0 3.4.45 4.75 1.1.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-3.45.3-5 .9V7.5c1.55-.6 3.3-.9 5-.9 1.2 0 2.4.15 3.5.5v11.4z"/>
+            </svg>
+        </div>
+        <div>
+            <div class="detalhe_codigo_row">
+                <span class="tag_codigo">{{ disciplina.codigo }}</span>
+                <span class="badge_status">Vagas disponíveis</span>
+            </div>
+            <h1>{{ disciplina.nome }}</h1>
+            {% if disciplina.professor %}
+            <p class="detalhe_professor">Prof. {{ disciplina.professor.nome }} — {{ disciplina.professor.departamento }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <a href="{% url 'matricula' %}" class="btn_inscrever">Inscrever-se</a>
+</header>
+
+<!-- Stats -->
+<div class="stats_row">
+    <div class="stat_card">
+        <span class="stat_label">Créditos</span>
+        <span class="stat_value">{{ disciplina.creditos }}</span>
+    </div>
+    <div class="stat_card">
+        <span class="stat_label">Período</span>
+        <span class="stat_value">{{ disciplina.periodo }}º</span>
+    </div>
+    <div class="stat_card">
+        <span class="stat_label">Turmas</span>
+        <span class="stat_value">{{ disciplina.quantidade_turmas }}</span>
+    </div>
+    <div class="stat_card">
+        <span class="stat_label">Alunos inscritos</span>
+        <span class="stat_value">{{ alunos_count }}</span>
+    </div>
+    <div class="stat_card">
+        <span class="stat_label">Nota média</span>
+        <span class="stat_value {% if disciplina.nota_media >= 7 %}nota_boa{% elif disciplina.nota_media >= 5 %}nota_media{% else %}nota_ruim{% endif %}">
+            {% if disciplina.nota_media > 0 %}{{ disciplina.nota_media }}{% else %}—{% endif %}
+        </span>
+    </div>
+</div>
+
+<!-- Grid principal -->
+<div class="detalhe_grid">
+
+    <!-- Horários -->
+    <section class="detalhe_section">
+        <h2 class="section_title">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Horários
+        </h2>
+        {% if horarios %}
+        <ul class="horario_lista">
+            {% for h in horarios %}
+            <li class="horario_item">
+                <span class="horario_dia">{{ h.get_dia_semana_display }}</span>
+                <span class="horario_hora">{{ h.horario_inicio|time:"H:i" }} – {{ h.horario_fim|time:"H:i" }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="vazio">Nenhum horário cadastrado.</p>
+        {% endif %}
+    </section>
+
+    <!-- Avaliações -->
+    <section class="detalhe_section">
+        <h2 class="section_title">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+            </svg>
+            Avaliações dos alunos
+        </h2>
+        {% if avaliacoes %}
+        <ul class="avaliacao_lista">
+            {% for av in avaliacoes %}
+            <li class="avaliacao_item">
+                <div class="avaliacao_top">
+                    <span class="avaliacao_nome">{{ av.aluno.user.get_full_name }}</span>
+                    <span class="avaliacao_nota {% if av.nota >= 7 %}nota_boa{% elif av.nota >= 5 %}nota_media{% else %}nota_ruim{% endif %}">
+                        {{ av.nota }}
+                    </span>
+                </div>
+                {% if av.comentario %}
+                <p class="avaliacao_comentario">{{ av.comentario }}</p>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="vazio">Nenhuma avaliação ainda.</p>
+        {% endif %}
+    </section>
+
+</div>
+
+<!-- Botão voltar -->
+<a href="{% url 'disciplinas' %}" class="btn_voltar">
+    ← Voltar para Disciplinas
+</a>
+
+{% endblock %}

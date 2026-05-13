@@ -29,7 +29,10 @@
             <div class="navbar-auth">
                 {% if user.is_authenticated %}
                     <span class="nav-user">{{ user.get_full_name|default:user.username }}</span>
-                    <a href="{% url 'logout' %}" class="btn-nav-outline">Sair</a>
+                    <form method="post" action="{% url 'logout' %}" style="margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-nav-outline">Sair</button>
+                    </form>
                 {% else %}
                     <a href="{% url 'login' %}" class="btn-nav-outline">Entrar</a>
                     <a href="{% url 'register' %}" class="btn-nav-primary">Cadastrar</a>

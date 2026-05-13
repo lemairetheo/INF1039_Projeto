@@ -15,8 +15,16 @@ def disciplinas(request):
 
 
 def disciplina_detalhe(request, pk):
-    disciplina = get_object_or_404(Disciplina, pk=pk)
-    return render(request, 'core/disciplina_detalhe.html', {'disciplina': disciplina})
+    disciplina = get_object_or_404(Disciplina.objects.select_related('professor'), pk=pk)
+    horarios   = disciplina.horarios.all().order_by('dia_semana', 'horario_inicio')
+    avaliacoes = disciplina.avaliacoes.select_related('aluno__user').all()
+    alunos_count = Student.objects.filter(grades__disciplinas=disciplina).distinct().count()
+    return render(request, 'core/disciplina_detalhe.html', {
+        'disciplina':   disciplina,
+        'horarios':     horarios,
+        'avaliacoes':   avaliacoes,
+        'alunos_count': alunos_count,
+    })
 
 
 def professores(request):
