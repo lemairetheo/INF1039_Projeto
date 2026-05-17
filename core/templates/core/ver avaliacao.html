@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Academic Curator - Avaliações</title>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">📘 Academic Curator</div>
+        <nav>
+            <a href="#">Disciplinas</a>
+            <a href="#">Matrícula</a>
+            <a href="#">Avaliações</a>
+            <a href="#">Minhas Avaliações</a>
+        </nav>
+        <div class="perfil-icon">J</div>
+    </header>
+
+    <main class="container">
+        <section class="header-content">
+            <div>
+                <h1>Avaliações</h1>
+                <p>Veja avaliações dos estudantes ou compartilhe a sua.</p>
+            </div>
+            <div class="actions">
+                <button class="btn-secondary">Minhas Avaliações</button>
+                <!-- Botão para disparar a criação -->
+                <a href="{% url 'nova_avaliacao' %}" class="btn-primary">+ Nova Avaliação</a>
+            </div>
+        </section>
+
+        <!-- Filtros -->
+        <div class="filters">
+            <select><option>Todos os professores</option></select>
+            <select><option>Todas as disciplinas</option></select>
+        </div>
+
+        <p class="count">{{ avaliacoes.count }} avaliação(ões)</p>
+
+        <!-- Lista de Cards -->
+        <div class="cards-list">
+            {% for avaliacao in avaliacoes %}
+            <div class="card">
+                <div class="card-header">
+                    <span class="tag blue">{{ avaliacao.disciplina }}</span>
+                    <span class="tag purple">{{ avaliacao.professor }}</span>
+                    <span class="date">{{ avaliacao.data_criacao|date:"d/m/Y" }}</span>
+                </div>
+                <div class="ratings">
+                    <span>Professor: ⭐⭐⭐⭐⭐</span>
+                    <span>Disciplina: ⭐⭐⭐⭐⭐</span>
+                </div>
+                <div class="comment-box">
+                    <p>"{{ avaliacao.comentario }}"</p>
+                </div>
+                <div class="card-footer">
+                    <span>👍</span> <span>🚩</span>
+                </div>
+            </div>
+            <div class="cards-list">
+            {% for avaliacao in avaliacoes %}
+            <div class="card">
+                <div class="card-header">
+                    <span class="tag blue">{{ avaliacao.disciplina }}</span>
+                    <span class="tag purple">{{ avaliacao.professor }}</span>
+                    <span class="date">{{ avaliacao.data_criacao|date:"d/m/Y" }}</span>
+                </div>
+                <div class="ratings">
+                    <span>Professor: ⭐⭐⭐⭐⭐</span>
+                    <span>Disciplina: ⭐⭐⭐⭐⭐</span>
+                </div>
+                <div class="comment-box">
+                    <p>"{{ avaliacao.comentario }}"</p>
+                </div>
+                <div class="card-footer">
+                    <span>👍</span> <span>🚩</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>
