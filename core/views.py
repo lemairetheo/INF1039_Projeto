@@ -1,7 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
-from django.db.models import Sum
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Count
+from django.core.exceptions import PermissionDenied
+from django.contrib import messages
 from .models import Disciplina, Professor, Grade, Horario, Student
 
 
@@ -21,8 +24,8 @@ def disciplina_detalhe(request, pk):
     alunos_count = Student.objects.filter(grades__disciplinas=disciplina).distinct().count()
     return render(request, 'core/disciplina_detalhe.html', {
         'disciplina':   disciplina,
-        'horarios':     horarios,
-        'avaliacoes':   avaliacoes,
+        'horarios':      horarios,
+        'avaliacoes':    avaliacoes,
         'alunos_count': alunos_count,
     })
 
@@ -128,65 +131,85 @@ def matricula_view(request):
 
 def inscrever_disciplina(request, disciplina_id):
     disciplina = get_object_or_404(Disciplina, id=disciplina_id)
-    student = Student.objects.first() #pra testar
+    student = Student.objects.first() # Mantido o mock padrão do seu projeto
+    
     grade, created = Grade.objects.get_or_create(
         aluno=student,
         semestre=1,
         ano=2026
     )
+    
+    # [PROTEÇÃO MD1] Aplica o validador antes de adicionar a matéria no banco
+    tem_conflito, mensagem = grade.verificar_conflito_para_adicionar(disciplina)
+    if tem_conflito:
+        # Registra a mensagem de erro no sistema de mensagens do Django
+        messages.error(request, mensagem)
+        return redirect('matricula')
+        
     grade.disciplinas.add(disciplina)
     return redirect('matricula')
 
-from django.db.models import Count # Certifique-se de importar o Count no topo do arquivo junto ao Sum
 
 def historico_grades_view(request):
-    # Se o usuário estiver logado, usamos request.user.student, senão usamos o mock para testes
     if request.user.is_authenticated:
         try:
             student = request.user.student
         except Student.DoesNotExist:
             student = Student.objects.first()
     else:
-        student = Student.objects.first() # Padrão usado nas suas outras views de teste
+        student = Student.objects.first() 
     
-    # 1. Busca TODAS as grades históricas do aluno
-    # Usa o annotate para calcular os totais direto no banco de dados
+    # 1. Coleta o histórico agregando valores direto no banco
     grades = Grade.objects.filter(aluno=student).annotate(
         total_disciplinas=Count('disciplinas'),
         total_creditos=Sum('disciplinas__creditos')
     ).order_by('-ano', '-semestre')
     
-    # 2. Captura a grade ativa (a primeira selecionada por padrão ou a mais recente)
-    # Se o usuário clicar em uma específica via GET (?grade_id=X), carregamos ela.
+    # 2. [SEGURANÇA TAREFA M2] Validação estrita do ID via parâmetro GET
     grade_id = request.GET.get('grade_id')
     if grade_id:
         grade_ativa = grades.filter(id=grade_id).first()
+        
+        # Bloqueio de ID Scan: Se a grade existe mas não pertence a este aluno
+        if not grade_ativa and Grade.objects.filter(id=grade_id).exists():
+            raise PermissionDenied("Você não tem autorização para visualizar este histórico de horários.")
     else:
         grade_ativa = grades.first()
 
-    # 3. Mapeia os horários da grade ativa para alimentar a tabela semanal
-    # Cria um dicionário para o template buscar rapidamente por "dia_hora"
-    grade_agenda = {}
+    # 3. [MOTOR DINÂMICO TAREFA MD1] Processamento de Matriz e Colisões Complexas
+    matriz_horarios = {}
+    horas_ordenadas = []
+    conflitos_detectados = []
     disciplinas_da_grade = []
-    
+    dias_semana_codigos = ['2', '3', '4', '5', '6'] 
+
     if grade_ativa:
         disciplinas_da_grade = grade_ativa.disciplinas.all().select_related('professor').prefetch_related('horarios')
+        conflitos_detectados = grade_ativa.mapa_de_conflitos
         
-        # Alimenta a matriz de horários para a tabela
-        for disciplina in disciplinas_da_grade:
-            for horario in disciplina.horarios.all():
-                # Formato da chave: 'DIA-HORA_INICIO' -> Ex: '2-09:00:00'
-                chave = f"{horario.dia_semana}-{horario.horario_inicio.strftime('%H:%M')}"
-                grade_agenda[chave] = disciplina.nome
-
-    # Cria a lista de horas que o CSS espera 
-    horas_grade = ['09:00', '15:00'] 
+        # Extrai os blocos horários exatos para construir as linhas dinamicamente
+        todos_horarios = Horario.objects.filter(
+            disciplina__in=disciplinas_da_grade
+        ).order_by('horario_inicio')
+        
+        horas_ordenadas = sorted(list(set(h.horario_inicio.strftime('%H:%M') for h in todos_horarios)))
+        
+        # Inicializa a matriz para evitar erros de KeyError no template
+        for hora in horas_ordenadas:
+            matriz_horarios[hora] = {dia: [] for dia in dias_semana_codigos}
+            
+        # Alimenta a matriz permitindo múltiplas matérias na mesma célula (colisão controlada)
+        for h in todos_horarios:
+            hora_str = h.horario_inicio.strftime('%H:%M')
+            matriz_horarios[hora_str][h.dia_semana].append(h.disciplina)
 
     context = {
         'grades': grades,
         'grade_ativa': grade_ativa,
         'disciplinas': disciplinas_da_grade,
-        'grade_agenda': grade_agenda,
-        'horas_grade': horas_grade,
+        'conflitos': conflitos_detectados,
+        'matriz_horarios': matriz_horarios,
+        'horas_ordenadas': horas_ordenadas,
+        'dias_semana_codigos': dias_semana_codigos,
     }
     return render(request, 'core/historico.html', context)
