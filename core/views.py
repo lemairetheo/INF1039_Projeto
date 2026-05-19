@@ -136,3 +136,57 @@ def inscrever_disciplina(request, disciplina_id):
     )
     grade.disciplinas.add(disciplina)
     return redirect('matricula')
+
+from django.db.models import Count # Certifique-se de importar o Count no topo do arquivo junto ao Sum
+
+def historico_grades_view(request):
+    # Se o usuário estiver logado, usamos request.user.student, senão usamos o mock para testes
+    if request.user.is_authenticated:
+        try:
+            student = request.user.student
+        except Student.DoesNotExist:
+            student = Student.objects.first()
+    else:
+        student = Student.objects.first() # Padrão usado nas suas outras views de teste
+    
+    # 1. Busca TODAS as grades históricas do aluno
+    # Usa o annotate para calcular os totais direto no banco de dados
+    grades = Grade.objects.filter(aluno=student).annotate(
+        total_disciplinas=Count('disciplinas'),
+        total_creditos=Sum('disciplinas__creditos')
+    ).order_by('-ano', '-semestre')
+    
+    # 2. Captura a grade ativa (a primeira selecionada por padrão ou a mais recente)
+    # Se o usuário clicar em uma específica via GET (?grade_id=X), carregamos ela.
+    grade_id = request.GET.get('grade_id')
+    if grade_id:
+        grade_ativa = grades.filter(id=grade_id).first()
+    else:
+        grade_ativa = grades.first()
+
+    # 3. Mapeia os horários da grade ativa para alimentar a tabela semanal
+    # Cria um dicionário para o template buscar rapidamente por "dia_hora"
+    grade_agenda = {}
+    disciplinas_da_grade = []
+    
+    if grade_ativa:
+        disciplinas_da_grade = grade_ativa.disciplinas.all().select_related('professor').prefetch_related('horarios')
+        
+        # Alimenta a matriz de horários para a tabela
+        for disciplina in disciplinas_da_grade:
+            for horario in disciplina.horarios.all():
+                # Formato da chave: 'DIA-HORA_INICIO' -> Ex: '2-09:00:00'
+                chave = f"{horario.dia_semana}-{horario.horario_inicio.strftime('%H:%M')}"
+                grade_agenda[chave] = disciplina.nome
+
+    # Cria a lista de horas que o CSS espera 
+    horas_grade = ['09:00', '15:00'] 
+
+    context = {
+        'grades': grades,
+        'grade_ativa': grade_ativa,
+        'disciplinas': disciplinas_da_grade,
+        'grade_agenda': grade_agenda,
+        'horas_grade': horas_grade,
+    }
+    return render(request, 'core/historico.html', context)
