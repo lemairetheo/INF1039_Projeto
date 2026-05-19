@@ -1,10 +1,10 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
+
 {% block title %}Histórico de Grades - Academic Curator{% endblock %}
 
 {% block extra_css %}
-    <!-- Mantemos o CSS específico da página de histórico -->
     <link rel="stylesheet" href="{% static 'historico.css' %}">
 {% endblock %}
 
@@ -16,25 +16,24 @@
             <h1>Histórico de Grades</h1>
             <p>Visualize e gerencie suas grades anteriores</p>
         </div>
-        <div class="actions">
-            <button class="btn-fav">☆ Favoritas</button>
-            <a href="{% url 'matricula' %}" class="btn-save" style="text-decoration: none; display: inline-block; text-align: center;">💾 Salvar Grade Atual</a>
-        </div>
     </div>
 
     <div class="grid-layout">
-        <!-- LADO ESQUERDO: Lista de Grades do Aluno -->
+        <!-- ── LADO ESQUERDO: Sidebar de Seleção ────────────────────────── -->
         <div class="sidebar">
+            <!-- CONDICIONAL DE ESTADO: Verifica se o aluno tem histórico -->
             {% if grades %}
                 {% for grade in grades %}
+                    <!-- Injeta o ID da iteração na Query String do link GET -->
                     <a href="?grade_id={{ grade.id }}" style="text-decoration: none; color: inherit;">
+                        <!-- Altera a classe visual caso este card seja o selecionado na URL -->
                         <div class="grade-card {% if grade.id == grade_ativa.id %}active{% endif %}">
                             <div class="grade-info">
                                 <h3>Grade {{ grade.semestre }}º Sem. / {{ grade.ano }}</h3>
-                                <span>Registro acadêmico do período</span>
+                                <span>Período Acadêmico</span>
                                 <div class="tags">
-                                    <span class="tag-blue">{{ grade.total_disciplinas|default:0 }} disciplinas</span>
-                                    <span class="tag-orange">{{ grade.total_creditos|default:0 }} créditos</span>
+                                    <span class="tag-blue">{{ grade.total_disciplinas|default:0 }} matérias</span>
+                                    <span class="tag-orange">{{ grade.total_creditos|default:0 }} CR</span>
                                 </div>
                             </div>
                             <span class="star-icon">☆</span>
@@ -42,80 +41,74 @@
                     </a>
                 {% endfor %}
             {% else %}
-                <div class="empty-state">
-                    <div class="icon-sync">🔄</div>
-                    <p>Nenhuma grade salva ainda.</p>
-                    <small>Vá para a aba Matrícula para adicionar matérias e gerar seu histórico.</small>
+                <!-- ESTADO VAZIO: Caso o aluno não possua nenhuma grade cadastrada -->
+                <div class="empty-state" style="text-align: center; padding: 40px 20px; color: #888;">
+                    <div class="icon-sync" style="font-size: 48px; margin-bottom: 15px;">🔄</div>
+                    <p style="font-weight: bold; margin: 0;">Nenhuma grade salva ainda.</p>
+                    <small style="display: block; margin-top: 5px;">Monte seus horários na aba de matrícula para gerar históricos.</small>
                 </div>
             {% endif %}
         </div>
 
-        <!-- LADO DIREITO: Detalhes da Grade Ativa -->
+        <!-- ── LADO DIREITO: Painel de Detalhes Filtrado ───────────────── -->
         <div class="details-panel">
+            <!-- CONDICIONAL DE ESTADO: Existe uma grade ativa selecionada? -->
             {% if grade_ativa %}
                 <div class="details-header">
                     <h2>Grade {{ grade_ativa.semestre }}º Semestre / {{ grade_ativa.ano }}</h2>
-                    <p>Matrícula associada: {{ grade_ativa.aluno.matricula }}</p>
+                    <p>Aluno: {{ grade_ativa.aluno.user.get_full_name }} | Matrícula: {{ grade_ativa.aluno.matricula }}</p>
                 </div>
 
+                <!-- Tabela Semanal Dinâmica -->
                 <div class="schedule-container">
-                    <div class="schedule-header">📅 Minha Grade Semanal ({{ grade_ativa.total_disciplinas }} disciplinas)</div>
                     <table class="timetable">
                         <thead>
                             <tr>
-                                <th></th>
-                                <th>SEG</th>
-                                <th>TER</th>
-                                <th>QUA</th>
-                                <th>QUI</th>
-                                <th>SEX</th>
+                                <th></th><th>SEG</th><th>TER</th><th>QUA</th><th>QUI</th><th>SEX</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>09:00</td>
-                                <td class="cell-blue">{{ grade_agenda.2-09:00|default:"" }}</td>
-                                <td class="cell-purple">{{ grade_agenda.3-09:00|default:"" }}</td>
-                                <td class="cell-blue">{{ grade_agenda.4-09:00|default:"" }}</td>
-                                <td class="cell-purple">{{ grade_agenda.5-09:00|default:"" }}</td>
-                                <td class="cell-pink">{{ grade_agenda.6-09:00|default:"" }}</td>
-                            </tr>
-                            <tr>
-                                <td>15:00</td>
-                                <td class="cell-pink">{{ grade_agenda.2-15:00|default:"" }}</td>
-                                <td class="cell-purple">{{ grade_agenda.3-15:00|default:"" }}</td>
-                                <td class="cell-pink">{{ grade_agenda.4-15:00|default:"" }}</td>
-                                <td class="cell-purple">{{ grade_agenda.5-15:00|default:"" }}</td>
-                                <td class="cell-blue">{{ grade_agenda.6-15:00|default:"" }}</td>
-                            </tr>
+                            {% for hora in horas_ordenadas %}
+                                <tr>
+                                    <td style="font-weight: bold;">{{ hora }}</td>
+                                    {% for dia in dias_semana_codigos %}
+                                        {% with celula=grade_agenda|dict_get:hora|dict_get:dia %}
+                                            {% if celula %}
+                                                {% with disciplina=celula|first %}
+                                                    <td class="cell-blue" style="text-align: center;">
+                                                        {{ disciplina.nome }}
+                                                    </td>
+                                                {% endwith %}
+                                            {% else %}
+                                                <td></td>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Lista Detalhada das Disciplinas -->
-                <div class="discipline-list">
+                <!-- Listagem Filtrada das Disciplinas -->
+                <div class="discipline-list" style="margin-top: 20px;">
+                    <h3>Disciplinas Inclusas</h3>
                     {% for disciplina in disciplinas %}
-                        <div class="disc-item">
-                            <div class="disc-icon">📘</div>
-                            <div class="disc-text">
-                                <strong>{{ disciplina.nome }}</strong> <small>{{ disciplina.codigo }}</small>
-                                <p>👤 Prof. {{ disciplina.professor.nome }} | 🎓 {{ disciplina.creditos }} créditos | ⭐ Nota Média: {{ disciplina.nota_media }}</p>
-                                <small style="color: #666; font-weight: 500;">
-                                    Horários: 
-                                    {% for h in disciplina.horarios.all %}
-                                        {{ h.get_dia_semana_display }} às {{ h.horario_inicio|time:"H:i" }}{% if not forloop.last %}, {% endif %}
-                                    {% empty %}
-                                        Sem horários definidos
-                                    {% endfor %}
-                                </small>
-                            </div>
+                        <div class="disc-item" style="border: 1px solid #eee; padding: 12px; margin-bottom: 8px; border-radius: 6px;">
+                            <strong>{{ disciplina.nome }}</strong> ({{ disciplina.codigo }})
+                            <p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">
+                                👤 Prof. {{ disciplina.professor.nome }} | 🎓 {{ disciplina.creditos }} créditos
+                            </p>
                         </div>
                     {% endfor %}
                 </div>
+
             {% else %}
-                <div class="empty-view">
-                    <div class="icon-eye">👁️</div>
-                    <p>Selecione uma grade na barra lateral para visualizar os detalhes completos</p>
+                <!-- ESTADO VAZIO DETALHES: Histórico existe mas nenhuma grade foi selecionada -->
+                <div class="empty-view" style="text-align: center; padding: 80px 20px; color: #aaa;">
+                    <div class="icon-eye" style="font-size: 56px; margin-bottom: 15px;">👁️</div>
+                    <p style="font-size: 18px; font-weight: 500; margin: 0;">Selecione uma grade para visualizar</p>
+                    <p style="font-size: 14px; margin: 5px 0 0 0;">Utilize a barra lateral esquerda para alternar entre os semestres.</p>
                 </div>
             {% endif %}
         </div>
