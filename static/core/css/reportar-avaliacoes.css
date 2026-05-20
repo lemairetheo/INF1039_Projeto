@@ -1,0 +1,142 @@
+.container_principal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+.modal_report {
+    background: #fff;
+    width: 100%;
+    max-width: 450px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    padding: 25px;
+    border: 1px solid #eee;
+}
+
+.modal_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.titulo_modal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.titulo_modal h2 {
+    font-size: 20px;
+    color: #333;
+    margin: 0;
+}
+
+.botao_fechar {
+    text-decoration: none;
+    font-size: 24px;
+    color: #999;
+    line-height: 1;
+}
+
+.instrucao {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.opcoes_motivo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.radio_container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 30px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #1a3a5f;
+    font-weight: 500;
+    user-select: none;
+}
+
+.radio_container input {
+    position: absolute;
+    opacity: 0;
+}
+
+.checkmark {
+    position: absolute;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 2px solid #1a3a5f;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1a3a5f;
+    transform: translate(-50%, -50%);
+}
+
+.radio_container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.campo_descricao {
+    margin-top: 20px;
+}
+
+.campo_descricao label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.campo_descricao textarea {
+    width: 100%;
+    height: 100px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background-color: #fdfdfd;
+    resize: none;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.botao_enviar {
+    width: 100%;
+    padding: 12px;
+    background-color: #b71c1c;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background 0.2s;
+}
+
+.botao_enviar:hover {
+    background-color: #d32f2f;
+}

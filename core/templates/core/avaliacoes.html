@@ -1,0 +1,188 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Avaliações | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/avaliacoes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container_principal"> <header class="cabecalho">
+        <div class="texto_cabecalho">
+            <div class="row_titulo">
+                <h1>Avaliações</h1>
+                <div class="acoes_topo">
+                    <a href="{% url 'minhas avaliações' %}" class="botao_minhas">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                        </svg>
+                        Minhas Avaliações
+                    </a>
+
+                    <a href="{% url 'Nova Avaliação' %}" class="botao_nova">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Nova Avaliação
+                    </a>
+                </div>
+            </div>
+            <p>Veja avaliações dos estudantes ou compartilhe a sua</p>
+        </div>
+    </header>
+
+    <section class="filtros_avaliacoes">
+        <div class="select_wrapper">
+            <select name="professor" class="filtro_select">
+                <option value="">Todos os professores</option>
+                <option value="1">Dr. Dessio Pinto</option>
+                <option value="2">Dr. Augusto Lima</option>
+                <option value="3">Dr. Eduardo Tavares</option>
+                <option value="4">Dr. Marcelo Fontes</option>
+                <option value="5">Dr. Ricardo Monteiro</option>
+                <option value="6">Dra. Beatriz Carvalho</option>
+                <option value="7">Dra. Camila Ribeiro</option>
+                <option value="8">Dra. Helena Vasconcelos</option>
+            </select>
+        </div>
+
+        <div class="select_wrapper">
+            <select name="disciplina" class="filtro_select">
+                <option value="">Todas as disciplinas</option>
+                <option value="CTC">Dept CTC</option>
+                <option value="FIS">Dept FIS</option>
+                <option value="INF">Dept INF</option>
+                <option value="MAT">Dept MAT</option>
+            </select>
+        </div>
+    </section>
+
+    <div class="contador_avaliacoes">
+        <span>15 avaliação(ões)</span>
+    </div>
+
+    <section class="grade_avaliacoes">
+        <article class="card_avaliacao">
+            <header class="avaliacao_header">
+                <div class="tags_info">
+                    <span class="tag_disciplina">Cálculo 1</span>
+                    <span class="tag_professor">Dra. Helena Vasconcelos</span>
+                </div>
+                <span class="data_postagem">20/05/2026</span>
+            </header>
+
+            <div class="notas_projeto">
+                <div class="nota_bloco">
+                    <label>Professor:</label>
+                    <span class="estrelas">★★★★★</span>
+                </div>
+
+                <div class="nota_bloco">
+                    <label>Disciplina:</label>
+                    <span class="estrelas">★★★☆☆</span>
+                </div>
+            </div>
+
+            <div class="comentario_texto">
+                <p>"A professora explica muito bem, mas a matéria exige muita dedicação e exercícios extras"</p>
+            </div>
+
+            <footer class="avaliacao_acoes">
+                <button class="botao_util">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                    </svg>
+
+                </button>
+
+                <a href="{% url 'Reportar Avaliação' %}" class="botao_denunciar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
+                    </svg>
+                </a>
+            </footer>
+        </article>
+
+        <article class="card_avaliacao">
+            <header class="avaliacao_header">
+                <div class="tags_info">
+                    <span class="tag_disciplina">Química Geral</span>
+                    <span class="tag_professor">Dra. Beatriz Carvalho</span>
+                </div>
+                <span class="data_postagem">18/05/2026</span>
+            </header>
+
+            <div class="notas_projeto">
+                <div class="nota_bloco">
+                    <label>Professor:</label>
+                    <span class="estrelas">★★★★☆</span>
+                </div>
+
+                <div class="nota_bloco">
+                    <label>Disciplina:</label>
+                    <span class="estrelas">★★★★★</span>
+                </div>
+            </div>
+
+            <div class="comentario_texto">
+                <p>"Aulas dinâmicas e laboratoriais interessantes. O conteúdo é bem distribuído ao longo do período"</p>
+            </div>
+
+            <footer class="avaliacao_acoes">
+                <button class="botao_util">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                    </svg>
+                </button>
+
+                <a href="{% url 'Reportar Avaliação' %}" class="botao_denunciar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
+                    </svg>
+                </a>
+            </footer>
+        </article>
+
+        <article class="card_avaliacao">
+            <header class="avaliacao_header">
+                <div class="tags_info">
+                    <span class="tag_disciplina">Inteligência Artificial</span>
+                    <span class="tag_professor">Dra. Camila Ribeiro</span>
+                </div>
+                <span class="data_postagem">15/05/2026</span>
+            </header>
+
+            <div class="notas_projeto">
+                <div class="nota_bloco">
+                    <label>Professor:</label>
+                    <span class="estrelas">★★★★★</span>
+                </div>
+
+                <div class="nota_bloco">
+                    <label>Disciplina:</label>
+                    <span class="estrelas">★★★★★</span>
+                </div>
+            </div>
+
+            <div class="comentario_texto">
+                <p>"Excelente didática para temas complexos como redes neurais. Os projetos práticos ajudam muito a fixar"</p>
+            </div>
+
+            <footer class="avaliacao_acoes">
+                <button class="botao_util">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                    </svg>
+                </button>
+
+                <a href="{% url 'Reportar Avaliação' %}" class="botao_denunciar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
+                    </svg>
+                </a>
+            </footer>
+        </article>
+    </section>
+</div>
+{% endblock %}

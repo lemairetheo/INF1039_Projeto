@@ -13,7 +13,7 @@ def home_view(request):
     return render(request, 'core/Homepage.html')
 
 
-def disciplinas(request):
+def disciplinas(request): 
     todas = Disciplina.objects.select_related('professor').all()
     return render(request, 'core/disciplinas.html', {'disciplinas': todas})
 
@@ -33,6 +33,14 @@ def disciplina_detalhe(request, pk):
 
 def professores(request):
     return render(request, 'core/professores.html')
+
+
+def avaliacoes(request):
+    return render(request, 'core/avaliacoes.html')
+
+
+def reportar_avaliacoes(request):
+    return render(request, 'core/reportar-avaliacoes.html')
 
 
 def erro_404(request, exception=None):

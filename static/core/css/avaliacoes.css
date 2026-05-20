@@ -1,0 +1,162 @@
+.container_principal {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.cabecalho {
+    padding: 20px 0;
+    margin-bottom: 10px;
+}
+
+.row_titulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.texto_cabecalho h1 {
+    font-size: 28px;
+    margin: 0;
+}
+
+.acoes_topo {
+    display: flex;
+    gap: 12px;
+}
+
+.botao_minhas, .botao_nova {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.botao_minhas {
+    background: #fff;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.botao_nova {
+    background: #1a3a5f;
+    color: #fff;
+}
+
+.filtros_avaliacoes {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filtro_select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    min-width: 250px;
+}
+
+.contador_avaliacoes {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.grade_avaliacoes {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.card_avaliacao {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.avaliacao_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.tag_disciplina, .tag_professor {
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.tag_disciplina {
+    background: #f8f9fa;
+    border: 1px solid #eee;
+}
+
+.tag_professor {
+    background: #5c6bc0;
+    color: #fff;
+}
+
+.data_postagem {
+    color: #aaa;
+    font-size: 12px;
+}
+
+.notas_projeto {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.estrelas {
+    color: #ffca28;
+    margin-left: 5px;
+}
+
+.comentario_texto {
+    background: #f8f9fa;
+    padding: 12px 18px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.comentario_texto p {
+    margin: 0;
+    font-size: 14px;
+    color: #444;
+    font-style: italic;
+}
+
+.avaliacao_acoes {
+    display: flex;
+    gap: 10px;
+}
+
+.botao_util, .botao_denunciar {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+.botao_util:hover {
+    color: #1e88e5;
+}
+
+.botao_util:active, .botao_util:focus {
+    color: #1e88e5;
+    outline: none;
+}
+
+.botao_denunciar:hover {
+    color: #d32f2f;
+} 

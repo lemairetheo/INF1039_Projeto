@@ -21,6 +21,7 @@
                 <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Início</a>
                 <a href="{% url 'disciplinas' %}" class="nav-link {% if request.resolver_match.url_name == 'disciplinas' %}active{% endif %}">Disciplinas</a>
                 <a href="{% url 'professores' %}" class="nav-link {% if request.resolver_match.url_name == 'professores' %}active{% endif %}">Professores</a>
+                <a href="{% url 'Avaliações' %}" class="nav-link {% if request.resolver_match.url_name == 'Avaliações' %}active{% endif %}">Avaliações</a>
                 <a href="{% url 'matricula' %}" class="nav-link {% if request.resolver_match.url_name == 'matricula' %}active{% endif %}">Matricula</a>
                 <a href="{% url 'grade' %}" class="nav-link {% if request.resolver_match.url_name == 'grade' %}active{% endif %}">Grade Horária</a>
                 <a href="{% url 'perfil' %}" class="nav-link {% if request.resolver_match.url_name == 'perfil' %}active{% endif %}">Perfil</a>
