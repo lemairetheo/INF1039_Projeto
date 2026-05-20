@@ -37,10 +37,6 @@ def professores(request):
 def erro_404(request, exception=None):
     return render(request, 'core/erro_404.html', status=404)
 
-def minhas_avaliacoes_prof(request):
-    return render(request, 'minhas-avaliacoes-prof.html')
-
-
 def perfil(request):
     if request.user.is_authenticated:
         student_profile = get_object_or_404(Student, user=request.user)
@@ -216,3 +212,6 @@ def historico_grades_view(request):
         'dias_semana_codigos': dias_semana_codigos,
     }
     return render(request, 'core/historico.html', context)
+
+def minhas_avaliacoes_prof(request):
+    return render(request, 'minhas-avaliacoes-prof.html')
