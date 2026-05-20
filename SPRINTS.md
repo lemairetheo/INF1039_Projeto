@@ -104,9 +104,8 @@
 > 27/05 → 01/06 | Login, Registro, Permissões
 
 ### Theo — 6 pts
-- [ ] Implementar login com `django.contrib.auth` *(média — 2pt)*
-- [ ] Implementar logout *(fácil — 1pt)*
-- [ ] Proteger views com `@login_required` *(fácil — 1pt)*
+- [ ] Implementar a possibilidade de editar o perfil do usuário. *(média — 2pt)*
+- [ ] Fazer Avaliação funcional (média — 2pt)
 - [ ] Criar página de perfil do aluno logado *(média — 2pt)*
 
 ### Jorge — 6 pts
