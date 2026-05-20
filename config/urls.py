@@ -19,7 +19,7 @@ urlpatterns = [
     path('perfil/', views.perfil, name='perfil'),
     path('Nova Avaliação/', views.criar_avaliacao, name='Nova Avaliação'),
     path('historico/', views.historico_grades_view, name='historico_grades'),
-    path('minhas avaliações/', views.minhas_avaliacoes, name='minhas avaliações'),
+    path('minhas-avaliacoes/', views.minhas_avaliacoes_prof, name='minhas avaliações'),
 ]
 
 handler404 = 'core.views.erro_404'

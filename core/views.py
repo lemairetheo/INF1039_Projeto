@@ -37,6 +37,9 @@ def professores(request):
 def erro_404(request, exception=None):
     return render(request, 'core/erro_404.html', status=404)
 
+def minhas_avaliacoes_prof(request):
+    return render(request, 'minhas-avaliacoes-prof.html')
+
 
 def perfil(request):
     if request.user.is_authenticated:
