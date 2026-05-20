@@ -1,0 +1,94 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Editar Perfil | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/editar_perfil.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="edit_wrapper">
+
+    <div class="edit_header">
+        <a href="{% url 'perfil' %}" class="btn_voltar">← Voltar ao Perfil</a>
+        <h1>Editar Perfil</h1>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="edit_form">
+        {% csrf_token %}
+
+        {% if messages %}
+        <div class="mensagem_sucesso">
+            {% for msg in messages %}{{ msg }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Informações pessoais -->
+        <section class="edit_section">
+            <h2 class="edit_section_title">Informações Pessoais</h2>
+
+            <div class="form_grid">
+                <div class="form_group">
+                    <label for="{{ user_form.first_name.id_for_label }}">Nome</label>
+                    {{ user_form.first_name }}
+                    {% if user_form.first_name.errors %}
+                    <span class="form_error">{{ user_form.first_name.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form_group">
+                    <label for="{{ user_form.last_name.id_for_label }}">Sobrenome</label>
+                    {{ user_form.last_name }}
+                    {% if user_form.last_name.errors %}
+                    <span class="form_error">{{ user_form.last_name.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form_group">
+                <label for="{{ user_form.email.id_for_label }}">Email</label>
+                {{ user_form.email }}
+                {% if user_form.email.errors %}
+                <span class="form_error">{{ user_form.email.errors.0 }}</span>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Bio e foto -->
+        <section class="edit_section">
+            <h2 class="edit_section_title">Sobre você</h2>
+
+            <div class="form_group">
+                <label for="{{ student_form.bio.id_for_label }}">Bio</label>
+                {{ student_form.bio }}
+                {% if student_form.bio.errors %}
+                <span class="form_error">{{ student_form.bio.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form_group">
+                <label for="{{ student_form.foto.id_for_label }}">Foto de perfil</label>
+                {% if request.user.student.foto %}
+                <div class="foto_atual">
+                    <img src="{{ request.user.student.foto.url }}" alt="Foto atual">
+                    <span>Foto atual</span>
+                </div>
+                {% endif %}
+                {{ student_form.foto }}
+                {% if student_form.foto.errors %}
+                <span class="form_error">{{ student_form.foto.errors.0 }}</span>
+                {% endif %}
+            </div>
+        </section>
+
+        <div class="form_actions">
+            <a href="{% url 'perfil' %}" class="btn_cancelar">Cancelar</a>
+            <button type="submit" class="btn_salvar">Salvar alterações</button>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

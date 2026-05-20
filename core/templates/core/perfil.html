@@ -1,111 +1,110 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Perfil — Academic Curator</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-  <link rel="stylesheet" href="perfil.css" />
-</head>
-<body>
+{% extends 'core/base.html' %}
+{% load static %}
 
-  <div class="page">
+{% block title %}Perfil | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/perfil.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="perfil_layout">
 
     <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="avatar">U</div>
-      <h2 class="user-name">Usuário</h2>
-      <span class="user-role">ESTUDANTE</span>
-      <button class="btn-matricula">Matrícula</button>
-      <button class="btn-matricula">Histórico da Grade</button>
-      <button class="btn-sair"><i class="ti ti-logout"></i> Sair</button>
+    <aside class="perfil_sidebar">
+        <div class="avatar">
+            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </div>
+        <h2 class="user_name">{{ user.get_full_name|default:user.username }}</h2>
+        <span class="user_role">ESTUDANTE</span>
+        <p class="user_matricula">Matrícula: {{ student.matricula }}</p>
+
+        <div class="sidebar_stats">
+            <div class="sidebar_stat">
+                <span class="sidebar_stat_value">{{ disciplinas_aluno.count }}</span>
+                <span class="sidebar_stat_label">Disciplinas</span>
+            </div>
+            <div class="sidebar_stat">
+                <span class="sidebar_stat_value">{{ total_creditos }}</span>
+                <span class="sidebar_stat_label">Créditos</span>
+            </div>
+        </div>
+
+        <div class="sidebar_actions">
+            <a href="{% url 'editar_perfil' %}" class="btn_sidebar">✏️ Editar Perfil</a>
+            <a href="{% url 'matricula' %}" class="btn_sidebar">Matrícula</a>
+            <a href="{% url 'grade' %}" class="btn_sidebar">Grade Horária</a>
+            <form method="post" action="{% url 'logout' %}" style="width:100%">
+                {% csrf_token %}
+                <button type="submit" class="btn_sidebar btn_sair">Sair</button>
+            </form>
+        </div>
     </aside>
 
-    <!-- CONTEÚDO -->
-    <main class="main">
-      <div class="main-header">
-        <h1>Meus Cursos</h1>
-        <a href="#" class="link-matricular">Matricular-se →</a>
-      </div>
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="perfil_main">
 
-      <div class="courses-grid">
-
-        <!-- Card 1 -->
-        <div class="course-card">
-          <div class="card-top"></div>
-          <div class="card-body">
-            <span class="course-code">FIS</span>
-            <h3 class="course-name">Física I</h3>
-            <p class="course-teacher">Dr. Augusto Lima</p>
-            <div class="card-status-row">
-              <span class="badge">Enrolled</span>
-              <div class="progress-wrap">
-                <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
-                <span class="progress-label">0% Concluído</span>
-              </div>
+        <!-- Disciplinas inscritas -->
+        <section class="perfil_section">
+            <div class="section_header">
+                <h1>Meus Cursos</h1>
+                <a href="{% url 'matricula' %}" class="link_matricular">Matricular-se →</a>
             </div>
-            <a href="#" class="avaliar-link">Avaliar Curso →</a>
-          </div>
-        </div>
 
-        <!-- Card 2 -->
-        <div class="course-card">
-          <div class="card-top"></div>
-          <div class="card-body">
-            <span class="course-code">INF</span>
-            <h3 class="course-name">Inteligência Artificial</h3>
-            <p class="course-teacher">Dra. Camila Ribeiro</p>
-            <div class="card-status-row">
-              <span class="badge">Enrolled</span>
-              <div class="progress-wrap">
-                <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
-                <span class="progress-label">0% Concluído</span>
-              </div>
+            {% if disciplinas_aluno %}
+            <div class="courses_grid">
+                {% for disciplina in disciplinas_aluno %}
+                <div class="course_card">
+                    <div class="card_top" style="background: #3f51b5;"></div>
+                    <div class="card_body">
+                        <span class="course_code">{{ disciplina.codigo|slice:":3" }}</span>
+                        <h3 class="course_name">
+                            <a href="{% url 'disciplina_detalhe' disciplina.pk %}">{{ disciplina.nome }}</a>
+                        </h3>
+                        {% if disciplina.professor %}
+                        <p class="course_teacher">Prof. {{ disciplina.professor.nome }}</p>
+                        {% endif %}
+                        <div class="card_status_row">
+                            <span class="badge">Inscrito</span>
+                            <span class="creditos_badge">{{ disciplina.creditos }} créditos</span>
+                        </div>
+                        <a href="{% url 'Nova Avaliação' %}" class="avaliar_link">Avaliar Curso →</a>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-            <a href="#" class="avaliar-link">Avaliar Curso →</a>
-          </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="course-card">
-          <div class="card-top"></div>
-          <div class="card-body">
-            <span class="course-code">MAT</span>
-            <h3 class="course-name">Cálculo II</h3>
-            <p class="course-teacher">Dr. Ricardo Monteiro</p>
-            <div class="card-status-row">
-              <span class="badge">Enrolled</span>
-              <div class="progress-wrap">
-                <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
-                <span class="progress-label">0% Concluído</span>
-              </div>
+            {% else %}
+            <div class="empty_state">
+                <p>Você ainda não está inscrito em nenhuma disciplina.</p>
+                <a href="{% url 'matricula' %}" class="btn_sidebar">Ir para Matrícula</a>
             </div>
-            <a href="#" class="avaliar-link">Avaliar Curso →</a>
-          </div>
-        </div>
+            {% endif %}
+        </section>
 
-        <!-- Card 4 -->
-        <div class="course-card">
-          <div class="card-top"></div>
-          <div class="card-body">
-            <span class="course-code">MAT</span>
-            <h3 class="course-name">Álgebra Linear</h3>
-            <p class="course-teacher">Dra. Helena Vasconcelos</p>
-            <div class="card-status-row">
-              <span class="badge">Enrolled</span>
-              <div class="progress-wrap">
-                <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
-                <span class="progress-label">0% Concluído</span>
-              </div>
+        <!-- Avaliações feitas -->
+        {% if avaliacoes %}
+        <section class="perfil_section">
+            <div class="section_header">
+                <h2>Minhas Avaliações</h2>
             </div>
-            <a href="#" class="avaliar-link">Avaliar Curso →</a>
-          </div>
-        </div>
+            <div class="avaliacoes_lista">
+                {% for av in avaliacoes %}
+                <div class="avaliacao_row">
+                    <span class="av_disciplina">{{ av.disciplina.nome }}</span>
+                    <span class="av_nota {% if av.nota >= 7 %}nota_boa{% elif av.nota >= 5 %}nota_media{% else %}nota_ruim{% endif %}">
+                        {{ av.nota }}
+                    </span>
+                    {% if av.comentario %}
+                    <span class="av_comentario">{{ av.comentario }}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
 
-      </div>
     </main>
+</div>
 
-  </div>
-
-</body>
-</html>
+{% endblock %}

@@ -6,6 +6,7 @@ from django.db.models import Sum, Count
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from .models import Disciplina, Professor, Grade, Horario, Student
+from .forms import UserEditForm, StudentEditForm, AvaliacaoForm
 
 
 def home_view(request):
@@ -37,22 +38,66 @@ def professores(request):
 def erro_404(request, exception=None):
     return render(request, 'core/erro_404.html', status=404)
 
+@login_required
 def perfil(request):
-    if request.user.is_authenticated:
-        student_profile = get_object_or_404(Student, user=request.user)
-        disciplinas_aluno = Disciplina.objects.filter(grades__aluno=student_profile)
-    else:
-        disciplinas_aluno = []
-    return render(request, 'core/perfil.html', {'disciplinas_aluno': disciplinas_aluno})
-
-
-def criar_avaliacao(request):
-    todas_disciplinas = Disciplina.objects.all().order_by('nome')
-    if request.method == 'POST':
-        return redirect('perfil')
-    return render(request, 'core/criar-avaliacao.html', {
-        'disciplinas': todas_disciplinas
+    student = get_object_or_404(Student, user=request.user)
+    disciplinas_aluno = Disciplina.objects.filter(
+        grades__aluno=student
+    ).select_related('professor').distinct()
+    avaliacoes = student.avaliacoes.select_related('disciplina').all()
+    total_creditos = disciplinas_aluno.aggregate(total=Sum('creditos'))['total'] or 0
+    return render(request, 'core/perfil.html', {
+        'student':          student,
+        'disciplinas_aluno': disciplinas_aluno,
+        'avaliacoes':        avaliacoes,
+        'total_creditos':    total_creditos,
     })
+
+
+@login_required
+def editar_perfil(request):
+    student = get_object_or_404(Student, user=request.user)
+    if request.method == 'POST':
+        user_form    = UserEditForm(request.POST, instance=request.user)
+        student_form = StudentEditForm(request.POST, request.FILES, instance=student)
+        if user_form.is_valid() and student_form.is_valid():
+            user_form.save()
+            student_form.save()
+            messages.success(request, 'Perfil atualizado com sucesso!')
+            return redirect('perfil')
+    else:
+        user_form    = UserEditForm(instance=request.user)
+        student_form = StudentEditForm(instance=student)
+    return render(request, 'core/editar_perfil.html', {
+        'user_form':    user_form,
+        'student_form': student_form,
+    })
+
+
+@login_required
+def criar_avaliacao(request):
+    student = get_object_or_404(Student, user=request.user)
+    if request.method == 'POST':
+        form = AvaliacaoForm(request.POST, student=student)
+        if form.is_valid():
+            avaliacao = form.save(commit=False)
+            avaliacao.aluno = student
+            # Se já avaliou esta disciplina, atualiza
+            Avaliacao.objects.update_or_create(
+                aluno=student,
+                disciplina=avaliacao.disciplina,
+                defaults={
+                    'nota':       avaliacao.nota,
+                    'comentario': avaliacao.comentario,
+                }
+            )
+            messages.success(request, 'Avaliação enviada com sucesso!')
+            return redirect('perfil')
+    else:
+        disciplina_id = request.GET.get('disciplina')
+        initial = {'disciplina': disciplina_id} if disciplina_id else {}
+        form = AvaliacaoForm(student=student, initial=initial)
+    return render(request, 'core/criar-avaliacao.html', {'form': form})
 
 
 def register_view(request):
@@ -67,6 +112,7 @@ def register_view(request):
     return render(request, 'core/cadastro1.html', {'form': form})
 
 
+@login_required
 def grade_view(request):
     student = Student.objects.first() 
     grade = Grade.objects.filter(aluno=student, semestre=1, ano=2026).first()
@@ -93,6 +139,7 @@ def grade_view(request):
     })
 
 
+@login_required
 def matricula_view(request):
     todas_disciplinas = Disciplina.objects.select_related('professor').all()
     student = Student.objects.first() 
@@ -128,6 +175,7 @@ def matricula_view(request):
     return render(request, 'core/matricula.html', context)
 
 
+@login_required
 def inscrever_disciplina(request, disciplina_id):
     disciplina = get_object_or_404(Disciplina, id=disciplina_id)
     student = Student.objects.first() # Mantido o mock padrão do seu projeto
@@ -149,6 +197,7 @@ def inscrever_disciplina(request, disciplina_id):
     return redirect('matricula')
 
 
+@login_required
 def historico_grades_view(request):
     if request.user.is_authenticated:
         try:

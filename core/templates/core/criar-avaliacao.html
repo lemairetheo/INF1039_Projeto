@@ -1,83 +1,92 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nova Avaliação — Academic Curator</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-  <link rel="stylesheet" href="criar-avaliacao.css" />
-</head>
-<body>
+{% extends 'core/base.html' %}
+{% load static %}
 
-  <div class="page">
+{% block title %}Nova Avaliação | Academic Curator{% endblock %}
 
-    <!-- Cabeçalho da página -->
-    <div class="page-header">
-      <div class="page-title">
-        <h1>Avaliações</h1>
-        <p>Veja avaliações dos estudantes ou compartilhe a sua.</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-outline">
-          <i class="ti ti-user"></i> Minhas Avaliações
-        </button>
-        <button class="btn-outline">
-          <i class="ti ti-list"></i> Ver Avaliações
-        </button>
-      </div>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/criar-avaliacao.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="aval_wrapper">
+
+    <div class="aval_header">
+        <div>
+            <span class="aval_label">AVALIAÇÃO DE CURSO</span>
+            <h1>Compartilhe sua Perspectiva</h1>
+            <p>Sua avaliação ajuda outros alunos a escolherem melhor.</p>
+        </div>
+        <a href="{% url 'perfil' %}" class="btn_voltar">← Voltar</a>
     </div>
 
-    <!-- Conteúdo principal -->
-    <div class="content">
+    <form method="post" class="aval_form">
+        {% csrf_token %}
 
-      <!-- Lado esquerdo -->
-      <div class="left">
-        <span class="label">AVALIAÇÃO DE CURSO</span>
-        <h2>Compartilhe sua Perspectiva</h2>
-      </div>
-
-      <!-- Lado direito (formulário) -->
-      <div class="right">
-
-        <div class="field">
-          <label for="curso">Selecione o Curso</label>
-          <select id="curso" name="curso" class="select-curso">
-            <option value="">Escolha um curso</option>
-          </select>
+        <!-- Disciplina -->
+        <div class="form_group">
+            <label>SELECIONE O CURSO</label>
+            {{ form.disciplina }}
+            {% if form.disciplina.errors %}
+            <span class="form_error">{{ form.disciplina.errors.0 }}</span>
+            {% endif %}
         </div>
 
-        <div class="rating-box">
-          <span>Avaliação do Curso</span>
-          <div class="stars">
-            <i class="ti ti-star"></i>
-            <i class="ti ti-star"></i>
-            <i class="ti ti-star"></i>
-            <i class="ti ti-star"></i>
-            <i class="ti ti-star"></i>
-          </div>
+        <!-- Nota via estrelas -->
+        <div class="form_group">
+            <label>NOTA (0 – 10)</label>
+            <div class="stars_wrapper">
+                {% for i in "12345678910" %}
+                {% endfor %}
+                {% for i in "0123456789" %}
+                <span class="star" data-value="{{ forloop.counter }}">★</span>
+                {% endfor %}
+                <span class="nota_display">— / 10</span>
+            </div>
+            {{ form.nota }}
+            {% if form.nota.errors %}
+            <span class="form_error">{{ form.nota.errors.0 }}</span>
+            {% endif %}
         </div>
 
-        <div class="rating-box">
-          <span>Avaliação do Professor</span>
-          <div class="stars">
-            <i class="ti ti-star"></i>
-            <i class="ti ti-star"></i>
-            <i class="ti ti-star"></i>
-            <i class="ti ti-star"></i>
-            <i class="ti ti-star"></i>
-          </div>
+        <!-- Comentário -->
+        <div class="form_group">
+            <label>COMENTÁRIO (OPCIONAL)</label>
+            {{ form.comentario }}
         </div>
 
-        <div class="field">
-          <label for="comentario">Comentário (opcional)</label>
-          <textarea id="comentario" name="comentario" placeholder="Descreva sua experiência com detalhes..."></textarea>
+        <div class="form_actions">
+            <a href="{% url 'perfil' %}" class="btn_cancelar">Cancelar</a>
+            <button type="submit" class="btn_enviar">Enviar Avaliação</button>
         </div>
 
-        <button class="btn-primary">Enviar Avaliação</button>
+    </form>
+</div>
+{% endblock %}
 
-      </div>
-    </div>
+{% block extra_js %}
+<script>
+    const stars      = document.querySelectorAll('.star');
+    const notaInput  = document.getElementById('id_nota');
+    const notaDisplay = document.querySelector('.nota_display');
 
-  </div>
-</body>
-</html>
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const val = parseInt(star.dataset.value);
+            notaInput.value = val;
+            notaDisplay.textContent = val + ' / 10';
+            stars.forEach((s, i) => {
+                s.classList.toggle('active', i < val);
+            });
+        });
+
+        star.addEventListener('mouseenter', () => {
+            const val = parseInt(star.dataset.value);
+            stars.forEach((s, i) => s.classList.toggle('hover', i < val));
+        });
+
+        star.addEventListener('mouseleave', () => {
+            stars.forEach(s => s.classList.remove('hover'));
+        });
+    });
+</script>
+{% endblock %}
