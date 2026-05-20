@@ -186,7 +186,7 @@ def inscrever_disciplina(request, disciplina_id):
         ano=2026
     )
     
-    # [PROTEÇÃO MD1] Aplica o validador antes de adicionar a matéria no banco
+    #  Aplica o validador antes de adicionar a matéria no banco
     tem_conflito, mensagem = grade.verificar_conflito_para_adicionar(disciplina)
     if tem_conflito:
         # Registra a mensagem de erro no sistema de mensagens do Django
@@ -213,7 +213,7 @@ def historico_grades_view(request):
         total_creditos=Sum('disciplinas__creditos')
     ).order_by('-ano', '-semestre')
     
-    # 2. [SEGURANÇA TAREFA M2] Validação estrita do ID via parâmetro GET
+    # 2.  Validação estrita do ID via parâmetro GET
     grade_id = request.GET.get('grade_id')
     if grade_id:
         grade_ativa = grades.filter(id=grade_id).first()
@@ -224,7 +224,7 @@ def historico_grades_view(request):
     else:
         grade_ativa = grades.first()
 
-    # 3. [MOTOR DINÂMICO TAREFA MD1] Processamento de Matriz e Colisões Complexas
+    # 3.  Processamento de Matriz e Colisões Complexas
     matriz_horarios = {}
     horas_ordenadas = []
     conflitos_detectados = []
