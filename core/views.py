@@ -214,4 +214,4 @@ def historico_grades_view(request):
     return render(request, 'core/historico.html', context)
 
 def minhas_avaliacoes_prof(request):
-    return render(request, 'minhas-avaliacoes-prof.html')
+    return render(request, 'core/minhas-avaliacoes-prof.html')
