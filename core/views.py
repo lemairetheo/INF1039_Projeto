@@ -206,8 +206,15 @@ def inscrever_disciplina(request, disciplina_id):
 
 @login_required
 def historico_grades(request):
-    # 1. Pega o aluno logado e todas as grades dele
-    aluno = request.user.student
+    # Tenta pegar o estudante, se não existir, evita que o erro aconteça
+    try:
+        aluno = request.user.student
+    except Student.DoesNotExist:
+        # Se o usuário não tiver perfil de aluno, exibe uma mensagem amigável ou cria um template de aviso
+        return render(request, 'core/historico.html', {
+            'error_message': "Seu usuário não possui um perfil de aluno cadastrado."
+        })
+    
     grades = aluno.grades.all()
     
     # 2. Verifica se o usuário clicou em alguma grade na barra lateral
@@ -233,17 +240,21 @@ def historico_grades(request):
         
         # Montamos a tabela linha por linha
         for hora in lista_horarios:
+            # Separamos o texto "08:00" em hora (8) e minuto (0) como números inteiros
+            h_int, m_int = map(int, hora.split(':'))
+            
             linha = {
                 'horario': hora,
                 'dias': [] # Guardará as matérias de Segunda a Sexta neste horário
             }
             
             for dia in codigos_dias:
-                # Buscamos se existe algum horário que combine com o Dia, a Hora e as Disciplinas da grade
+                # Buscamos se existe algum horário que combine com o Dia, a Hora e o Minuto
                 horario_encontrado = Horario.objects.filter(
                     disciplina__in=disciplinas_da_grade,
                     dia_semana=dia,
-                    horario_inicio__strftime='%H:%M' = hora # Compara o texto "08:00"
+                    horario_inicio__hour=h_int,    # Filtra a hora numérica (ex: 8)
+                    horario_inicio__minute=m_int   # Filtra o minuto numérico (ex: 0)
                 ).first()
                 
                 if horario_encontrado:

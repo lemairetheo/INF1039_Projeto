@@ -1,3 +1,9 @@
+{% if error_message %}
+    <div class="alert alert-danger" style="text-align: center; padding: 20px; color: red;">
+        {{ error_message }}
+    </div>
+{% endif %}
+
 {% extends 'core/base.html' %}
 {% load static %}
 
