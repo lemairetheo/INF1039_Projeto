@@ -1,11 +1,10 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-
 {% block title %}Histórico de Grades - Academic Curator{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static ' core/css/historico.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/historico.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -21,12 +20,9 @@
     <div class="grid-layout">
         <!-- ── LADO ESQUERDO: Sidebar de Seleção ────────────────────────── -->
         <div class="sidebar">
-            <!-- CONDICIONAL DE ESTADO: Verifica se o aluno tem histórico -->
             {% if grades %}
                 {% for grade in grades %}
-                    <!-- Injeta o ID da iteração na Query String do link GET -->
                     <a href="?grade_id={{ grade.id }}" style="text-decoration: none; color: inherit;">
-                        <!-- Altera a classe visual caso este card seja o selecionado na URL -->
                         <div class="grade-card {% if grade.id == grade_ativa.id %}active{% endif %}">
                             <div class="grade-info">
                                 <h3>Grade {{ grade.semestre }}º Sem. / {{ grade.ano }}</h3>
@@ -41,7 +37,6 @@
                     </a>
                 {% endfor %}
             {% else %}
-                <!-- ESTADO VAZIO: Caso o aluno não possua nenhuma grade cadastrada -->
                 <div class="empty-state" style="text-align: center; padding: 40px 20px; color: #888;">
                     <div class="icon-sync" style="font-size: 48px; margin-bottom: 15px;">🔄</div>
                     <p style="font-weight: bold; margin: 0;">Nenhuma grade salva ainda.</p>
@@ -52,14 +47,13 @@
 
         <!-- ── LADO DIREITO: Painel de Detalhes Filtrado ───────────────── -->
         <div class="details-panel">
-            <!-- CONDICIONAL DE ESTADO: Existe uma grade ativa selecionada? -->
             {% if grade_ativa %}
                 <div class="details-header">
                     <h2>Grade {{ grade_ativa.semestre }}º Semestre / {{ grade_ativa.ano }}</h2>
                     <p>Aluno: {{ grade_ativa.aluno.user.get_full_name }} | Matrícula: {{ grade_ativa.aluno.matricula }}</p>
                 </div>
 
-                <!-- Tabela Semanal Dinâmica -->
+                <!-- Tabela Semanal Dinâmica (Sintaxe 100% Nativa) -->
                 <div class="schedule-container">
                     <table class="timetable">
                         <thead>
@@ -68,21 +62,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for hora in horas_ordenadas %}
+                            {% for linha in tabela_horarios %}
                                 <tr>
-                                    <td style="font-weight: bold;">{{ hora }}</td>
-                                    {% for dia in dias_semana_codigos %}
-                                        {% with celula=grade_agenda|dict_get:hora|dict_get:dia %}
-                                            {% if celula %}
-                                                {% with disciplina=celula|first %}
-                                                    <td class="cell-blue" style="text-align: center;">
-                                                        {{ disciplina.nome }}
-                                                    </td>
-                                                {% endwith %}
-                                            {% else %}
-                                                <td></td>
-                                            {% endif %}
-                                        {% endwith %}
+                                    <td style="font-weight: bold;">{{ linha.horario }}</td>
+                                    {% for celula in linha.dias %}
+                                        {% if celula %}
+                                            <td class="cell-blue" style="text-align: center;">
+                                                {{ celula.nome }}
+                                            </td>
+                                        {% else %}
+                                            <td></td>
+                                        {% endif %}
                                     {% endfor %}
                                 </tr>
                             {% endfor %}
@@ -104,7 +94,6 @@
                 </div>
 
             {% else %}
-                <!-- ESTADO VAZIO DETALHES: Histórico existe mas nenhuma grade foi selecionada -->
                 <div class="empty-view" style="text-align: center; padding: 80px 20px; color: #aaa;">
                     <div class="icon-eye" style="font-size: 56px; margin-bottom: 15px;">👁️</div>
                     <p style="font-size: 18px; font-weight: 500; margin: 0;">Selecione uma grade para visualizar</p>
