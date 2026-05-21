@@ -204,40 +204,61 @@ def inscrever_disciplina(request, disciplina_id):
     grade.disciplinas.add(disciplina)
     return redirect('matricula')
 
+@login_required
 def historico_grades(request):
-    # ... sua lógica para pegar o aluno, grades e grade_ativa ...
-
-    # 1. Defina a ordem dos horários e dias que você quer exibir
-    lista_horarios = ["08:00", "10:00", "14:00", "16:00"]
-    dias_semana = ["SEG", "TER", "QUA", "QUI", "SEX"]
-
-    # 2. Monte uma estrutura linear simplificada para o template
-    tabela_horarios = []
+    # 1. Pega o aluno logado e todas as grades dele
+    aluno = request.user.student
+    grades = aluno.grades.all()
     
-    for hora in lista_horarios:
-        linha_atual = {
-            'horario': hora,
-            'dias': []  # Vai conter as disciplinas ordenadas de SEG a SEX
-        }
+    # 2. Verifica se o usuário clicou em alguma grade na barra lateral
+    grade_id = request.GET.get('grade_id')
+    if grade_id:
+        grade_ativa = get_object_or_404(Grade, id=grade_id, aluno=aluno)
+    else:
+        grade_ativa = grades.first() # Se não clicou, mostra a mais recente
         
-        for dia in dias_semana:
-            # Procure se existe alguma matéria nesse dia e horário específicos
-            # (Adapte essa busca de acordo com seus Models)
-            materia = disciplinas_da_grade_ativa.filter(
-                horarios__dia=dia, 
-                horarios__hora=hora
-            ).first()
+    # Preparamos os dados que vão rodar na tabela do HTML
+    tabela_horarios = []
+    disciplinas_da_grade = []
+    
+    # 3. Se o aluno tiver uma grade selecionada, montamos os horários
+    if grade_ativa:
+        disciplinas_da_grade = grade_ativa.disciplinas.all()
+        
+        # Lista dos horários padrão das aulas da sua faculdade (adicione ou mude os horários aqui)
+        lista_horarios = ["08:00", "10:00", "14:00", "16:00"]
+        
+        # Mapeamento dos dias da semana exatamente como está no seu Model ('2' para Segunda, etc.)
+        codigos_dias = ['2', '3', '4', '5', '6'] 
+        
+        # Montamos a tabela linha por linha
+        for hora in lista_horarios:
+            linha = {
+                'horario': hora,
+                'dias': [] # Guardará as matérias de Segunda a Sexta neste horário
+            }
             
-            # Adiciona o objeto da matéria ou None se estiver vago
-            linha_atual['dias'].append(materia)
-            
-        tabela_horarios.append(linha_atual)
+            for dia in codigos_dias:
+                # Buscamos se existe algum horário que combine com o Dia, a Hora e as Disciplinas da grade
+                horario_encontrado = Horario.objects.filter(
+                    disciplina__in=disciplinas_da_grade,
+                    dia_semana=dia,
+                    horario_inicio__strftime='%H:%M' = hora # Compara o texto "08:00"
+                ).first()
+                
+                if horario_encontrado:
+                    linha['dias'].append(horario_encontrado.disciplina)
+                else:
+                    linha['dias'].append(None) # Quadrado vazio no HTML
+                    
+            tabela_horarios.append(linha)
 
+    # 4. Enviamos tudo mastigado para o HTML
     context = {
         'grades': grades,
         'grade_ativa': grade_ativa,
-        'disciplinas': disciplinas_da_grade_ativa,
-        'tabela_horarios': tabela_horarios, # <--- Enviando a tabela pronta
+        'disciplinas': disciplinas_da_grade,
+        'tabela_horarios': tabela_horarios,
     }
     
     return render(request, 'core/historico.html', context)
