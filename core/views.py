@@ -204,70 +204,42 @@ def inscrever_disciplina(request, disciplina_id):
     grade.disciplinas.add(disciplina)
     return redirect('matricula')
 
+def historico_grades(request):
+    # ... sua lógica para pegar o aluno, grades e grade_ativa ...
 
-@login_required
-def historico_grades_view(request):
-    if request.user.is_authenticated:
-        try:
-            student = request.user.student
-        except Student.DoesNotExist:
-            student = Student.objects.first()
-    else:
-        student = Student.objects.first() 
+    # 1. Defina a ordem dos horários e dias que você quer exibir
+    lista_horarios = ["08:00", "10:00", "14:00", "16:00"]
+    dias_semana = ["SEG", "TER", "QUA", "QUI", "SEX"]
+
+    # 2. Monte uma estrutura linear simplificada para o template
+    tabela_horarios = []
     
-    # 1. Coleta o histórico agregando valores direto no banco
-    grades = Grade.objects.filter(aluno=student).annotate(
-        total_disciplinas=Count('disciplinas'),
-        total_creditos=Sum('disciplinas__creditos')
-    ).order_by('-ano', '-semestre')
-    
-    # 2.  Validação estrita do ID via parâmetro GET
-    grade_id = request.GET.get('grade_id')
-    if grade_id:
-        grade_ativa = grades.filter(id=grade_id).first()
+    for hora in lista_horarios:
+        linha_atual = {
+            'horario': hora,
+            'dias': []  # Vai conter as disciplinas ordenadas de SEG a SEX
+        }
         
-        # Bloqueio de ID Scan: Se a grade existe mas não pertence a este aluno
-        if not grade_ativa and Grade.objects.filter(id=grade_id).exists():
-            raise PermissionDenied("Você não tem autorização para visualizar este histórico de horários.")
-    else:
-        grade_ativa = grades.first()
-
-    # 3.  Processamento de Matriz e Colisões Complexas
-    matriz_horarios = {}
-    horas_ordenadas = []
-    conflitos_detectados = []
-    disciplinas_da_grade = []
-    dias_semana_codigos = ['2', '3', '4', '5', '6'] 
-
-    if grade_ativa:
-        disciplinas_da_grade = grade_ativa.disciplinas.all().select_related('professor').prefetch_related('horarios')
-        conflitos_detectados = grade_ativa.mapa_de_conflitos
-        
-        # Extrai os blocos horários exatos para construir as linhas dinamicamente
-        todos_horarios = Horario.objects.filter(
-            disciplina__in=disciplinas_da_grade
-        ).order_by('horario_inicio')
-        
-        horas_ordenadas = sorted(list(set(h.horario_inicio.strftime('%H:%M') for h in todos_horarios)))
-        
-        # Inicializa a matriz para evitar erros de KeyError no template
-        for hora in horas_ordenadas:
-            matriz_horarios[hora] = {dia: [] for dia in dias_semana_codigos}
+        for dia in dias_semana:
+            # Procure se existe alguma matéria nesse dia e horário específicos
+            # (Adapte essa busca de acordo com seus Models)
+            materia = disciplinas_da_grade_ativa.filter(
+                horarios__dia=dia, 
+                horarios__hora=hora
+            ).first()
             
-        # Alimenta a matriz permitindo múltiplas matérias na mesma célula (colisão controlada)
-        for h in todos_horarios:
-            hora_str = h.horario_inicio.strftime('%H:%M')
-            matriz_horarios[hora_str][h.dia_semana].append(h.disciplina)
+            # Adiciona o objeto da matéria ou None se estiver vago
+            linha_atual['dias'].append(materia)
+            
+        tabela_horarios.append(linha_atual)
 
     context = {
         'grades': grades,
         'grade_ativa': grade_ativa,
-        'disciplinas': disciplinas_da_grade,
-        'conflitos': conflitos_detectados,
-        'matriz_horarios': matriz_horarios,
-        'horas_ordenadas': horas_ordenadas,
-        'dias_semana_codigos': dias_semana_codigos,
+        'disciplinas': disciplinas_da_grade_ativa,
+        'tabela_horarios': tabela_horarios, # <--- Enviando a tabela pronta
     }
+    
     return render(request, 'core/historico.html', context)
 
 def minhas_avaliacoes_prof(request):
