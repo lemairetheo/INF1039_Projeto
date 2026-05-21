@@ -28,8 +28,8 @@
                                 <h3>Grade {{ grade.semestre }}º Sem. / {{ grade.ano }}</h3>
                                 <span>Período Acadêmico</span>
                                 <div class="tags">
-                                    <span class="tag-blue">{{ grade.total_disciplinas|default:0 }} matérias</span>
-                                    <span class="tag-orange">{{ grade.total_creditos|default:0 }} CR</span>
+                                  <span class="tag-blue">{{ grade.disciplinas.count }} matérias</span>
+                                    <span class="tag-blue">{{ grade.disciplinas.count }} matérias</span>
                                 </div>
                             </div>
                             <span class="star-icon">☆</span>
