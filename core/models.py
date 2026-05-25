@@ -59,6 +59,7 @@ class Disciplina(models.Model):
     creditos = models.PositiveIntegerField()
     periodo = models.PositiveIntegerField()
     quantidade_turmas = models.PositiveIntegerField(default=1)
+    status = models.BooleanField()
 
     @property
     def nota_media(self):
