@@ -23,6 +23,7 @@ urlpatterns = [
     path('minhas-avaliacoes/', views.minhas_avaliacoes_prof, name='minhas avaliações'),
     path('avaliacoes/', views.avaliacoes, name='Avaliações'),
     path('avaliacoes/reportar-avaliacao/', views.reportar_avaliacoes, name='Reportar Avaliação'),
+    path('detalhes_disciplina/',views.detalhes_disciplina,name='detalhes_disciplina'),
 ]
  
 handler404 = 'core.views.erro_404'

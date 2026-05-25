@@ -19,9 +19,20 @@
             <div class="status_creditos">
                 <span><strong>{{ total_creditos_matriculados }}/30</strong> créditos</span>
                 <div class="barra_progresso_bg">
-                    <div class="barra_fill" style="width: {% widthratio total_creditos_matriculados 30 100 %}%"></div>
+                    <div class="barra_fill" style="width: {% widthratio total_creditos_matriculados 30 100 %}"></div>
                 </div>
             </div>
+        </div>
+
+        <div class="mb-4 flex justify-end">
+            <button
+                data-modal-target="teste-modal"
+                data-modal-toggle="teste-modal"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+                type="button"
+            >
+                TESTE
+            </button>
         </div>
 
         <div class="filtros_container">
@@ -170,4 +181,7 @@
         </table>
     </section>
 </div>
+
+{% include 'core/modal_turma.html' %}
+
 {% endblock %}

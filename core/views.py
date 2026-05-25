@@ -147,7 +147,6 @@ def grade_view(request):
     })
 
 
-@login_required
 def matricula_view(request):
     todas_disciplinas = Disciplina.objects.select_related('professor').all()
     student = Student.objects.first() 
@@ -274,5 +273,105 @@ def historico_grades(request):
     
     return render(request, 'core/historico.html', context)
 
-def minhas_avaliacoes_prof(request):
+def minhas_avaliacoes_prof(request, prof_id):
+
+    # avaliacoes = Avaliacao.objects.filter(professor = prof_id).all()
+
+    # context = {
+    #     "avaliacoes": avalicaoes,
+    # }
+
+
     return render(request, 'core/minhas-avaliacoes-prof.html')
+
+
+def inscrever_disciplina(request, disciplina_id):
+
+    if request.method == "POST":
+
+        turma_id = request.POST.get("turma_id")
+
+        print(turma_id)
+
+        turma = Turma.objects.get(id=turma_id)
+
+        # lógica matrícula aqui
+
+        return redirect("matricula")
+
+    return redirect("matricula")
+
+
+from django.shortcuts import render
+
+
+def detalhes_disciplina(request):
+
+
+    disciplina = {
+        "id": 1,
+        "nome": "Cálculo I",
+        "creditos": 4,
+        "descricao": "Limites, derivadas e integrais de funções de uma variável.",
+        "departamento": "MAT",
+    }
+
+    turmas = [
+        {
+            "id": 1,
+            "professor": {
+                "nome": "Dra. Helena Vasconcelos"
+            },
+            "horario": "SEG 09:00–11:00, QUA 09:00–11:00",
+            "vagas_ocupadas": 28,
+            "vagas_totais": 40,
+            "nota_media": 4.5,
+        },
+        {
+            "id": 2,
+            "professor": {
+                "nome": "Dr. Ricardo Almeida"
+            },
+            "horario": "TER 13:00–15:00, QUI 13:00–15:00",
+            "vagas_ocupadas": 34,
+            "vagas_totais": 40,
+            "nota_media": 4.2,
+        },
+        {
+            "id": 3,
+            "professor": {
+                "nome": "Prof. Fernanda Costa"
+            },
+            "horario": "SEG 19:00–21:00, QUA 19:00–21:00",
+            "vagas_ocupadas": 15,
+            "vagas_totais": 40,
+            "nota_media": 4.8,
+        },
+    ]
+
+    avaliacoes = [
+        {
+            "data": "29/04/2026",
+            "comentario": "Matéria pesada, mas a professora explica muito bem."
+        },
+        {
+            "data": "17/04/2026",
+            "comentario": "As listas ajudam bastante. Exige dedicação semanal."
+        },
+        {
+            "data": "05/04/2026",
+            "comentario": "Provas difíceis, porém coerentes com o conteúdo."
+        },
+    ]
+
+    context = {
+        "disciplina": disciplina,
+        "turmas": turmas,
+        "avaliacoes": avaliacoes,
+    }
+
+    return render(
+        request,
+        "core/matricula_turma.html",
+        context
+    )
