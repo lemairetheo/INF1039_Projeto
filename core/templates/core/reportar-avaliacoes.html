@@ -1,0 +1,84 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Reportar Avaliação | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/reportar-avaliacoes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container_principal">
+    <div class="modal_report">
+        <header class="modal_header">
+            <div class="titulo_modal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2">
+                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
+                </svg>
+                <h2>Denunciar Avaliação</h2>
+            </div>
+            <a href="{% url 'Avaliações' %}" class="botao_fechar">×</a>
+        </header>
+
+        <form method="post" class="form_report" action="{% url 'Avaliações' %}">
+            {% csrf_token %}
+            <p class="instrucao">Selecione o motivo da denúncia:</p>
+
+            <div class="opcoes_motivo">
+                <label class="radio_container">
+                    <input type="radio" name="motivo" value="ofensivo">
+                    <span class="checkmark"></span>
+                    Conteúdo ofensivo
+                </label>
+
+                <label class="radio_container">
+                    <input type="radio" name="motivo" value="falso">
+                    <span class="checkmark"></span>
+                    Informação falsa
+                </label>
+
+                <label class="radio_container">
+                    <input type="radio" name="motivo" value="spam">
+                    <span class="checkmark"></span>
+                    Spam
+                </label>
+
+                <label class="radio_container">
+                    <input type="radio" name="motivo" value="contexto">
+                    <span class="checkmark"></span>
+                    Fora do contexto
+                </label>
+
+                <label class="radio_container">
+                    <input type="radio" name="motivo" value="outros" id="radio_outros">
+                    <span class="checkmark"></span>
+                    Outros
+                </label>
+            </div>
+
+            <div class="campo_descricao">
+                <label id="label_descricao">Descrição (opcional)</label>
+                <textarea name="descricao" placeholder="Descreva o motivo da denúncia..."></textarea>
+            </div>
+
+            <button type="submit" class="botao_enviar">Enviar Denúncia</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const radioOutros = document.getElementById('radio_outros');
+    const radios = document.querySelectorAll('input[name="motivo"]');
+    const labelDesc = document.getElementById('label_descricao');
+
+    radios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radioOutros.checked) {
+                labelDesc.textContent = "Descrição (obrigatória)";
+            } else {
+                labelDesc.textContent = "Descrição (opcional)";
+            }
+        });
+    });
+</script>
+{% endblock %}

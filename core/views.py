@@ -13,7 +13,7 @@ def home_view(request):
     return render(request, 'core/Homepage.html')
 
 
-def disciplinas(request):
+def disciplinas(request): 
     todas = Disciplina.objects.select_related('professor').all()
     return render(request, 'core/disciplinas.html', {'disciplinas': todas})
 
@@ -32,6 +32,14 @@ def disciplina_detalhe(request, pk):
 
 def professores(request):
     return render(request, 'core/professores.html')
+
+
+def avaliacoes(request):
+    return render(request, 'core/avaliacoes.html')
+
+
+def reportar_avaliacoes(request):
+    return render(request, 'core/reportar-avaliacoes.html')
 
 
 def erro_404(request, exception=None):
@@ -185,7 +193,7 @@ def inscrever_disciplina(request, disciplina_id):
         ano=2026
     )
     
-    # [PROTEÇÃO MD1] Aplica o validador antes de adicionar a matéria no banco
+    #  Aplica o validador antes de adicionar a matéria no banco
     tem_conflito, mensagem = grade.verificar_conflito_para_adicionar(disciplina)
     if tem_conflito:
         # Registra a mensagem de erro no sistema de mensagens do Django
@@ -195,70 +203,74 @@ def inscrever_disciplina(request, disciplina_id):
     grade.disciplinas.add(disciplina)
     return redirect('matricula')
 
-
 @login_required
-def historico_grades_view(request):
-    if request.user.is_authenticated:
-        try:
-            student = request.user.student
-        except Student.DoesNotExist:
-            student = Student.objects.first()
-    else:
-        student = Student.objects.first() 
+def historico_grades(request):
+    # Tenta pegar o estudante, se não existir, evita que o erro aconteça
+    try:
+        aluno = request.user.student
+    except Student.DoesNotExist:
+        # Se o usuário não tiver perfil de aluno, exibe uma mensagem amigável ou cria um template de aviso
+        return render(request, 'core/historico.html', {
+            'error_message': "Seu usuário não possui um perfil de aluno cadastrado."
+        })
     
-    # 1. Coleta o histórico agregando valores direto no banco
-    grades = Grade.objects.filter(aluno=student).annotate(
-        total_disciplinas=Count('disciplinas'),
-        total_creditos=Sum('disciplinas__creditos')
-    ).order_by('-ano', '-semestre')
+    grades = aluno.grades.all()
     
-    # 2. [SEGURANÇA TAREFA M2] Validação estrita do ID via parâmetro GET
+    # 2. Verifica se o usuário clicou em alguma grade na barra lateral
     grade_id = request.GET.get('grade_id')
     if grade_id:
-        grade_ativa = grades.filter(id=grade_id).first()
-        
-        # Bloqueio de ID Scan: Se a grade existe mas não pertence a este aluno
-        if not grade_ativa and Grade.objects.filter(id=grade_id).exists():
-            raise PermissionDenied("Você não tem autorização para visualizar este histórico de horários.")
+        grade_ativa = get_object_or_404(Grade, id=grade_id, aluno=aluno)
     else:
-        grade_ativa = grades.first()
-
-    # 3. [MOTOR DINÂMICO TAREFA MD1] Processamento de Matriz e Colisões Complexas
-    matriz_horarios = {}
-    horas_ordenadas = []
-    conflitos_detectados = []
+        grade_ativa = grades.first() # Se não clicou, mostra a mais recente
+        
+    # Preparamos os dados que vão rodar na tabela do HTML
+    tabela_horarios = []
     disciplinas_da_grade = []
-    dias_semana_codigos = ['2', '3', '4', '5', '6'] 
-
+    
+    # 3. Se o aluno tiver uma grade selecionada, montamos os horários
     if grade_ativa:
-        disciplinas_da_grade = grade_ativa.disciplinas.all().select_related('professor').prefetch_related('horarios')
-        conflitos_detectados = grade_ativa.mapa_de_conflitos
+        disciplinas_da_grade = grade_ativa.disciplinas.all()
         
-        # Extrai os blocos horários exatos para construir as linhas dinamicamente
-        todos_horarios = Horario.objects.filter(
-            disciplina__in=disciplinas_da_grade
-        ).order_by('horario_inicio')
+        # Lista dos horários padrão das aulas da sua faculdade (adicione ou mude os horários aqui)
+        lista_horarios = ["08:00", "10:00", "14:00", "16:00"]
         
-        horas_ordenadas = sorted(list(set(h.horario_inicio.strftime('%H:%M') for h in todos_horarios)))
+        # Mapeamento dos dias da semana exatamente como está no seu Model ('2' para Segunda, etc.)
+        codigos_dias = ['2', '3', '4', '5', '6'] 
         
-        # Inicializa a matriz para evitar erros de KeyError no template
-        for hora in horas_ordenadas:
-            matriz_horarios[hora] = {dia: [] for dia in dias_semana_codigos}
+        # Montamos a tabela linha por linha
+        for hora in lista_horarios:
+            # Separamos o texto "08:00" em hora (8) e minuto (0) como números inteiros
+            h_int, m_int = map(int, hora.split(':'))
             
-        # Alimenta a matriz permitindo múltiplas matérias na mesma célula (colisão controlada)
-        for h in todos_horarios:
-            hora_str = h.horario_inicio.strftime('%H:%M')
-            matriz_horarios[hora_str][h.dia_semana].append(h.disciplina)
+            linha = {
+                'horario': hora,
+                'dias': [] # Guardará as matérias de Segunda a Sexta neste horário
+            }
+            
+            for dia in codigos_dias:
+                # Buscamos se existe algum horário que combine com o Dia, a Hora e o Minuto
+                horario_encontrado = Horario.objects.filter(
+                    disciplina__in=disciplinas_da_grade,
+                    dia_semana=dia,
+                    horario_inicio__hour=h_int,    # Filtra a hora numérica (ex: 8)
+                    horario_inicio__minute=m_int   # Filtra o minuto numérico (ex: 0)
+                ).first()
+                
+                if horario_encontrado:
+                    linha['dias'].append(horario_encontrado.disciplina)
+                else:
+                    linha['dias'].append(None) # Quadrado vazio no HTML
+                    
+            tabela_horarios.append(linha)
 
+    # 4. Enviamos tudo mastigado para o HTML
     context = {
         'grades': grades,
         'grade_ativa': grade_ativa,
         'disciplinas': disciplinas_da_grade,
-        'conflitos': conflitos_detectados,
-        'matriz_horarios': matriz_horarios,
-        'horas_ordenadas': horas_ordenadas,
-        'dias_semana_codigos': dias_semana_codigos,
+        'tabela_horarios': tabela_horarios,
     }
+    
     return render(request, 'core/historico.html', context)
 
 def minhas_avaliacoes_prof(request):
