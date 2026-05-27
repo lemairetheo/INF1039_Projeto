@@ -24,6 +24,9 @@
                 <a href="{% url 'matricula' %}" class="nav-link {% if request.resolver_match.url_name == 'matricula' %}active{% endif %}">Matricula</a>
                 <a href="{% url 'grade' %}" class="nav-link {% if request.resolver_match.url_name == 'grade' %}active{% endif %}">Grade Horária</a>
                 <a href="{% url 'perfil' %}" class="nav-link {% if request.resolver_match.url_name == 'perfil' %}active{% endif %}">Perfil</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'Nova Avaliação' %}" class="nav-link {% if request.resolver_match.url_name == 'Nova Avaliação' %}active{% endif %}">Avaliação</a>
+                {% endif %}
             </nav>
 
             <div class="navbar-auth">

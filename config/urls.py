@@ -18,7 +18,7 @@ urlpatterns = [
     path('erro_404/', views.erro_404, name='erro_404'),
     path('perfil/', views.perfil, name='perfil'),
     path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
-    path('Nova Avaliação/', views.criar_avaliacao, name='Nova Avaliação'),
+    path('avaliacao/nova/', views.criar_avaliacao, name='Nova Avaliação'),
     path('historico/', views.historico_grades_view, name='historico_grades'),
     path('minhas-avaliacoes/', views.minhas_avaliacoes_prof, name='minhas avaliações'),
 ]

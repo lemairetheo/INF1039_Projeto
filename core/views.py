@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
-from .models import Disciplina, Professor, Grade, Horario, Student
+from .models import Avaliacao, Disciplina, Professor, Grade, Horario, Student
 from .forms import UserEditForm, StudentEditForm, AvaliacaoForm
 
 
@@ -29,7 +29,6 @@ def disciplina_detalhe(request, pk):
         'avaliacoes':    avaliacoes,
         'alunos_count': alunos_count,
     })
-
 
 def professores(request):
     return render(request, 'core/professores.html')

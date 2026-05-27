@@ -35,7 +35,12 @@
             {% endif %}
         </div>
     </div>
-    <a href="{% url 'matricula' %}" class="btn_inscrever">Inscrever-se</a>
+    <div class="detalhe_actions">
+        <a href="{% url 'matricula' %}" class="btn_inscrever">Inscrever-se</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'Nova Avaliação' %}?disciplina={{ disciplina.pk }}" class="btn_avaliar">⭐ Avaliar</a>
+        {% endif %}
+    </div>
 </header>
 
 <!-- Stats -->
