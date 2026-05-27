@@ -15,6 +15,7 @@ urlpatterns = [
     path('grade/', views.grade_view, name='grade'),
     path('matricula/', views.matricula_view, name='matricula'),
     path('inscrever-turma/<int:disciplina_id>/', views.inscrever_disciplina, name='inscrever_disciplina'),
+    path('cancelar-turma/<int:disciplina_id>/', views.cancelar_inscricao, name='cancelar_inscricao'),
     path('erro_404/', views.erro_404, name='erro_404'),
     path('perfil/', views.perfil, name='perfil'),
     path('perfil/editar/', views.editar_perfil, name='editar_perfil'),

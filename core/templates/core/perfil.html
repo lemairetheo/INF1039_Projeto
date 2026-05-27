@@ -62,9 +62,9 @@
                         <h3 class="course_name">
                             <a href="{% url 'disciplina_detalhe' disciplina.pk %}">{{ disciplina.nome }}</a>
                         </h3>
-                        {% if disciplina.professor %}
-                        <p class="course_teacher">Prof. {{ disciplina.professor.nome }}</p>
-                        {% endif %}
+                        {% with disciplina.turma_disciplina.first as t %}
+                        {% if t %}<p class="course_teacher">Prof. {{ t.professor.nome }}</p>{% endif %}
+                        {% endwith %}
                         <div class="card_status_row">
                             <span class="badge">Inscrito</span>
                             <span class="creditos_badge">{{ disciplina.creditos }} créditos</span>
