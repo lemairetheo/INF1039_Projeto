@@ -1,0 +1,185 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ disciplina.nome }} | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/turma_detalhe.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+
+        <div class="p-8">
+
+            <!-- Voltar -->
+            <div class="mb-6">
+                <a href="{% url 'matricula' %}"
+                   class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="20"
+                         height="20"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor"
+                         stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+
+                    Voltar para matrícula
+                </a>
+            </div>
+
+            <!-- Cabeçalho -->
+            <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide">
+                {{ disciplina.professor.departamento }}
+            </p>
+
+            <h1 class="text-3xl font-bold text-gray-900 mt-1">
+                {{ disciplina.nome }}
+            </h1>
+
+            <p class="text-gray-500 mt-1">
+                {{ disciplina.creditos }} créditos
+            </p>
+
+            {% if disciplina.descricao %}
+                <p class="text-gray-700 mt-4">
+                    {{ disciplina.descricao }}
+                </p>
+            {% endif %}
+
+            <form method="POST"
+                  action="">
+
+                {% csrf_token %}
+
+                <!-- Turmas -->
+                <div class="mt-10">
+
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                        Escolha uma turma
+                    </h2>
+
+                    <div class="space-y-4">
+
+                        {% for turma in turmas %}
+
+                        <label
+                            class="cursor-pointer block border border-gray-200 hover:border-blue-500 rounded-2xl p-5 transition hover:shadow-md">
+
+                            <input
+                                type="radio"
+                                name="turma_id"
+                                value="{{ turma.id }}"
+                                required
+                                class="mr-4">
+
+                            <div class="flex justify-between items-center">
+
+                                <div>
+                                    <p class="font-semibold text-gray-900">
+                                        {{ turma.professor.nome }}
+                                    </p>
+
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        {{ turma.horario }}
+                                    </p>
+                                </div>
+
+                                <div class="text-right">
+
+                                    <p class="text-sm text-gray-500">
+                                        {{ turma.vagas_ocupadas }}/{{ turma.vagas_totais }} vagas
+                                    </p>
+
+                                    <div class="text-yellow-500">
+                                        ★ {{ turma.nota_media }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </label>
+
+                        {% empty %}
+
+                        <div class="border rounded-xl p-6 text-center text-gray-500">
+                            Nenhuma turma disponível.
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+                <!-- Avaliações -->
+                {% if avaliacoes %}
+                <div class="mt-12">
+
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                        Avaliações dos alunos
+                    </h2>
+
+                    <div class="space-y-4">
+
+                        {% for avaliacao in avaliacoes %}
+
+                        <div class="border border-gray-200 rounded-2xl p-5 bg-gray-50">
+
+                            <div class="flex justify-between">
+
+                                <span class="font-semibold">
+                                    Anônimo
+                                </span>
+
+                                <span class="text-sm text-gray-500">
+                                    {{ avaliacao.data }}
+                                </span>
+
+                            </div>
+
+                            <p class="text-gray-700 mt-4 italic">
+                                "{{ avaliacao.comentario }}"
+                            </p>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+                {% endif %}
+
+                <!-- Rodapé -->
+                <div class="mt-12 flex justify-end gap-3">
+
+                    <a href="{% url 'matricula' %}"
+                       class="px-5 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">
+                        Cancelar
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+
+                        Selecionar turma
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -65,9 +65,9 @@
                 <span class="tag_departamento">{{ disciplina.codigo|slice:":3" }}</span>
                 <span class="info_extra">{{ disciplina.creditos }} créditos • Período {{ disciplina.periodo }}</span>
             </div>
-            {% if disciplina.professor %}
-            <p class="card_descricao">Prof. {{ disciplina.professor.nome }}</p>
-            {% endif %}
+            {% with disciplina.turma_disciplina.first as t %}
+            {% if t %}<p class="card_descricao">Prof. {{ t.professor.nome }}</p>{% endif %}
+            {% endwith %}
         </div>
     </article>
     {% empty %}

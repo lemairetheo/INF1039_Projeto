@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Professor, Disciplina, Grade, Horario, Avaliacao
+from .models import Student, Professor, Disciplina, Matricula, Avaliacao, Turma
 
 
 @admin.register(Student)
@@ -22,29 +22,31 @@ class ProfessorAdmin(admin.ModelAdmin):
     search_fields = ('nome', 'departamento')
 
 
-class HorarioInline(admin.TabularInline):
-    model = Horario
-    extra = 2
+class TurmaInline(admin.TabularInline):
+    model = Turma
+    extra = 1
 
 
 @admin.register(Disciplina)
 class DisciplinaAdmin(admin.ModelAdmin):
-    list_display  = ('codigo', 'nome', 'creditos', 'periodo', 'professor')
-    list_filter   = ('periodo', 'professor')
+    list_display  = ('codigo', 'nome', 'creditos', 'periodo', 'status')
+    list_filter   = ('periodo', 'status')
     search_fields = ('codigo', 'nome')
-    inlines = [HorarioInline]
+    inlines       = [TurmaInline]
 
 
-@admin.register(Horario)
-class HorarioAdmin(admin.ModelAdmin):
-    list_display = ('disciplina', 'dia_semana', 'horario_inicio')
+@admin.register(Turma)
+class TurmaAdmin(admin.ModelAdmin):
+    list_display  = ('disciplina', 'professor', 'dia_semana', 'horario')
+    list_filter   = ('dia_semana', 'professor')
+    search_fields = ('disciplina__nome', 'professor__nome')
 
 
-@admin.register(Grade)
-class GradeAdmin(admin.ModelAdmin):
-    list_display  = ('aluno', 'semestre', 'ano')
+@admin.register(Matricula)
+class MatriculaAdmin(admin.ModelAdmin):
+    list_display  = ('aluno', 'disciplina', 'semestre', 'ano')
     list_filter   = ('ano', 'semestre')
-    filter_horizontal = ('disciplinas',)
+    search_fields = ('aluno__user__first_name', 'disciplina__nome')
 
 
 @admin.register(Avaliacao)

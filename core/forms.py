@@ -60,5 +60,5 @@ class AvaliacaoForm(forms.ModelForm):
         if student:
             # Só mostrar disciplinas em que o aluno está inscrito
             self.fields['disciplina'].queryset = Disciplina.objects.filter(
-                grades__aluno=student
+                matricula_disciplina__aluno=student
             ).distinct()

@@ -2,6 +2,25 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Avg
 
+class DiaSemana(models.TextChoices):
+    SEGUNDA = "SEG", "Segunda-feira"
+    TERCA = "TER", "Terça-feira"
+    QUARTA = "QUA", "Quarta-feira"
+    QUINTA = "QUI", "Quinta-feira"
+    SEXTA = "SEX", "Sexta-feira"
+    SABADO = "SAB", "Sábado"
+
+class Horario(models.TextChoices):
+    H07_09 = "07-09", "07:00 - 09:00"
+    H09_11 = "09-11", "09:00 - 11:00"
+    H11_13 = "11-13", "11:00 - 13:00"
+    H13_15 = "13-15", "13:00 - 15:00"
+    H15_17 = "15-17", "15:00 - 17:00"
+    H17_19 = "17-19", "17:00 - 19:00"
+    H19_21 = "19-21", "19:00 - 21:00"
+
+
+
 # ── Usuario (Aluno) ────────────────────────────────────────────────────────────
 class Student(models.Model):
     user       = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student')
@@ -39,8 +58,8 @@ class Disciplina(models.Model):
     nome = models.CharField(max_length=100)
     creditos = models.PositiveIntegerField()
     periodo = models.PositiveIntegerField()
-    professor = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='disciplinas')
     quantidade_turmas = models.PositiveIntegerField(default=1)
+    status = models.BooleanField(default=True)
 
     @property
     def nota_media(self):
@@ -52,35 +71,19 @@ class Disciplina(models.Model):
     def __str__(self):
         return f"{self.codigo} - {self.nome}"
 
-# ── Horario ─────────────────────────────────────────────────────────────────
-class Horario(models.Model):
-    DIAS_CHOICES = [
-        ('2', 'Segunda'), ('3', 'Terça'), ('4', 'Quarta'), ('5', 'Quinta'), ('6', 'Sexta'),
-    ]
-    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='horarios')
-    dia_semana = models.CharField(max_length=1, choices=DIAS_CHOICES)
-    horario_inicio = models.TimeField()
-    horario_fim = models.TimeField()
-
-    def __str__(self):
-        return f"{self.disciplina.nome} - {self.get_dia_semana_display()} às {self.horario_inicio}"
-
-
-# ── Grade (horário semestral do aluno) ─────────────────────────────────────────
-class Grade(models.Model):
+class Matricula(models.Model):
     aluno       = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='grades')
+    disciplina  = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='matricula_disciplina')
     semestre    = models.PositiveIntegerField()
     ano         = models.PositiveIntegerField()
-    disciplinas = models.ManyToManyField(Disciplina, blank=True, related_name='grades')
 
     def __str__(self):
         return f"{self.aluno} — {self.semestre}º sem. {self.ano}"
 
     class Meta:
-        verbose_name = 'Grade'
-        verbose_name_plural = 'Grades'
+        verbose_name = 'Matricula'
+        verbose_name_plural = 'Matriculas'
         ordering = ['-ano', '-semestre']
-
 
 # ── Avaliação ──────────────────────────────────────────────────────────────────
 class Avaliacao(models.Model):
@@ -96,3 +99,10 @@ class Avaliacao(models.Model):
         verbose_name = 'Avaliação'
         verbose_name_plural = 'Avaliações'
         ordering = ['disciplina', 'aluno']
+
+class Turma(models.Model):
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='turma_disciplina')
+    professor = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='turma_professor')
+    horario = models.CharField(max_length=5,choices=Horario.choices)
+    dia_semana = models.CharField(max_length=3,choices=DiaSemana.choices)
+    

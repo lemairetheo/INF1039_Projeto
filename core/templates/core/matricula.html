@@ -19,9 +19,20 @@
             <div class="status_creditos">
                 <span><strong>{{ total_creditos_matriculados }}/30</strong> créditos</span>
                 <div class="barra_progresso_bg">
-                    <div class="barra_fill" style="width: {% widthratio total_creditos_matriculados 30 100 %}%"></div>
+                    <div class="barra_fill" style="width: {% widthratio total_creditos_matriculados 30 100 %}"></div>
                 </div>
             </div>
+        </div>
+
+        <div class="mb-4 flex justify-end">
+            <button
+                data-modal-target="teste-modal"
+                data-modal-toggle="teste-modal"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+                type="button"
+            >
+                TESTE
+            </button>
         </div>
 
         <div class="filtros_container">
@@ -69,35 +80,27 @@
                 <button class="toggle_grade">^</button>
             </div>
 
-            {% if horarios %}
-                <div class="grid_header_dias">
-                    <div class="espaco_hora"></div>
-                    <div class="dia_label">SEG</div>
-                    <div class="dia_label">TER</div>
-                    <div class="dia_label">QUA</div>
-                    <div class="dia_label">QUI</div>
-                    <div class="dia_label">SEX</div>
-                </div>
-
-                <div class="grid_corpo">
-                    <div class="coluna_timeline" style="grid-template-rows: repeat({{ horas_range|length }}, 60px);">
-                        {% for h in horas_range %}
-                            <div class="slot_hora">{{ h }}:00</div>
+            {% if turmas %}
+                <table style="width:100%;border-collapse:collapse;margin-top:8px;">
+                    <thead>
+                        <tr style="background:#f1f5f9;">
+                            <th style="padding:8px;text-align:left;">Disciplina</th>
+                            <th style="padding:8px;text-align:left;">Professor</th>
+                            <th style="padding:8px;text-align:left;">Dia</th>
+                            <th style="padding:8px;text-align:left;">Horário</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in turmas %}
+                        <tr style="border-bottom:1px solid #e2e8f0;">
+                            <td style="padding:8px;font-weight:600;">{{ t.disciplina.nome }}</td>
+                            <td style="padding:8px;color:#64748b;">{{ t.professor.nome }}</td>
+                            <td style="padding:8px;">{{ t.get_dia_semana_display }}</td>
+                            <td style="padding:8px;">{{ t.get_horario_display }}</td>
+                        </tr>
                         {% endfor %}
-                    </div>
-
-                    <div class="grid_cards_disciplinas" style="grid-template-rows: repeat({{ total_rows }}, 30px);">
-                        {% for h in horarios %}
-                            <article class="card_materia dept_{{ h.disciplina.professor.departamento|slugify }} dia_{{ h.dia_semana }}" 
-                                     style="grid-row: calc(({{ h.horario_inicio.hour }} - {{ hora_min }}) * 2 + 1) / span 4;">
-                                <div class="card_content">
-                                    <h3>{{ h.disciplina.nome }}</h3>
-                                    <span class="nome_professor">{{ h.disciplina.professor.nome }}</span>
-                                </div>
-                            </article>
-                        {% endfor %}
-                    </div>
-                </div>
+                    </tbody>
+                </table>
             {% else %}
                 <div class="grade_vazia">
                     <div class="vazia_conteudo">
@@ -111,7 +114,7 @@
         <div class="badges_container">
             {% for d in disciplinas %}
                 {% if d.id in matriculadas_ids %}
-                    <span class="badge_pill dept_{{ d.professor.departamento|slugify }}">
+                    <span class="badge_pill">
                         {{ d.nome }}
                     </span>
                 {% endif %}
@@ -145,7 +148,7 @@
                                     <span class="mini_badge_matriculado">MATRICULADO</span>
                                 {% endif %}
                             </span>
-                            <span class="disc_sub">{{ d.professor.departamento|upper }}</span>
+                            <span class="disc_sub">{{ d.codigo|slice:":3"|upper }}</span>
                         </div>
                     </td>
                     <td><span class="box_credito">{{ d.creditos }}</span></td>
@@ -156,7 +159,10 @@
 
                     <td>
                         {% if d.id in matriculadas_ids %}
-                            <span class="txt_matriculado">Matriculado</span>
+                            <form action="{% url 'cancelar_inscricao' d.id %}" method="POST" style="display:inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn_cancelar" style="color:#ef4444;background:none;border:1px solid #ef4444;padding:4px 10px;border-radius:6px;cursor:pointer;">Cancelar</button>
+                            </form>
                         {% else %}
                             <form action="{% url 'inscrever_disciplina' d.id %}" method="POST">
                                 {% csrf_token %}
@@ -170,4 +176,7 @@
         </table>
     </section>
 </div>
+
+{% include 'core/modal_turma.html' %}
+
 {% endblock %}
