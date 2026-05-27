@@ -255,7 +255,9 @@ def historico_grades(request):
     return render(request, 'core/historico.html', context)
 
 
-def minhas_avaliacoes_prof(request):
+def minhas_avaliacoes_prof(request, id_professor):
+
+
     return render(request, 'core/minhas-avaliacoes-prof.html')
 
 

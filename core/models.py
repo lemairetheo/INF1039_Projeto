@@ -92,7 +92,8 @@ class Matricula(models.Model):
 # ── Avaliação ──────────────────────────────────────────────────────────────────
 class Avaliacao(models.Model):
     aluno      = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='avaliacoes')
-    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='avaliacoes')
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='avaliacoes', null=True)
+    professor  = models.ForeignKey(Professor, on_delete=models.CASCADE, related_name='avaliacoes', null=True)
     nota       = models.DecimalField(max_digits=4, decimal_places=2)
     comentario = models.TextField(blank=True, null=True)
 
@@ -109,4 +110,6 @@ class Turma(models.Model):
     professor = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='turma_professor')
     horario = models.CharField(max_length=5,choices=Horario.choices)
     dia_semana = models.CharField(max_length=3,choices=DiaSemana.choices)
+
+
     

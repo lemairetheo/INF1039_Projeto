@@ -1,14 +1,13 @@
-<!DOCTYPE html>
+{% extends 'core/base_prof.html'%}
 {% load static %}
 
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Minhas Avaliações — Academic Curator</title>
-  <link rel="stylesheet" href="{% static 'core/css/minhas-avaliacoes-prof.css' %}" />
-</head>
-<body>
+{% block title %}Minhas Avaliações | Academic Curator{% endblock %}
+
+{% block extra_css%}
+<link rel="stylesheet" href="{% static 'core/css/minhas-avaliacoes-prof.css' %}" />
+{% endblock %}
+
+{% block content %}
 
   <!-- PAGE -->
   <main class="page">
@@ -24,9 +23,8 @@
       <label class="filter-card__label" for="filtro-disciplina">Filtrar por disciplina</label>
       <select class="filter-card__select" id="filtro-disciplina">
         <option>Todas as disciplinas</option>
-        <option>Introdução à Programação</option>
-        <option>Estrutura de Dados</option>
-        <option>Engenharia de Software</option>
+        {% for disciplina in disciplinas %}
+          <option></option>
       </select>
     </div>
 
@@ -183,5 +181,4 @@
     </div>
   </main>
 
-</body>
-</html>
+{% endblock %}

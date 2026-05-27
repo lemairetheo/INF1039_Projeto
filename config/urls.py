@@ -23,7 +23,7 @@ urlpatterns = [
     path('avaliacoes/', views.avaliacoes, name='Avaliações'),
     path('avaliacoes/reportar/', views.reportar_avaliacoes, name='Reportar Avaliação'),
     path('historico/', views.historico_grades, name='historico_grades'),
-    path('minhas-avaliacoes/', views.minhas_avaliacoes_prof, name='minhas avaliações'),
+    path('minhas-avaliacoes/<int:id_professor>', views.minhas_avaliacoes_prof, name='minhas avaliações'),
     path('detalhes_disciplina/', views.detalhes_disciplina, name='detalhes_disciplina'),
 ]
 
