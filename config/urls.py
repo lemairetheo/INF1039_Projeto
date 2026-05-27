@@ -19,7 +19,9 @@ urlpatterns = [
     path('perfil/', views.perfil, name='perfil'),
     path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
     path('avaliacao/nova/', views.criar_avaliacao, name='Nova Avaliação'),
-    path('historico/', views.historico_grades_view, name='historico_grades'),
+    path('avaliacoes/', views.avaliacoes, name='Avaliações'),
+    path('avaliacoes/reportar/', views.reportar_avaliacoes, name='reportar_avaliacoes'),
+    path('historico/', views.historico_grades, name='historico_grades'),
     path('minhas-avaliacoes/', views.minhas_avaliacoes_prof, name='minhas avaliações'),
 ]
 
