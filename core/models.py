@@ -18,7 +18,11 @@ class Horario(models.TextChoices):
     H15_17 = "15-17", "15:00 - 17:00"
     H17_19 = "17-19", "17:00 - 19:00"
     H19_21 = "19-21", "19:00 - 21:00"
-
+ 
+class Status(models.TextChoices):
+    APROVADO = "aprovado"
+    CANCELADO = "cancelado"
+    SOB_AVALIACAO = "Sob avaliaçao"
 
 
 # ── Usuario (Aluno) ────────────────────────────────────────────────────────────
@@ -59,7 +63,7 @@ class Disciplina(models.Model):
     creditos = models.PositiveIntegerField()
     periodo = models.PositiveIntegerField()
     quantidade_turmas = models.PositiveIntegerField(default=1)
-    status = models.BooleanField(default=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.SOB_AVALIACAO)
 
     @property
     def nota_media(self):
