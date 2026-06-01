@@ -282,6 +282,7 @@ def minhas_avaliacoes_prof(request, id_professor):
 
 
     nota_professor = Avaliacao.objects.filter(professor=professor).aggregate(media=Avg('nota_prof'))['media']
+    nota_disciplina = Avaliacao.objects.filter().aggregate(media=Avg('nota_disc'))['media']
     print(nota_professor)
 
     return render(request, 'core/minhas-avaliacoes-prof.html', {
