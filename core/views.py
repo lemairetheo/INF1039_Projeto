@@ -273,10 +273,17 @@ def historico_grades(request):
     return render(request, 'core/historico.html', context)
 
 
-def minhas_avaliacoes_prof(request, id_professor):
+def minhas_avaliacoes_prof(request, id_professor, ):
+    qtd_avaliacoes = Avaliacao.objects.count()
 
-
-    return render(request, 'core/minhas-avaliacoes-prof.html')
+    return render(request, 'core/minhas-avaliacoes-prof.html', {
+        'disciplinas': disciplinas,
+        'avaliacoes': avaliacoes,
+        'qtd_avaliacoes': qtd_avaliacoes,
+        'nota_professor': nota_professor,
+        'nota_disciplina': nota_disciplina,
+        }
+    )
 
 
 def detalhes_disciplina(request):

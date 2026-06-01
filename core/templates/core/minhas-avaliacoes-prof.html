@@ -22,9 +22,13 @@
     <div class="filter-card">
       <label class="filter-card__label" for="filtro-disciplina">Filtrar por disciplina</label>
       <select class="filter-card__select" id="filtro-disciplina">
-        <option>Todas as disciplinas</option>
+        <option value="">Todas as disciplinas</option>
+
         {% for disciplina in disciplinas %}
-          <option></option>
+          <option value="{{ disciplina.id }}">
+            {{ disciplina.nome }}
+          </option>
+        {% endfor %}
       </select>
     </div>
 
@@ -32,151 +36,54 @@
     <div class="stats-grid">
       <div class="stat-card">
         <p class="stat-card__label">Média do Curso</p>
-        <p class="stat-card__value">4.5 <span>/ 5</span></p>
+        <p class="stat-card__value">{{ nota_disciplina }} <span>/ 5</span></p>
       </div>
       <div class="stat-card">
         <p class="stat-card__label">Média do Professor</p>
-        <p class="stat-card__value">5.0 <span>/ 5</span></p>
+        <p class="stat-card__value">{{ nota_professor }} <span>/ 5</span></p>
       </div>
     </div>
 
     <!-- Count -->
-    <p class="reviews-count">4 avaliação(ões)</p>
+    <p class="reviews-count"> {{ qtd_avaliacoes }} avaliação(ões)</p>
 
     <!-- Review list -->
     <div class="review-list">
 
-      <!-- Avaliação 1 -->
-      <div class="review-card">
-        <div class="review-card__top">
-          <div>
-            <p class="review-card__discipline">Engenharia de Software</p>
-            <p class="review-card__meta">Por Aluno • 29/04/2026</p>
+      <!-- Avaliação -->
+      {% for avaliacao in avaliacoes %}
+        <div class="review-card">
+          <div class="review-card__top">
+            <div>
+              <p class="review-card__discipline">{{ avaliacao.disciplina.nome }}</p>
+              <p class="review-card__meta">Criado em: {{ avaliacao.data_avaliacao }}</p>
+            </div>
+            <div class="review-card__badges">
+              <span class="badge">Curso {{ avaliacao.nota_disc }}/5</span>
+              <span class="badge">Professor {{ avaliacao.nota_prof }}/5</span>
+            </div>
           </div>
-          <div class="review-card__badges">
-            <span class="badge">Curso 4/5</span>
-            <span class="badge">Professor 5/5</span>
-          </div>
-        </div>
-        <p class="review-card__text">"Aprendi muito sobre metodologias ágeis e boas práticas. Recomendo para quem quer atuar no mercado."</p>
-        <hr class="review-card__divider" />
-        <div class="review-card__actions">
-          <span class="action-like">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
-              <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-            </svg>
-            0
-          </span>
-          <button class="action-flag" aria-label="Denunciar avaliação">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-              <line x1="4" y1="22" x2="4" y2="15"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Avaliação 2 -->
-      <div class="review-card">
-        <div class="review-card__top">
-          <div>
-            <p class="review-card__discipline">Introdução à Programação</p>
-            <p class="review-card__meta">Por Aluno • 29/04/2026</p>
-          </div>
-          <div class="review-card__badges">
-            <span class="badge">Curso 5/5</span>
-            <span class="badge">Professor 5/5</span>
+          <p class="review-card__text">{{ avaliacao.comentario }}</p>
+          <hr class="review-card__divider" />
+          <div class="review-card__actions">
+            <span class="action-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+              </svg>
+              0
+            </span>
+            <a class="action-flag" href="{% url 'Reportar Avaliação' avaliacao.id %}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                <line x1="4" y1="22" x2="4" y2="15"/>
+              </svg>
+            </a>
           </div>
         </div>
-        <p class="review-card__text">"Professor Dessio é incrível! Explica de forma clara e os exercícios são muito bem elaborados. A melhor introdução à programação que poderia ter."</p>
-        <hr class="review-card__divider" />
-        <div class="review-card__actions">
-          <span class="action-like">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
-              <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-            </svg>
-            0
-          </span>
-          <button class="action-flag" aria-label="Denunciar avaliação">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-              <line x1="4" y1="22" x2="4" y2="15"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Avaliação 3 -->
-      <div class="review-card">
-        <div class="review-card__top">
-          <div>
-            <p class="review-card__discipline">Estrutura de Dados</p>
-            <p class="review-card__meta">Por Aluno • 29/04/2026</p>
-          </div>
-          <div class="review-card__badges">
-            <span class="badge">Curso 4/5</span>
-            <span class="badge">Professor 5/5</span>
-          </div>
-        </div>
-        <p class="review-card__text">"Disciplina densa, mas o professor torna tudo mais leve. Ótimas analogias para entender árvores e grafos."</p>
-        <hr class="review-card__divider" />
-        <div class="review-card__actions">
-          <span class="action-like">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
-              <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-            </svg>
-            0
-          </span>
-          <button class="action-flag" aria-label="Denunciar avaliação">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-              <line x1="4" y1="22" x2="4" y2="15"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Avaliação 4 -->
-      <div class="review-card">
-        <div class="review-card__top">
-          <div>
-            <p class="review-card__discipline">Engenharia de Software</p>
-            <p class="review-card__meta">Por Aluno • 29/04/2026</p>
-          </div>
-          <div class="review-card__badges">
-            <span class="badge">Curso 5/5</span>
-            <span class="badge">Professor 5/5</span>
-          </div>
-        </div>
-        <p class="review-card__text">"Projeto em equipe foi a melhor parte. Acompanha de perto e dá feedbacks valiosos sobre arquitetura."</p>
-        <hr class="review-card__divider" />
-        <div class="review-card__actions">
-          <span class="action-like">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
-              <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-            </svg>
-            0
-          </span>
-          <button class="action-flag" aria-label="Denunciar avaliação">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-              <line x1="4" y1="22" x2="4" y2="15"/>
-            </svg>
-          </button>
-        </div>
-      </div>
+      {% endfor %}
 
     </div>
   </main>
