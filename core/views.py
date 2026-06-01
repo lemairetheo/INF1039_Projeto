@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 from django.contrib import messages
 from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia
 from .forms import UserEditForm, StudentEditForm, AvaliacaoForm
