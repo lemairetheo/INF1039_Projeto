@@ -100,7 +100,7 @@ class Avaliacao(models.Model):
     data_avaliacao = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.aluno} | {self.disciplina} | {self.nota}"
+        return f"{self.aluno} | {self.disciplina} | {self.nota_disc} | {self.nota_prof}"
 
     class Meta:
         verbose_name = 'Avaliação'
