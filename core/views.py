@@ -4,7 +4,7 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.contrib import messages
-from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student
+from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia
 from .forms import UserEditForm, StudentEditForm, AvaliacaoForm
 
 
@@ -66,8 +66,26 @@ def avaliacoes(request):
     return render(request, 'core/avaliacoes.html')
 
 
-def reportar_avaliacoes(request):
-    return render(request, 'core/reportar-avaliacoes.html')
+#@login_required
+def reportar_avaliacoes(request, avaliacao_id):
+    avaliacao = get_object_or_404(Avaliacao, id=avaliacao_id)
+
+    if request.method == 'POST':
+        motivo = request.POST.get('motivo')
+        descricao = request.POST.get('descricao', '').strip()
+
+        if motivo == 'outros' and not descricao:
+            messages.error(request, "A descrição é obrigatória quando o motivo for 'Outros'.")
+            return render(request, 'core/reportar-avaliacoes.html', {'avaliacao': avaliacao})
+
+        Denuncia.objects.create(
+            avaliacao=avaliacao,
+            motivo=motivo,
+            descricao=descricao
+        )
+        messages.success(request, 'Avaliação reportada com sucesso! Analisaremos o caso.')
+        return redirect('Avaliações') 
+    return render(request, 'core/reportar-avaliacoes.html', {'avaliacao': avaliacao})
 
 
 def erro_404(request, exception=None):

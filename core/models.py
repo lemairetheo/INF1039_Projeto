@@ -105,6 +105,19 @@ class Avaliacao(models.Model):
         verbose_name_plural = 'Avaliações'
         ordering = ['disciplina', 'aluno']
 
+
+# ── Denuncia ──────────────────────────────────────────────────────────────────
+class Denuncia(models.Model):
+    avaliacao = models.ForeignKey(Avaliacao, on_delete=models.CASCADE, related_name='denuncias')
+    motivo = models.CharField(max_length=50)
+    descricao = models.TextField(blank=True, null=True)
+    data_denuncia = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Denúncia ({self.motivo}) - Avaliação ID: {self.avaliacao.id}"
+
+
+# ── Turma ──────────────────────────────────────────────────────────────────
 class Turma(models.Model):
     disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='turma_disciplina')
     professor = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='turma_professor')

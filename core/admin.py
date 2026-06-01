@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Professor, Disciplina, Matricula, Avaliacao, Turma
+from .models import Student, Professor, Disciplina, Matricula, Avaliacao, Turma, Denuncia
 
 
 @admin.register(Student)
@@ -54,3 +54,11 @@ class AvaliacaoAdmin(admin.ModelAdmin):
     list_display  = ('aluno', 'disciplina', 'nota')
     list_filter   = ('disciplina',)
     search_fields = ('aluno__user__first_name', 'disciplina__nome')
+
+
+@admin.register(Denuncia)
+class DenunciaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'avaliacao', 'motivo', 'data_denuncia')
+    list_filter = ('motivo', 'data_denuncia')
+    search_fields = ('descricao', 'motivo')
+    ordering = ('-data_denuncia',)
