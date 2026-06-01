@@ -51,7 +51,7 @@ class MatriculaAdmin(admin.ModelAdmin):
 
 @admin.register(Avaliacao)
 class AvaliacaoAdmin(admin.ModelAdmin):
-    list_display  = ('aluno', 'disciplina', 'nota')
+    list_display  = ('aluno', 'disciplina', 'nota_prof', 'nota_disc')
     list_filter   = ('disciplina',)
     search_fields = ('aluno__user__first_name', 'disciplina__nome')
 
