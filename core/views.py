@@ -273,17 +273,17 @@ def historico_grades(request):
     return render(request, 'core/historico.html', context)
 
 
+
 def minhas_avaliacoes_prof(request, id_professor):
-    qtd_avaliacoes = Avaliacao.objects.count()
     professor = get_object_or_404(Professor, id=id_professor)
-    avaliacoes = Avaliacao.objects.filter(professor=professor).aggregate(total=Sum('nota_prof'))['total']
-    
-    soma_notas_prof = avaliacoes.total
 
+    avaliacoes = Avaliacao.objects.filter(professor=professor)
+    qtd_avaliacoes = avaliacoes.count()
 
-    nota_professor = Avaliacao.objects.filter(professor=professor).aggregate(media=Avg('nota_prof'))['media']
-    nota_disciplina = Avaliacao.objects.filter().aggregate(media=Avg('nota_disc'))['media']
-    print(nota_professor)
+    disciplinas = Disciplina.objects.filter(turma_disciplina__professor=professor).distinct()
+
+    nota_professor = avaliacoes.aggregate(media=Avg('nota_prof'))['media']
+    nota_disciplina = avaliacoes.aggregate(media=Avg('nota_disc'))['media']
 
     return render(request, 'core/minhas-avaliacoes-prof.html', {
         'disciplinas': disciplinas,
@@ -291,8 +291,8 @@ def minhas_avaliacoes_prof(request, id_professor):
         'qtd_avaliacoes': qtd_avaliacoes,
         'nota_professor': nota_professor,
         'nota_disciplina': nota_disciplina,
-        }
-    )
+    })
+
 
 
 def detalhes_disciplina(request):
