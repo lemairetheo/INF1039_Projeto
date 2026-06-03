@@ -285,6 +285,11 @@ def minhas_avaliacoes_prof(request, id_professor):
     nota_professor = avaliacoes.aggregate(media=Avg('nota_prof'))['media']
     nota_disciplina = avaliacoes.aggregate(media=Avg('nota_disc'))['media']
 
+    if nota_professor == None:
+        nota_professor = 0
+    if nota_disciplina == None:
+        nota_disciplina = 0
+        
     return render(request, 'core/minhas-avaliacoes-prof.html', {
         'disciplinas': disciplinas,
         'avaliacoes': avaliacoes,

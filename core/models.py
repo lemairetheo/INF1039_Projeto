@@ -67,7 +67,7 @@ class Disciplina(models.Model):
 
     @property
     def nota_media(self):
-        media = self.avaliacoes.aggregate(Avg('nota'))['nota__avg']
+        media = self.avaliacoes.aggregate(media=Avg('nota_disc'))['media']
         if media is None:
             return 0.0
         return round(float(media), 1)
