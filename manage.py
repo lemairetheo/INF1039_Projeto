@@ -20,4 +20,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-python manage.py importar_microhorario
+python manage.py micro puc
