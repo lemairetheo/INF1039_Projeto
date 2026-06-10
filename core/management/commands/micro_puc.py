@@ -1,12 +1,18 @@
 import re
 import time
+import traceback
 from io import StringIO
-from django.core.management.base import BaseCommand
-from core.models import Disciplina, Professor, Turma
+
 import pandas as pd
 from bs4 import BeautifulSoup
+from django.core.management.base import BaseCommand
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
+from core.models import Disciplina, Professor, Turma
 
 DIAS_MAP = {
     "2": "SEG",
@@ -19,10 +25,6 @@ DIAS_MAP = {
 
 
 def extrair_dias_horarios(texto):
-    """Extrai pares (dia, horario) da string de horário do MicroHorário.
-
-    Exemplos: 2ABCD -> [('SEG', 'ABCD')]
-    """
     texto = str(texto or "").upper()
     resultados = []
     padrao = r"([234567]+)([A-Z]+)"
@@ -32,210 +34,241 @@ def extrair_dias_horarios(texto):
             dia = DIAS_MAP.get(d)
             if dia:
                 resultados.append((dia, horarios))
+
     return resultados
 
 
 class Command(BaseCommand):
-    help = "Importa disciplinas, professores e turmas do MicroHorário diretamente para o banco."
+    help = "Importa dados do MicroHorário da PUC para o banco do Django e gera CSV"
+
+    def criar_driver(self):
+        options = webdriver.ChromeOptions()
+        # Se quiser rodar sem abrir a janela do navegador, descomente a linha abaixo:
+        # options.add_argument("--headless")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920,1080")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        return webdriver.Chrome(options=options)
+
+    def salvar_debug(self, driver):
+        try:
+            driver.save_screenshot("erro_microhorario.png")
+            with open("microhorario_debug.html", "w", encoding="utf-8") as f:
+                f.write(driver.page_source)
+        except Exception:
+            pass
 
     def handle(self, *args, **options):
-        # Configuração do Selenium Headless
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless=new")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
+        driver = self.criar_driver()
 
-        driver = webdriver.Chrome(options=chrome_options)
-
-        url = (
-            "https://microhorario.rdc.puc-rio.br/WebMicroHorarioConsulta/"
-            "MicroHorarioConsulta.aspx?sessao="
-            "U2lzdGVtYT1QVUNPTkxJTkVfQUxVTk8mQXBsaWNhY2FvPU1JQ1JPX0hPUkFSSU8m"
-            "RnVuY2FvPUNPTlNVTFRBJklEPTBhODJkN2MxODEzZjQxZTY5ZTQ1MTNhNmQxY2I4Yzdk"
-        )
-
-        self.stdout.write("Abrindo MicroHorário...")
-        driver.get(url)
-        time.sleep(3)
-
-        # Clica no botão de Buscar/Consultar
         try:
-            try:
-                botao = driver.find_element(
-                    By.XPATH,
-                    "//a[contains(text(),'Buscar') or contains(text(),'Consultar')]",
-                )
-            except Exception:
-                botao = driver.find_element(
-                    By.XPATH, "//input[@type='submit' or @value='Buscar']"
-                )
-
-            botao.click()
-            self.stdout.write("Consulta iniciada, coletando dados...")
-            time.sleep(4)
-        except Exception as e:
-            driver.quit()
-            self.stdout.write(
-                self.style.ERROR(f"Erro ao iniciar consulta: {e}")
+            # URL atualizada enviada pelo usuário (Horário/Sala)
+            url = (
+                "https://microhorario.rdc.puc-rio.br/"
+                "WebMicroHorarioConsulta/"
+                "MicroHorarioConsulta.aspx?sessao="
+                "U2lzdGVtYT1QVUNPTkxJTkVfQUxVTk8m"
+                "QXBsaWNhY2FvPU1JQ1JPX0hPUkFSSU8m"
+                "RnVuY2FvPUhPUkFSSU9fU0FMQSZJRD04"
+                "OTJjOWY4NjAxZjM0NzdhODBlNjQxMTdl"
+                "YWViM2U1ZQ__"
             )
-            return
 
-        todos_os_dfs = []
-        pagina_atual = 1
+            self.stdout.write("Acessando a página do Microhorário da PUC (Nova URL)...")
+            driver.get(url)
+            time.sleep(3)
 
-        while True:
-            self.stdout.write(f"Raspando página {pagina_atual}...")
-            html = driver.page_source
-            soup = BeautifulSoup(html, "html.parser")
-            tabela_encontrada = False
-
-            for tabela in soup.find_all("table"):
-                try:
-                    dfs = pd.read_html(StringIO(str(tabela)))
-                    if dfs and len(dfs[0].columns) >= 10:
-                        # Pega as 10 colunas relevantes
-                        df = dfs[0].iloc[:, :10].copy()
-
-                        # Força a renomeação correta mapeando o HTML da PUC
-                        df.columns = [
-                            "codigo_turma",  # Coluna 0 (Ex: INF1001)
-                            "codigo",  # Coluna 1 (Normalmente igual ou sub-código)
-                            "nome",  # Coluna 2 (Nome da matéria)
-                            "professor",  # Coluna 3
-                            "credito",  # Coluna 4
-                            "vagas",
-                            "inscritos",
-                            "status",
-                            "horario_sala",  # Coluna 8 ou 9 dependendo da variação
-                            "extra",
-                        ]
-
-                        todos_os_dfs.append(df)
-                        tabela_encontrada = True
-                        break
-                except Exception:
-                    pass
-
-            if not tabela_encontrada:
-                self.stdout.write(
-                    self.style.WARNING(
-                        f"Nenhuma tabela válida na página {pagina_atual}"
-                    )
-                )
-
-            # Lógica de Paginação (Próxima Página)
-            proxima = pagina_atual + 1
+            # ==================================================================
+            # PASSO 1: CLICAR NO BOTÃO BUSCAR / CONSULTAR
+            # ==================================================================
+            self.stdout.write("Tentando clicar no botão para listar todas as disciplinas...")
             try:
-                link = driver.find_element(By.XPATH, f"//a[text()='{proxima}']")
-                driver.execute_script(
-                    "arguments[0].scrollIntoView();", link
-                )
-                time.sleep(0.5)
-                link.click()
-                pagina_atual = proxima
+                try:
+                    botao_buscar = driver.find_element(
+                        By.XPATH, "//a[contains(text(), 'Buscar') or contains(text(), 'Consultar')]"
+                    )
+                except Exception:
+                    botao_buscar = driver.find_element(
+                        By.XPATH, "//input[@type='submit' or @value='Buscar' or @id='btnConsultar']"
+                    )
+
+                botao_buscar.click()
+                self.stdout.write(self.style.SUCCESS("Botão clicado com sucesso! Iniciando varredura..."))
                 time.sleep(4)
-            except Exception:
+
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f"[Erro Inicial] Não foi possível iniciar a busca: {e}"))
+                self.salvar_debug(driver)
+                driver.quit()
+                return
+
+            # ==================================================================
+            # PASSO 2: LOOP DE PAGINAÇÃO E COLETA
+            # ==================================================================
+            todos_os_dfs = []
+            pagina_atual = 1
+
+            while True:
+                self.stdout.write(f"Lendo e processando os dados da página {pagina_atual} ...")
+                
+                html_content = driver.page_source
+                soup = BeautifulSoup(html_content, 'html.parser')
+                tabelas_html = soup.find_all('table')
+                
+                tabela_encontrada = False
+                for tab in tabelas_html:
+                    try:
+                        df_lista = pd.read_html(StringIO(str(tab)))
+                        
+                        if df_lista and len(df_lista[0].columns) >= 10:
+                            df_pagina = df_lista[0].iloc[:, :10].copy()
+                            
+                            df_pagina.columns = [
+                                "codigo_turma",  
+                                "codigo",
+                                "nome",
+                                "professor",
+                                "credito",
+                                "vagas",
+                                "inscritos",
+                                "status",
+                                "horario_sala",
+                                "extra",
+                            ]
+                            
+                            todos_os_dfs.append(df_pagina)
+                            tabela_encontrada = True
+                            break
+                    except Exception:
+                        continue
+                        
+                if not tabela_encontrada:
+                    self.stdout.write(
+                        self.style.WARNING(f"Aviso: Nenhuma tabela detectada na página {pagina_atual}.")
+                    )
+
+                # --- LÓGICA DE NAVEGAÇÃO AVANÇADA (TRATA RETICÊNCIAS) ---
+                proxima_pagina = pagina_atual + 1
                 try:
-                    link = driver.find_element(
-                        By.XPATH, f"//a[contains(@href, 'Page${proxima}')]"
-                    )
-                    driver.execute_script(
-                        "arguments[0].scrollIntoView();", link
-                    )
-                    link.click()
-                    pagina_atual = proxima
+                    link_proxima = driver.find_element(By.XPATH, f"//a[text()='{proxima_pagina}']")
+                    driver.execute_script("arguments[0].scrollIntoView();", link_proxima)
+                    time.sleep(0.5)
+                    link_proxima.click()
+                    
+                    pagina_atual = proxima_pagina
                     time.sleep(4)
+                    
                 except Exception:
-                    self.stdout.write("Fim das páginas encontradas.")
-                    break
+                    try:
+                        link_reticencias = driver.find_element(
+                            By.XPATH, f"//a[contains(@href, \"Page${proxima_pagina}\")]"
+                        )
+                        driver.execute_script("arguments[0].scrollIntoView();", link_reticencias)
+                        link_reticencias.click()
+                        
+                        pagina_atual = proxima_pagina
+                        time.sleep(4)
+                    except Exception:
+                        self.stdout.write(self.style.SUCCESS("\nChegamos ao fim de todas as páginas disponíveis!"))
+                        break
 
-        driver.quit()
+            driver.quit()
 
-        if not todos_os_dfs:
-            self.stdout.write(self.style.ERROR("Nenhum dado coletado."))
-            return
+            # ==================================================================
+            # PASSO 3: TRATAMENTO E LIMPEZA DOS DADOS (PANDAS)
+            # ==================================================================
+            if not todos_os_dfs:
+                self.stdout.write(self.style.ERROR("\nNenhum dado pôde ser extraído do site."))
+                return
 
-        # Tratamento dos Dados no Pandas
-        df_final = pd.concat(todos_os_dfs, ignore_index=True)
-        df_final["codigo_turma"] = df_final["codigo_turma"].astype(str)
-        df_final["codigo"] = df_final["codigo"].astype(str)
+            self.stdout.write("\nIniciando o processo de limpeza dos dados coletados...")
+            df_final = pd.concat(todos_os_dfs, ignore_index=True)
+            
+            df_final["codigo_turma"] = df_final["codigo_turma"].astype(str)
+            df_final["codigo"] = df_final["codigo"].astype(str)
+            
+            df_final = df_final[~df_final["codigo_turma"].str.contains("Disciplina", na=False, case=False)]
+            
+            palavras_para_remover = ["Último", "Primeiro", "<<", ">>", "antigos"]
+            for palavra in palavras_para_remover:
+                df_final = df_final[~df_final["codigo_turma"].str.contains(palavra, na=False, case=False)]
+                df_final = df_final[~df_final["codigo"].str.contains(palavra, na=False, case=False)]
+            
+            df_final = df_final[df_final["codigo"].str.strip().str.len() > 3]
+            
+            df_final["nome"] = df_final["nome"].astype(str).str.strip()
+            df_final["codigo_turma"] = df_final["codigo_turma"].astype(str).str.strip()
+            df_final["codigo"] = df_final["codigo"].astype(str).str.strip()
+            
+            df_final.replace("", pd.NA, inplace=True)
+            df_final = df_final.dropna(subset=["nome", "codigo"])
+            df_final = df_final.loc[:, df_final.columns != ""]
 
-        # Limpeza de lixo de paginação e topo de tabela
-        df_final = df_final[
-            ~df_final["codigo_turma"].str.contains(
-                "Disciplina|Último|Primeiro|<<|>>", na=False, case=False
-            )
-        ]
-        df_final = df_final[
-            df_final["codigo_turma"].str.strip().str.len() >= 3
-        ]
+            # Exportação do CSV local para conferência rápida
+            df_final.to_csv("microhorario_puc_completo.csv", index=False, encoding="utf-8-sig")
+            self.stdout.write("Backup de segurança salvo em 'microhorario_puc_completo.csv'.")
 
-        df_final["nome"] = df_final["nome"].astype(str).str.strip()
-        df_final.dropna(subset=["nome", "codigo_turma"], inplace=True)
+            # ==================================================================
+            # PASSO 4: SALVAR DADOS NO DJANGO ORM
+            # ==================================================================
+            disciplinas_criadas = 0
+            professores_criados = 0
+            turmas_criadas = 0
 
-        # Contadores para o relatório final
-        disciplinas_criadas = 0
-        professores_criados = 0
-        turmas_criadas = 0
+            self.stdout.write("Inserindo/Atualizando os registros no banco de dados...")
 
-        self.stdout.write("Salvando os dados no Banco de Dados...")
+            for _, row in df_final.iterrows():
+                professor_nome = str(row.get("professor", "")).strip()
+                if not professor_nome or professor_nome == "<NA>":
+                    professor_nome = "Não informado"
 
-        # Loop de Inserção no Django ORM
-        for _, row in df_final.iterrows():
-            # 1. Trata Professor
-            professor_nome = str(
-                row.get("professor", "Não informado")
-            ).strip()
-            if not professor_nome or professor_nome.lower() == "nan":
-                professor_nome = "Não informado"
-
-            professor, prof_created = Professor.objects.get_or_create(
-                nome=professor_nome,
-                defaults={"departamento": "Não informado"},
-            )
-            if prof_created:
-                professores_criados += 1
-
-            # 2. Trata Créditos
-            try:
-                creditos = int(float(row.get("credito", 0)))
-            except Exception:
-                creditos = 0
-
-            # 3. Trata Disciplina (Usa o código limpo da matéria)
-            cod_disciplina = str(row["codigo_turma"]).strip()
-
-            disciplina, disc_created = Disciplina.objects.update_or_create(
-                codigo=cod_disciplina,
-                defaults={
-                    "nome": str(row["nome"]).strip(),
-                    "creditos": creditos,
-                    "periodo": 0,
-                },
-            )
-            if disc_created:
-                disciplinas_criadas += 1
-
-            # 4. Trata Turma (Quebra horários múltiplos, ex: 2ABCD 4EFGH)
-            horarios = extrair_dias_horarios(row.get("horario_sala", ""))
-
-            for dia_semana, horario in horarios:
-                # Evita duplicar exatamente a mesma combinação
-                _, turma_created = Turma.objects.get_or_create(
-                    disciplina=disciplina,
-                    professor=professor,
-                    dia_semana=dia_semana,
-                    horario=horario,
+                professor, criado = Professor.objects.get_or_create(
+                    nome=professor_nome,
+                    defaults={"departamento": "Não informado"},
                 )
-                if turma_created:
-                    turmas_criadas += 1
+                if criado:
+                    professores_criados += 1
 
-        # Feedback Final de Sucesso no Terminal
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"\n[OK] Importação concluída com sucesso!\n"
-                f"- {disciplinas_criadas} novas disciplinas adicionadas/atualizadas.\n"
-                f"- {professores_criados} novos professores cadastrados.\n"
-                f"- {turmas_criadas} novos horários de turmas criados."
+                try:
+                    creditos = int(float(row.get("credito", 0)))
+                except Exception:
+                    creditos = 0
+
+                disciplina, criada = Disciplina.objects.update_or_create(
+                    codigo=row["codigo_turma"],
+                    defaults={
+                        "nome": row["nome"],
+                        "creditos": creditos,
+                        "periodo": 0,
+                    },
+                )
+                if criada:
+                    disciplinas_criadas += 1
+
+                horarios = extrair_dias_horarios(row.get("horario_sala", ""))
+                for dia, horario in horarios:
+                    _, turma_criada = Turma.objects.get_or_create(
+                        disciplina=disciplina,
+                        professor=professor,
+                        dia_semana=dia,
+                        horario=horario,
+                    )
+                    if turma_criada:
+                        turmas_criadas += 1
+
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"\n[Sucesso Total] Importação concluída!\n"
+                    f"Páginas vasculhadas: {pagina_atual}\n"
+                    f"Disciplinas no Banco: {disciplinas_criadas}\n"
+                    f"Professores no Banco: {professores_criados}\n"
+                    f"Vínculos de Turmas: {turmas_criadas}\n"
+                )
             )
-        )
+
+        except Exception as e:
+            self.salvar_debug(driver)
+            self.stdout.write(self.style.ERROR(f"\nErro crítico na execução do comando: {e}"))
+            traceback.print_exc()
+            driver.quit()
