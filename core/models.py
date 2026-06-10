@@ -44,6 +44,7 @@ class Student(models.Model):
 
 # ── Professor ──────────────────────────────────────────────────────────────────
 class Professor(models.Model):
+    user         = models.OneToOneField(User, on_delete=models.CASCADE, related_name='professor', null=True, blank=True)
     nome         = models.CharField(max_length=100)
     departamento = models.CharField(max_length=100)
 

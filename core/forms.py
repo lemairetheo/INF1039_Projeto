@@ -1,6 +1,35 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Student, Avaliacao, Disciplina
+from .models import Student, Professor, Avaliacao, Disciplina
+
+
+ROLE_CHOICES = [
+    ('student',   'Estudante'),
+    ('professor', 'Professor'),
+]
+
+class RegisterForm(UserCreationForm):
+    first_name   = forms.CharField(max_length=50, label='Nome')
+    last_name    = forms.CharField(max_length=50, label='Sobrenome')
+    email        = forms.EmailField(label='Email')
+    role         = forms.ChoiceField(choices=ROLE_CHOICES, label='Tipo de conta', widget=forms.RadioSelect)
+    # Campos específicos por papel
+    matricula    = forms.CharField(max_length=20, required=False, label='Matrícula', help_text='Obrigatório para estudantes')
+    departamento = forms.CharField(max_length=100, required=False, label='Departamento', help_text='Obrigatório para professores')
+
+    class Meta(UserCreationForm.Meta):
+        model  = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+
+    def clean(self):
+        cleaned = super().clean()
+        role = cleaned.get('role')
+        if role == 'student' and not cleaned.get('matricula'):
+            self.add_error('matricula', 'A matrícula é obrigatória para estudantes.')
+        if role == 'professor' and not cleaned.get('departamento'):
+            self.add_error('departamento', 'O departamento é obrigatório para professores.')
+        return cleaned
 
 
 class UserEditForm(forms.ModelForm):

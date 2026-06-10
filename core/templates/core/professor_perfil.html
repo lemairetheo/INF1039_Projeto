@@ -1,0 +1,77 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Perfil — {{ professor.nome }} | Academic Curator{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width:1100px; margin:0 auto; padding:40px 24px;">
+
+    <!-- Header -->
+    <div style="background:#fff; border:1px solid #f1f5f9; border-radius:12px; padding:28px; display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; box-shadow:0 1px 3px rgba(0,0,0,.08);">
+        <div style="display:flex; gap:20px; align-items:center;">
+            <div style="width:64px; height:64px; border-radius:50%; background:#eef0fb; display:flex; align-items:center; justify-content:center; font-size:28px;">👨‍🏫</div>
+            <div>
+                <h1 style="margin:0 0 4px; font-size:22px; font-weight:700; color:#0f172a;">{{ professor.nome }}</h1>
+                <p style="margin:0; color:#64748b; font-size:14px;">{{ professor.departamento }}</p>
+                <span style="display:inline-block; margin-top:6px; background:#eef0fb; color:#3f51b5; border-radius:20px; padding:2px 12px; font-size:12px; font-weight:600;">Professor</span>
+            </div>
+        </div>
+        <div style="text-align:center; background:#f8fafc; border-radius:10px; padding:16px 24px;">
+            <p style="margin:0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.05em;">Nota média</p>
+            <p style="margin:4px 0 0; font-size:28px; font-weight:700; color:{% if nota_media >= 7 %}#22c55e{% elif nota_media >= 5 %}#f59e0b{% else %}#ef4444{% endif %};">
+                {% if nota_media > 0 %}{{ nota_media }}{% else %}—{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Grid -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+        <!-- Turmas -->
+        <section style="background:#fff; border:1px solid #f1f5f9; border-radius:12px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,.06);">
+            <h2 style="font-size:15px; font-weight:700; color:#0f172a; margin:0 0 18px;">📅 Minhas Turmas</h2>
+            {% if turmas %}
+            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px;">
+                {% for t in turmas %}
+                <li style="background:#f8fafc; border-radius:8px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <p style="margin:0; font-weight:600; color:#1e293b; font-size:14px;">{{ t.disciplina.nome }}</p>
+                        <p style="margin:2px 0 0; font-size:12px; color:#64748b;">{{ t.disciplina.codigo }}</p>
+                    </div>
+                    <div style="text-align:right; font-size:13px; color:#64748b;">
+                        <p style="margin:0;">{{ t.get_dia_semana_display }}</p>
+                        <p style="margin:0;">{{ t.get_horario_display }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="color:#94a3b8; font-size:14px; text-align:center; padding:20px 0;">Nenhuma turma atribuída.</p>
+            {% endif %}
+        </section>
+
+        <!-- Avaliações recentes -->
+        <section style="background:#fff; border:1px solid #f1f5f9; border-radius:12px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,.06);">
+            <h2 style="font-size:15px; font-weight:700; color:#0f172a; margin:0 0 18px;">⭐ Avaliações recentes</h2>
+            {% if avaliacoes %}
+            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px;">
+                {% for av in avaliacoes|slice:":5" %}
+                <li style="background:#f8fafc; border-radius:8px; padding:12px 14px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span style="font-weight:600; font-size:14px; color:#1e293b;">{{ av.aluno.user.get_full_name }}</span>
+                        <span style="font-weight:700; font-size:15px; color:{% if av.nota_prof >= 7 %}#22c55e{% elif av.nota_prof >= 5 %}#f59e0b{% else %}#ef4444{% endif %};">{{ av.nota_prof }}</span>
+                    </div>
+                    {% if av.comentario %}
+                    <p style="margin:0; font-size:13px; color:#64748b;">{{ av.comentario }}</p>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="color:#94a3b8; font-size:14px; text-align:center; padding:20px 0;">Nenhuma avaliação ainda.</p>
+            {% endif %}
+        </section>
+
+    </div>
+</div>
+{% endblock %}

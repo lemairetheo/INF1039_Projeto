@@ -24,11 +24,23 @@
                 <a href="{% url 'disciplinas' %}" class="nav-link {% if request.resolver_match.url_name == 'disciplinas' %}active{% endif %}">Disciplinas</a>
                 <a href="{% url 'professores' %}" class="nav-link {% if request.resolver_match.url_name == 'professores' %}active{% endif %}">Professores</a>
                 <a href="{% url 'Avaliações' %}" class="nav-link {% if request.resolver_match.url_name == 'Avaliações' %}active{% endif %}">Avaliações</a>
-                <a href="{% url 'matricula' %}" class="nav-link {% if request.resolver_match.url_name == 'matricula' %}active{% endif %}">Matricula</a>
-                <a href="{% url 'grade' %}" class="nav-link {% if request.resolver_match.url_name == 'grade' %}active{% endif %}">Grade Horária</a>
-                <a href="{% url 'perfil' %}" class="nav-link {% if request.resolver_match.url_name == 'perfil' %}active{% endif %}">Perfil</a>
+
                 {% if user.is_authenticated %}
-                <a href="{% url 'Nova Avaliação' %}" class="nav-link {% if request.resolver_match.url_name == 'Nova Avaliação' %}active{% endif %}">Avaliação</a>
+                    {% if user.student %}
+                        {# ── Links exclusivos para estudantes ── #}
+                        <a href="{% url 'matricula' %}" class="nav-link {% if request.resolver_match.url_name == 'matricula' %}active{% endif %}">Matrícula</a>
+                        <a href="{% url 'grade' %}" class="nav-link {% if request.resolver_match.url_name == 'grade' %}active{% endif %}">Grade Horária</a>
+                        <a href="{% url 'perfil' %}" class="nav-link {% if request.resolver_match.url_name == 'perfil' %}active{% endif %}">Perfil</a>
+                        <a href="{% url 'Nova Avaliação' %}" class="nav-link {% if request.resolver_match.url_name == 'Nova Avaliação' %}active{% endif %}">Avaliar</a>
+                    {% elif user.professor %}
+                        {# ── Links exclusivos para professores ── #}
+                        <a href="{% url 'professor_perfil' %}" class="nav-link {% if request.resolver_match.url_name == 'professor_perfil' %}active{% endif %}">Meu Perfil</a>
+                        <a href="{% url 'minhas avaliações' user.professor.id %}" class="nav-link {% if request.resolver_match.url_name == 'minhas avaliações' %}active{% endif %}">Minhas Avaliações</a>
+                    {% endif %}
+                {% else %}
+                    {# ── Visitante: mostra links básicos ── #}
+                    <a href="{% url 'matricula' %}" class="nav-link {% if request.resolver_match.url_name == 'matricula' %}active{% endif %}">Matrícula</a>
+                    <a href="{% url 'grade' %}" class="nav-link {% if request.resolver_match.url_name == 'grade' %}active{% endif %}">Grade Horária</a>
                 {% endif %}
             </nav>
 

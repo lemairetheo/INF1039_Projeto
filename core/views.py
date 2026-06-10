@@ -1,11 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Avg
 from django.contrib import messages
 from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia
-from .forms import UserEditForm, StudentEditForm, AvaliacaoForm
+from .forms import UserEditForm, StudentEditForm, AvaliacaoForm, RegisterForm
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -59,7 +58,10 @@ def disciplina_detalhe(request, pk):
     })
 
 def professores(request):
-    return render(request, 'core/professores.html')
+    todos = Professor.objects.prefetch_related(
+        'turma_professor__disciplina', 'avaliacoes'
+    ).all()
+    return render(request, 'core/professores.html', {'professores': todos})
 
 
 def avaliacoes(request):
@@ -155,14 +157,58 @@ def criar_avaliacao(request):
 
 def register_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')
+            user = form.save(commit=False)
+            user.first_name = form.cleaned_data['first_name']
+            user.last_name  = form.cleaned_data['last_name']
+            user.email      = form.cleaned_data['email']
+            user.save()
+
+            role = form.cleaned_data['role']
+            if role == 'student':
+                Student.objects.create(
+                    user=user,
+                    matricula=form.cleaned_data['matricula'],
+                )
+                login(request, user)
+                return redirect('perfil')
+            else:
+                Professor.objects.create(
+                    user=user,
+                    nome=f"{user.first_name} {user.last_name}".strip() or user.username,
+                    departamento=form.cleaned_data['departamento'],
+                )
+                login(request, user)
+                return redirect('professor_perfil')
     else:
-        form = UserCreationForm()
+        form = RegisterForm()
     return render(request, 'core/cadastro1.html', {'form': form})
+
+
+def login_redirect_view(request):
+    """Redirect after login based on user role."""
+    if not request.user.is_authenticated:
+        return redirect('login')
+    if hasattr(request.user, 'student'):
+        return redirect('perfil')
+    if hasattr(request.user, 'professor'):
+        return redirect('professor_perfil')
+    return redirect('home')
+
+
+@login_required
+def professor_perfil(request):
+    professor  = get_object_or_404(Professor, user=request.user)
+    turmas     = professor.turma_professor.select_related('disciplina').all()
+    avaliacoes = professor.avaliacoes.select_related('aluno__user', 'disciplina').all()
+    nota_media = avaliacoes.aggregate(media=Avg('nota_prof'))['media'] or 0
+    return render(request, 'core/professor_perfil.html', {
+        'professor':  professor,
+        'turmas':     turmas,
+        'avaliacoes': avaliacoes,
+        'nota_media': round(float(nota_media), 1),
+    })
 
 
 @login_required

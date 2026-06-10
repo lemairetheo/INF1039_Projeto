@@ -6,6 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Conta - Academic Curator</title>
     <link rel="stylesheet" href="{% static 'core/css/cadastro1.css' %}">
+    <style>
+        .role_selector { display: flex; gap: 16px; margin-bottom: 20px; }
+        .role_card {
+            flex: 1; border: 2px solid #e2e8f0; border-radius: 10px;
+            padding: 16px; cursor: pointer; text-align: center; transition: all .2s;
+        }
+        .role_card:has(input:checked) { border-color: #3f51b5; background: #eef0fb; }
+        .role_card input { display: none; }
+        .role_card .icon { font-size: 28px; margin-bottom: 6px; }
+        .role_card .label { font-weight: 600; font-size: 14px; color: #1e293b; }
+        .role_card .desc  { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .field_student, .field_professor { display: none; }
+        .field_errors { color: #ef4444; font-size: 13px; margin-bottom: 12px; }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -31,32 +45,75 @@
                 <h2>Criar Conta</h2>
                 <div class="divider"></div>
 
-                <form method="post">
+                {% if form.errors %}
+                <div class="field_errors">
+                    {% for field in form %}{% for error in field.errors %}<p>{{ error }}</p>{% endfor %}{% endfor %}
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post" id="registerForm">
                     {% csrf_token %}
 
-                    {% if form.errors %}
-                    <div class="form-errors">
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <p>{{ error }}</p>
-                            {% endfor %}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-
-                    <div class="form-group">
-                        <label for="id_username">Usuário</label>
-                        <input type="text" name="username" id="id_username" placeholder="seu.usuario" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_password1">Senha</label>
-                        <input type="password" name="password1" id="id_password1" placeholder="Mínimo 8 caracteres" required>
+                    <!-- Tipo de conta -->
+                    <p style="font-weight:600; margin-bottom:10px; font-size:14px;">Tipo de conta</p>
+                    <div class="role_selector">
+                        <label class="role_card">
+                            <input type="radio" name="role" value="student" {% if form.role.value != 'professor' %}checked{% endif %}>
+                            <div class="icon">🎓</div>
+                            <div class="label">Estudante</div>
+                            <div class="desc">Matricule-se em disciplinas e avalie cursos</div>
+                        </label>
+                        <label class="role_card">
+                            <input type="radio" name="role" value="professor" {% if form.role.value == 'professor' %}checked{% endif %}>
+                            <div class="icon">👨‍🏫</div>
+                            <div class="label">Professor</div>
+                            <div class="desc">Gerencie turmas e veja avaliações</div>
+                        </label>
                     </div>
 
+                    <!-- Nome e Sobrenome -->
+                    <div style="display:flex; gap:12px;">
+                        <div class="form-group" style="flex:1">
+                            <label>Nome</label>
+                            <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" placeholder="Seu nome" required>
+                        </div>
+                        <div class="form-group" style="flex:1">
+                            <label>Sobrenome</label>
+                            <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" placeholder="Seu sobrenome" required>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label for="id_password2">Confirmar Senha</label>
-                        <input type="password" name="password2" id="id_password2" placeholder="Repita a senha" required>
+                        <label>Email</label>
+                        <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="seu@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Usuário</label>
+                        <input type="text" name="username" value="{{ form.username.value|default:'' }}" placeholder="seu.usuario" required>
+                    </div>
+
+                    <!-- Campo apenas para estudante -->
+                    <div class="form-group field_student">
+                        <label>Matrícula</label>
+                        <input type="text" name="matricula" value="{{ form.matricula.value|default:'' }}" placeholder="Ex: 2024001">
+                    </div>
+
+                    <!-- Campo apenas para professor -->
+                    <div class="form-group field_professor">
+                        <label>Departamento</label>
+                        <input type="text" name="departamento" value="{{ form.departamento.value|default:'' }}" placeholder="Ex: Ciência da Computação">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" name="password1" placeholder="Mínimo 8 caracteres" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirmar Senha</label>
+                        <input type="password" name="password2" placeholder="Repita a senha" required>
                     </div>
 
                     <button type="submit" class="btn-submit">Criar Conta</button>
@@ -68,5 +125,15 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function updateFields() {
+            const role = document.querySelector('input[name="role"]:checked')?.value;
+            document.querySelectorAll('.field_student').forEach(el => el.style.display = role === 'student' ? 'block' : 'none');
+            document.querySelectorAll('.field_professor').forEach(el => el.style.display = role === 'professor' ? 'block' : 'none');
+        }
+        document.querySelectorAll('input[name="role"]').forEach(r => r.addEventListener('change', updateFields));
+        updateFields();
+    </script>
 </body>
 </html>

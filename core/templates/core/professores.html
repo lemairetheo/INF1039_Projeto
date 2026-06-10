@@ -16,6 +16,8 @@
 </header>
 
 <section class="grade_professores">
+    {% for prof in professores %}
+    {% with turmas=prof.turma_professor.all avaliacoes=prof.avaliacoes.all %}
     <article class="card_professor">
         <header class="perfil_cabecalho">
             <div class="avatar_circulo">
@@ -24,95 +26,40 @@
                 </svg>
             </div>
             <div class="nome_professor">
-                <h2>Paula Guaranys</h2>
-                <span>0 disciplina(s)</span>
+                <h2>{{ prof.nome }}</h2>
+                <span>{{ prof.departamento }}</span>
             </div>
         </header>
-        <div class="avaliacao_estrelas">
-            <span class="estrelas">☆☆☆☆☆</span>
-            <span>Sem avaliação</span>
-        </div>
-        <div class="lista_tags_disciplinas"></div>
-        <div class="acoes_professor">
-            <button class="botao_perfil">Perfil</button>
-            <button class="botao_avaliacoes">Ver Avaliações</button>
-        </div>
-    </article>
 
-    <article class="card_professor">
-        <header class="perfil_cabecalho">
-            <div class="avatar_circulo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-                </svg>
-            </div>
-            <div class="nome_professor">
-                <h2>Waldemar Celes</h2>
-                <span>1 disciplina(s)</span>
-            </div>
-        </header>
         <div class="avaliacao_estrelas">
-            <span class="estrelas">☆☆☆☆☆</span>
-            <span>Sem avaliação</span>
+            {% if avaliacoes %}
+                <span class="estrelas">★★★★★</span>
+                <span>{{ avaliacoes|length }} avaliação(ões)</span>
+            {% else %}
+                <span class="estrelas">☆☆☆☆☆</span>
+                <span>Sem avaliação</span>
+            {% endif %}
         </div>
-        <div class="lista_tags_disciplinas">
-            <span class="tag_disciplina">INF1037 - Programação em C</span>
-        </div>
-        <div class="acoes_professor">
-            <button class="botao_perfil">Perfil</button>
-            <button class="botao_avaliacoes">Ver Avaliações</button>
-        </div>
-    </article>
 
-    <article class="card_professor">
-        <header class="perfil_cabecalho">
-            <div class="avatar_circulo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-                </svg>
-            </div>
-            <div class="nome_professor">
-                <h2>Luís Bicalho</h2>
-                <span>1 disciplina(s)</span>
-            </div>
-        </header>
-        <div class="avaliacao_estrelas">
-            <span class="estrelas">★★★★★</span>
-            <span>Com avaliação</span>
-        </div>
         <div class="lista_tags_disciplinas">
-            <span class="tag_disciplina">INF1039 - Projetos: Aplica Interativa</span>
+            {% for t in turmas %}
+                <span class="tag_disciplina">{{ t.disciplina.codigo }} — {{ t.disciplina.nome }}</span>
+            {% empty %}
+                <span style="font-size:13px; color:#94a3b8;">Nenhuma turma atribuída</span>
+            {% endfor %}
         </div>
-        <div class="acoes_professor">
-            <button class="botao_perfil">Perfil</button>
-            <button class="botao_avaliacoes">Ver Avaliações</button>
-        </div>
-    </article>
 
-    <article class="card_professor">
-        <header class="perfil_cabecalho">
-            <div class="avatar_circulo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-                </svg>
-            </div>
-            <div class="nome_professor">
-                <h2>Nicolau Saldanha</h2>
-                <span>2 disciplina(s)</span>
-            </div>
-        </header>
-        <div class="avaliacao_estrelas">
-            <span class="estrelas">☆☆☆☆☆</span>
-            <span>Com avaliação</span>
-        </div>
-        <div class="lista_tags_disciplinas">
-            <span class="tag_disciplina">MAT4200 - Álgebra Linear I</span>
-            <span class="tag_disciplina">MAT4161 - Cálculo a uma Variável</span>
-        </div>
         <div class="acoes_professor">
-            <button class="botao_perfil">Perfil</button>
-            <button class="botao_avaliacoes">Ver Avaliações</button>
+            {% if prof.user %}
+                <a href="{% url 'minhas avaliações' prof.id %}" class="botao_avaliacoes">Ver Avaliações</a>
+            {% else %}
+                <span class="botao_avaliacoes" style="opacity:.4; cursor:default;">Ver Avaliações</span>
+            {% endif %}
         </div>
     </article>
+    {% endwith %}
+    {% empty %}
+    <p style="color:#94a3b8; text-align:center; padding:40px;">Nenhum professor cadastrado.</p>
+    {% endfor %}
 </section>
 {% endblock %}
