@@ -3,7 +3,7 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Avg
 from django.contrib import messages
-from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia
+from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia, Requisito
 from .forms import UserEditForm, StudentEditForm, AvaliacaoForm, RegisterForm
 
 
@@ -44,18 +44,17 @@ def disciplinas(request):
 
 
 def disciplina_detalhe(request, pk):
-    disciplina   = get_object_or_404(Disciplina, pk=pk)
-    turmas       = disciplina.turma_disciplina.select_related('professor').all()
-    avaliacoes   = disciplina.avaliacoes.select_related('aluno__user').all()
-    alunos_count = Student.objects.filter(
-        grades__disciplina=disciplina
-    ).distinct().count()
+    disciplina = get_object_or_404(Disciplina.objects.prefetch_related('grupos_requisitos__disciplinas'), pk=pk)
+    turmas = disciplina.turma_disciplina.select_related('professor').all()
+    avaliacoes = disciplina.avaliacoes.select_related('aluno__user').all()
+    alunos_count = Student.objects.filter(grades__disciplina=disciplina).distinct().count()
     return render(request, 'core/disciplina_detalhe.html', {
         'disciplina':   disciplina,
         'turmas':       turmas,
         'avaliacoes':   avaliacoes,
         'alunos_count': alunos_count,
     })
+
 
 def professores(request):
     todos = Professor.objects.prefetch_related(

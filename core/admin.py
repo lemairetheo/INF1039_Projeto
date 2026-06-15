@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Professor, Disciplina, Matricula, Avaliacao, Turma, Denuncia
+from .models import Student, Professor, Disciplina, Matricula, Avaliacao, Turma, Denuncia, Requisito
 
 
 @admin.register(Student)
@@ -29,10 +29,17 @@ class TurmaInline(admin.TabularInline):
 
 @admin.register(Disciplina)
 class DisciplinaAdmin(admin.ModelAdmin):
-    list_display  = ('codigo', 'nome', 'creditos', 'periodo', 'status')
+    list_display  = ('codigo', 'nome', 'creditos', 'periodo', 'status', 'ementa')
     list_filter   = ('periodo', 'status')
-    search_fields = ('codigo', 'nome')
+    search_fields = ('codigo', 'nome', 'ementa')
     inlines       = [TurmaInline]
+
+@admin.register(Requisito)
+class RequisitoAdmin(admin.ModelAdmin):
+    list_display      = ('disciplina_principal', 'tipo', 'operador')
+    list_filter       = ('tipo', 'operador')
+    search_fields     = ('disciplina_principal__codigo', 'disciplina_principal__nome')
+    filter_horizontal = ('disciplinas',)
 
 
 @admin.register(Turma)

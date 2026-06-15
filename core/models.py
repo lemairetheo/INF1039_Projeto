@@ -65,6 +65,7 @@ class Disciplina(models.Model):
     periodo = models.PositiveIntegerField()
     quantidade_turmas = models.PositiveIntegerField(default=1)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.SOB_AVALIACAO)
+    ementa = models.TextField(blank=True, null=True)
 
     @property
     def nota_media(self):
@@ -73,9 +74,32 @@ class Disciplina(models.Model):
             return 0.0
         return round(float(media), 1)
 
+    @property
+    def pre_requisitos(self):
+        return self.grupos_requisitos.filter(tipo='PRE')
+
+    @property
+    def co_requisitos(self):
+        return self.grupos_requisitos.filter(tipo='CO')
+        
     def __str__(self):
         return f"{self.codigo} - {self.nome}"
 
+
+# ── Requisitos ──────────────────────────────────────────────────────────────────
+class Requisito(models.Model):
+    TIPO_CHOICES = [('PRE', 'Pré-requisito'), ('CO', 'Co-requisito'),]
+    OPERADOR_CHOICES = [('AND', 'E'), ('OR', 'OU'),]
+    disciplina_principal = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='grupos_requisitos')
+    tipo = models.CharField(max_length=3, choices=TIPO_CHOICES)
+    operador = models.CharField(max_length=3, choices=OPERADOR_CHOICES, default='AND')
+    disciplinas = models.ManyToManyField(Disciplina, related_name='compoem_grupos',blank=True)
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} ({self.get_operador_display()}) para {self.disciplina_principal.codigo}"
+
+
+# ── Matricula ──────────────────────────────────────────────────────────────────
 class Matricula(models.Model):
     aluno       = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='grades')
     disciplina  = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='matricula_disciplina')
