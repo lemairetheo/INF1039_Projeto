@@ -11,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Importações oficiais do Django
 from django.core.management.base import BaseCommand
-from core.models import Disciplina, Professor, Turma  # Importa os seus models
+from core.models import Disciplina, Professor, Turma, DiaSemanaAula  # Importado DiaSemanaAula
 
 
 class Command(BaseCommand):
@@ -83,7 +83,6 @@ class Command(BaseCommand):
             # --- LÓGICA DE NAVEGAÇÃO ENTRE PÁGINAS ---
             proxima_pagina = pagina_atual + 1
             try:
-                # Tenta ir para o número da próxima página (Ex: '2')
                 link_proxima = driver.find_element(By.XPATH, f"//a[text()='{proxima_pagina}']")
                 driver.execute_script("arguments[0].scrollIntoView();", link_proxima)
                 time.sleep(0.5)
@@ -92,14 +91,12 @@ class Command(BaseCommand):
                 time.sleep(4)
             except:
                 try:
-                    # Se mudar o bloco de páginas, tenta clicar nas reticências '...'
                     link_reticencias = driver.find_element(By.XPATH, f"//a[contains(@href, \"Page${proxima_pagina}\")]")
                     driver.execute_script("arguments[0].scrollIntoView();", link_reticencias)
                     link_reticencias.click()
                     pagina_atual += 1
                     time.sleep(4)
                 except:
-                    # Se ambos falharem, chegamos ao fim real da listagem do site
                     self.stdout.write(self.style.SUCCESS("\nChegamos ao fim definitivo de todas as páginas do site!"))
                     break
 
@@ -164,29 +161,63 @@ class Command(BaseCommand):
                         }
                     )
 
-                    # 3. Lógica básica para mapear Horário e Dia da Semana com base nos Choices do seu Model
-                    v_horario_cru = str(row['horario_sala']).strip()
+                    # 3. Tratamento Avançado do Horário da PUC (Ex: "2A 07:00-09:00", "4C 11:00-13:00")
+                    v_horario_cru = str(row['horario_sala']).strip().upper()
                     
-                    dia_selecionado = "SEG"
-                    horario_selecionado = "07-09"
+                    # Mapeamento do padrão numérico da PUC para a sua classe DiaSemana
+                    # 2 = Segunda, 3 = Terça, 4 = Quarta, 5 = Quinta, 6 = Sexta, 7 = Sábado
+                    mapa_dias = {
+                        "2": "SEG",
+                        "3": "TER",
+                        "4": "QUA",
+                        "5": "QUI",
+                        "6": "SEX",
+                        "7": "SAB"
+                    }
+                    
+                    # Descobre os dias da semana presentes no texto (Pode haver mais de um, ex: "2A 4A")
+                    codigos_dias_encontrados = []
+                    for digito, sigla in mapa_dias.items():
+                        if digito in v_horario_cru:
+                            codigos_dias_encontrados.append(sigla)
 
-                    for choice_dia, _ in Turma._meta.get_field('dia_semana').choices:
-                        if choice_dia in v_horario_cru.upper():
-                            dia_selecionado = choice_dia
+                    # Mapeamento do intervalo de horas da PUC para o Choice do seu Model
+                    horario_selecionado = "07-09"  # Padrão caso falhe o parse
+                    mapa_horarios = {
+                        "07:00": "07-09",
+                        "09:00": "09-11",
+                        "11:00": "11-13",
+                        "13:00": "13-15",
+                        "15:00": "15-17",
+                        "17:00": "17-19",
+                        "19:00": "19-21",
+                    }
+                    
+                    for hora_inicio, choice_valor in mapa_horarios.items():
+                        if hora_inicio in v_horario_cru:
+                            horario_selecionado = choice_valor
                             break
 
-                    for choice_horario, _ in Turma._meta.get_field('horario').choices:
-                        if choice_horario in v_horario_cru:
-                            horario_selecionado = choice_horario
-                            break
-
-                    # 4. Cria ou atualiza a Turma vinculando as chaves estrangeiras corretas
-                    Turma.objects.get_or_create(
+                    # 4. Cria ou atualiza a Turma vinculando as chaves estrangeiras corretas (exceto ManyToMany)
+                    turma_obj, _ = Turma.objects.get_or_create(
                         disciplina=disciplina_obj,
                         professor=professor_obj,
-                        horario=horario_selecionado,
-                        dia_semana=dia_selecionado
+                        horario=horario_selecionado
                     )
+
+                    # 5. Vincula os dias da semana coletados (Lógica ManyToMany)
+                    if codigos_dias_encontrados:
+                        dias_projeto = []
+                        for cod_dia in codigos_dias_encontrados:
+                            dia_aula_obj, _ = DiaSemanaAula.objects.get_or_create(dia=cod_dia)
+                            dias_projeto.append(dia_aula_obj)
+                        
+                        # Associa os dias capturados à turma
+                        turma_obj.dias_semana.set(dias_projeto)
+                    else:
+                        # Fallback seguro caso não ache nenhum dia estruturado no texto
+                        dia_padrao, _ = DiaSemanaAula.objects.get_or_create(dia="SEG")
+                        turma_obj.dias_semana.set([dia_padrao])
 
                     registros_salvos += 1
 
