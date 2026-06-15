@@ -6,6 +6,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/grade.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/matricula.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/modal_turma.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -161,13 +162,26 @@
                         {% if d.id in matriculadas_ids %}
                             <form action="{% url 'cancelar_inscricao' d.id %}" method="POST" style="display:inline">
                                 {% csrf_token %}
-                                <button type="submit" class="btn_cancelar" style="color:#ef4444;background:none;border:1px solid #ef4444;padding:4px 10px;border-radius:6px;cursor:pointer;">Cancelar</button>
+                                <button type="submit" class="btn_cancelar" ...>Cancelar</button>
                             </form>
                         {% else %}
-                            <form action="{% url 'inscrever_disciplina' d.id %}" method="POST">
-                                {% csrf_token %}
-                                <button type="submit" class="btn_selecionar_turma">Selecionar turma →</button>
-                            </form>
+                            <button
+                                data-bs-target="testmodal"
+                                type="button"
+                                class="btn_selecionar_turma"
+                                onclick="abrirModalTurma(
+                                    '{{ d.codigo|slice:":3"|upper|escapejs }}',
+                                    '{{ d.nome|escapejs }}',
+                                    '{{ d.creditos }}',
+                                    '{{ d.descricao|escapejs }}',
+                                    '{{ d.professor.nome|escapejs }}',
+                                    '{{ d.horario_display|escapejs }}',
+                                    '{{ d.vagas_ocupadas }}/{{ d.vagas_total }}',
+                                    '{{ d.nota_media }}',
+                                    '{% url "inscrever_disciplina" d.id %}'
+                                )">
+                                Selecionar turma →
+                            </button>
                         {% endif %}
                     </td>
                 </tr>
@@ -177,6 +191,6 @@
     </section>
 </div>
 
-{% include 'core/modal_turma.html' %}
+{% include 'core/modal_turmas.html' %}
 
 {% endblock %}

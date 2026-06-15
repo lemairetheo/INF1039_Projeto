@@ -224,3 +224,42 @@
     color: #003366;
     text-decoration: underline;
 }
+/* ── Overlay / fond sombre ── */
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;                  /* top/right/bottom/left: 0 */
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.overlay.open {
+    display: flex;             /* s'affiche seulement quand .open est ajouté */
+}
+
+/* ── La boîte du modal ── */
+.modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px;
+    width: 90%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+/* ── Bouton fermer (X) ── */
+.modal__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+}
+.modal__close:hover { color: #0f172a; }
