@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Professor, Disciplina, Matricula, Avaliacao, Turma, Denuncia, Requisito
+from .models import Student, Professor, Disciplina, Matricula, Avaliacao, Turma, Denuncia, Requisito, DiaSemanaAula
 
 
 @admin.register(Student)
@@ -44,9 +44,14 @@ class RequisitoAdmin(admin.ModelAdmin):
 
 @admin.register(Turma)
 class TurmaAdmin(admin.ModelAdmin):
-    list_display  = ('disciplina', 'professor', 'dia_semana', 'horario')
-    list_filter   = ('dia_semana', 'professor')
+    list_display  = ('disciplina', 'professor', 'horario', 'get_dias')
+    list_filter   = ('professor',)
     search_fields = ('disciplina__nome', 'professor__nome')
+    filter_horizontal = ('dias_semana',)
+
+    def get_dias(self, obj):
+        return obj.get_dias_display()
+    get_dias.short_description = 'Dias'
 
 
 @admin.register(Matricula)
@@ -63,9 +68,14 @@ class AvaliacaoAdmin(admin.ModelAdmin):
     search_fields = ('aluno__user__first_name', 'disciplina__nome')
 
 
+@admin.register(DiaSemanaAula)
+class DiaSemanaAulaAdmin(admin.ModelAdmin):
+    list_display = ('dia', '__str__')
+    ordering = ('dia',)
+
+
 @admin.register(Denuncia)
 class DenunciaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'avaliacao', 'motivo', 'data_denuncia')
-    list_filter = ('motivo', 'data_denuncia')
+    list_display = ('id', 'avaliacao', 'motivo')
+    list_filter  = ('motivo',)
     search_fields = ('descricao', 'motivo')
-    ordering = ('-data_denuncia',)

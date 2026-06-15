@@ -78,7 +78,7 @@
             <ul class="horario_lista">
                 {% for t in turmas %}
                 <li class="horario_item">
-                    <span class="horario_dia">{{ t.get_dia_semana_display }}</span>
+                    <span class="horario_dia">{{ t.get_dias_display }}</span>
                     <span class="horario_hora">{{ t.get_horario_display }} — Prof. {{ t.professor.nome }}</span>
                 </li>
                 {% endfor %}

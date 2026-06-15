@@ -1,64 +1,60 @@
 from django.core.management.base import BaseCommand
-from core.models import Turma, Disciplina, Professor
+from core.models import Turma, DiaSemanaAula, Disciplina, Professor, DiaSemana
 
 
-# dia_semana uses DiaSemana choices: SEG, TER, QUA, QUI, SEX, SAB
-# horario uses Horario choices: 07-09, 09-11, 11-13, 13-15, 15-17, 17-19, 19-21
+# Chaque entrée = une turma avec potentiellement plusieurs jours
 TURMAS = [
-    {"disciplina": "INF1039", "professor": "Ana Lima",        "dia": "SEG", "horario": "09-11"},
-    {"disciplina": "INF1039", "professor": "Ana Lima",        "dia": "QUA", "horario": "09-11"},
-    {"disciplina": "INF1020", "professor": "Carlos Souza",    "dia": "TER", "horario": "11-13"},
-    {"disciplina": "INF1020", "professor": "Carlos Souza",    "dia": "QUI", "horario": "11-13"},
-    {"disciplina": "INF1025", "professor": "Maria Santos",    "dia": "SEG", "horario": "13-15"},
-    {"disciplina": "INF1025", "professor": "Maria Santos",    "dia": "QUA", "horario": "13-15"},
-    {"disciplina": "INF1010", "professor": "Pedro Alves",     "dia": "TER", "horario": "07-09"},
-    {"disciplina": "INF1010", "professor": "Pedro Alves",     "dia": "QUI", "horario": "07-09"},
-    {"disciplina": "MAT1001", "professor": "Sofia Ribeiro",   "dia": "SEG", "horario": "11-13"},
-    {"disciplina": "MAT1001", "professor": "Sofia Ribeiro",   "dia": "SAB", "horario": "11-13"},
-    {"disciplina": "INF1045", "professor": "Lucas Ferreira",  "dia": "TER", "horario": "13-15"},
-    {"disciplina": "INF1045", "professor": "Lucas Ferreira",  "dia": "QUI", "horario": "13-15"},
-    {"disciplina": "INF1030", "professor": "Beatriz Costa",   "dia": "QUA", "horario": "15-17"},
-    {"disciplina": "INF1030", "professor": "Beatriz Costa",   "dia": "SAB", "horario": "15-17"},
+    {"disciplina": "INF1039", "professor": "Ana Lima",       "horario": "09-11", "dias": ["SEG", "QUA"]},
+    {"disciplina": "INF1020", "professor": "Carlos Souza",   "horario": "11-13", "dias": ["TER", "QUI"]},
+    {"disciplina": "INF1025", "professor": "Maria Santos",   "horario": "13-15", "dias": ["SEG", "QUA"]},
+    {"disciplina": "INF1010", "professor": "Pedro Alves",    "horario": "07-09", "dias": ["TER", "QUI"]},
+    {"disciplina": "MAT1001", "professor": "Sofia Ribeiro",  "horario": "11-13", "dias": ["SEG", "SAB"]},
+    {"disciplina": "INF1045", "professor": "Lucas Ferreira", "horario": "13-15", "dias": ["TER", "QUI"]},
+    {"disciplina": "INF1030", "professor": "Beatriz Costa",  "horario": "15-17", "dias": ["QUA", "SAB"]},
 ]
 
 
 class Command(BaseCommand):
-    help = 'Popula o banco de dados com turmas (horários) de exemplo'
+    help = 'Popula o banco de dados com turmas e dias da semana'
 
     def handle(self, *args, **kwargs):
+        # Garante que todos os dias existem
+        for codigo, _ in DiaSemana.choices:
+            DiaSemanaAula.objects.get_or_create(dia=codigo)
+        self.stdout.write('  ✔ Dias da semana criados/verificados')
+
         created_count = 0
 
         for data in TURMAS:
             disciplina = Disciplina.objects.filter(codigo=data['disciplina']).first()
             if not disciplina:
                 self.stdout.write(self.style.WARNING(
-                    f'  ⚠ Disciplina não encontrada: {data["disciplina"]} — rode seed_disciplinas primeiro'
+                    f'  ⚠ Disciplina não encontrada: {data["disciplina"]}'
                 ))
                 continue
 
             professor = Professor.objects.filter(nome__icontains=data['professor']).first()
             if not professor:
-                # Create professor on the fly if not found
-                nome_parts = data['professor'].split()
-                dept = disciplina.codigo[:3]
+                dept = data['disciplina'][:3]
                 professor = Professor.objects.create(nome=data['professor'], departamento=dept)
-                self.stdout.write(self.style.WARNING(
-                    f'  ➕ Professor criado: {professor.nome} ({professor.departamento})'
-                ))
+                self.stdout.write(self.style.WARNING(f'  ➕ Professor criado: {professor.nome}'))
 
             turma, created = Turma.objects.get_or_create(
                 disciplina=disciplina,
                 professor=professor,
-                dia_semana=data['dia'],
                 horario=data['horario'],
             )
 
+            dias_objs = DiaSemanaAula.objects.filter(dia__in=data['dias'])
+            turma.dias_semana.set(dias_objs)
+
             if created:
                 created_count += 1
+                dias_str = ', '.join(data['dias'])
                 self.stdout.write(self.style.SUCCESS(
-                    f'  ✔ Turma criada: {disciplina.codigo} — {data["dia"]} {data["horario"]} ({professor.nome})'
+                    f'  ✔ Turma criada: {disciplina.codigo} — {data["horario"]} ({dias_str})'
                 ))
             else:
-                self.stdout.write(f'  – Já existe: {disciplina.codigo} {data["dia"]} {data["horario"]}')
+                self.stdout.write(f'  – Já existe: {disciplina.codigo} {data["horario"]}')
 
         self.stdout.write(self.style.SUCCESS(f'\n{created_count} turma(s) criada(s) com sucesso!'))
