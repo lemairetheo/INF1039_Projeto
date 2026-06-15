@@ -138,7 +138,7 @@ class Denuncia(models.Model):
     avaliacao = models.ForeignKey(Avaliacao, on_delete=models.CASCADE, related_name='denuncias')
     motivo = models.CharField(max_length=50)
     descricao = models.TextField(blank=True, null=True)
-    data_denuncia = models.DateTimeField(auto_now_add=True)
+    data_denuncia = [models.DateTimeField(auto_now_add=True)]
 
     def __str__(self):
         return f"Denúncia ({self.motivo}) - Avaliação ID: {self.avaliacao.id}"
@@ -147,9 +147,30 @@ class Denuncia(models.Model):
 # ── Turma ──────────────────────────────────────────────────────────────────
 class Turma(models.Model):
     disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='turma_disciplina')
-    professor = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='turma_professor')
-    horario = models.CharField(max_length=5,choices=Horario.choices)
-    dia_semana = models.CharField(max_length=3,choices=DiaSemana.choices)
+    professor  = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='turma_professor')
+    horario    = models.CharField(max_length=5, choices=Horario.choices)
+    dias_semana = models.ManyToManyField('DiaSemanaAula', related_name='turmas', blank=True)
+
+    def get_dias_display(self):
+        return ', '.join(d.get_dia_display() for d in self.dias_semana.all())
+
+    def __str__(self):
+        return f"{self.disciplina.codigo} — {self.get_horario_display()}"
+
+
+class DiaSemanaAula(models.Model):
+    dia = models.CharField(max_length=3, choices=DiaSemana.choices, unique=True)
+
+    def get_dia_display(self):
+        return dict(DiaSemana.choices).get(self.dia, self.dia)
+
+    def __str__(self):
+        return self.get_dia_display()
+
+    class Meta:
+        verbose_name = 'Dia da Semana'
+        verbose_name_plural = 'Dias da Semana'
+        ordering = ['dia']
 
 
     
