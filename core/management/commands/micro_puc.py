@@ -137,35 +137,11 @@ class Command(BaseCommand):
                     v_codigo = str(row['codigo']).strip()
                     v_nome = str(row['nome']).strip()
                     v_nome_professor = str(row['professor']).strip() if row['professor'] != "" else "Não Informado"
-                    
-                    try:
-                        creditos_limpos = int(float(row['credito'])) if row['credito'] != "" else 0
-                    except (ValueError, TypeError):
-                        creditos_limpos = 0
 
-                    # 1. Salva/Atualiza a Disciplina mapeada no seu models.py
-                    disciplina_obj, _ = Disciplina.objects.update_or_create(
-                        codigo=v_codigo,
-                        defaults={
-                            'nome': v_nome,
-                            'creditos': creditos_limpos,
-                            'periodo': 1,  # Valor padrão obrigatório exigido pelo seu model
-                        }
-                    )
-
-                    # 2. Salva/Atualiza o Professor responsável
-                    professor_obj, _ = Professor.objects.get_or_create(
-                        nome=v_nome_professor,
-                        defaults={
-                            'departamento': 'Geral'
-                        }
-                    )
-
-                    # 3. Tratamento Avançado do Horário da PUC (Ex: "2A 07:00-09:00", "4C 11:00-13:00")
+                    # 1. Tratamento Avançado do Horário da PUC (Ex: "2A 07:00-09:00", "4C 11:00-13:00")
                     v_horario_cru = str(row['horario_sala']).strip().upper()
                     
                     # Mapeamento do padrão numérico da PUC para a sua classe DiaSemana
-                    # 2 = Segunda, 3 = Terça, 4 = Quarta, 5 = Quinta, 6 = Sexta, 7 = Sábado
                     mapa_dias = {
                         "2": "SEG",
                         "3": "TER",
@@ -175,11 +151,34 @@ class Command(BaseCommand):
                         "7": "SAB"
                     }
                     
-                    # Descobre os dias da semana presentes no texto (Pode haver mais de um, ex: "2A 4A")
+                    # Descobre os dias da semana presentes no texto
                     codigos_dias_encontrados = []
                     for digito, sigla in mapa_dias.items():
                         if digito in v_horario_cru:
                             codigos_dias_encontrados.append(sigla)
+
+                    # --- NOVA LÓGICA DE CRÉDITOS ---
+                    # Conta a quantidade de dias encontrados. Se não achar nenhum no texto, assume o mínimo de 1 dia.
+                    total_dias = len(codigos_dias_encontrados) if len(codigos_dias_encontrados) > 0 else 1
+                    creditos_calculados = total_dias * 2
+
+                    # 2. Salva/Atualiza a Disciplina mapeada utilizando os créditos calculados
+                    disciplina_obj, _ = Disciplina.objects.update_or_create(
+                        codigo=v_codigo,
+                        defaults={
+                            'nome': v_nome,
+                            'creditos': creditos_calculados,  # Substituído pelo cálculo: (Dias da semana * 2)
+                            'periodo': 1,  
+                        }
+                    )
+
+                    # 3. Salva/Atualiza o Professor responsável
+                    professor_obj, _ = Professor.objects.get_or_create(
+                        nome=v_nome_professor,
+                        defaults={
+                            'departamento': 'Geral'
+                        }
+                    )
 
                     # Mapeamento do intervalo de horas da PUC para o Choice do seu Model
                     horario_selecionado = "07-09"  # Padrão caso falhe o parse
@@ -198,7 +197,7 @@ class Command(BaseCommand):
                             horario_selecionado = choice_valor
                             break
 
-                    # 4. Cria ou atualiza a Turma vinculando as chaves estrangeiras corretas (exceto ManyToMany)
+                    # 4. Cria ou atualiza a Turma vinculando as chaves estrangeiras corretas
                     turma_obj, _ = Turma.objects.get_or_create(
                         disciplina=disciplina_obj,
                         professor=professor_obj,
