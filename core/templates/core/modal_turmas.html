@@ -1,167 +1,158 @@
 {% load static %}
 
-<div class="turma_modal_overlay" id="testmodal">
+{% for disciplina, turmas_disciplina in disciplinas_com_turmas %}
+{% if disciplina.id not in matriculadas_ids %}
+<div class="turma_modal_overlay" id="modal-{{ disciplina.id }}">
     <div class="turma_modal_scope">
         <div class="turma_modal" role="dialog">
 
-        <button class="turma_modal__close" id="btn-fechar-x" aria-label="Fechar">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-        </button>
-
-        <!-- Cabeçalho -->
-        <p class="turma_modal__tag" id="modal-dept"></p>
-        <h1 class="turma_modal__title" id="modal-title"></h1>
-        <p class="turma_modal__credits" id="modal-credits"></p>
-        <p class="turma_modal__description" id="modal-desc"></p>
-
-        <!-- Turma -->
-        <p class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            Escolha a turma
-        </p>
-
-        <div class="turma-card" id="turma-card">
-            <div class="turma-card__avatar">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
+            <button class="turma_modal__close"
+                onclick="fecharModal('modal-{{ disciplina.id }}')" aria-label="Fechar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
-            </div>
-            <div class="turma-card__info">
-                <p class="turma-card__name" id="modal-prof"></p>
-                <p class="turma-card__schedule">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    <span id="modal-sched"></span>
-                </p>
-            </div>
-            <div class="turma-card__meta">
-                <span class="turma-card__vagas" id="modal-vagas"></span>
-                <span class="turma-card__rating">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02
-                            12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                    </svg>
-                    <span id="modal-rating-val"></span>
-                </span>
-            </div>
-        </div>
+            </button>
 
-        <!-- Avaliações -->
-        <div class="reviews">
+            <p class="turma_modal__tag">{{ disciplina.codigo|slice:":3"|upper }}</p>
+            <h1 class="turma_modal__title">{{ disciplina.nome }}</h1>
+            <p class="turma_modal__credits">{{ disciplina.creditos }} créditos</p>
+            <p class="turma_modal__description">{{ disciplina.ementa }}</p>
+
             <p class="section-title">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="3" y1="9" x2="21" y2="9"/>
-                    <line x1="9" y1="21" x2="9" y2="9"/>
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
-                Avaliações dos Alunos
+                Escolha a turma
             </p>
-            <div id="modal-reviews">
-                <!-- preenchido via JS -->
-            </div>
-        </div>
 
-        <!-- Footer -->
-        <div class="turma_modal__footer">
-            <button class="btn btn--ghost" id="btn-fechar">Fechar</button>
-            <button class="btn btn--primary-disabled" id="btn-confirmar" disabled>Selecione uma turma</button>
+            {% for turma in turmas_disciplina %}
+            <div class="turma-card" onclick="selecionarTurma(this, '{% url "inscrever_disciplina" disciplina.id %}')">
+                <div class="turma-card__avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div class="turma-card__info">
+                    <p class="turma-card__name">{{ turma.professor.nome }}</p>
+                    <p class="turma-card__schedule">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        {{ turma.get_dias_display }} • {{ turma.get_horario_display }}
+                    </p>
+                </div>
+                <div class="turma-card__meta">
+                    <span class="turma-card__rating">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02
+                                12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                        {{ disciplina.nota_media }}
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <p style="color:#94a3b8;">Nenhuma turma disponível.</p>
+            {% endfor %}
+
+            <div class="reviews">
+                <p class="section-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                        <line x1="9" y1="21" x2="9" y2="9"/>
+                    </svg>
+                    Avaliações dos Alunos
+                </p>
+                {% for avaliacao in disciplina.avaliacoes.all %}
+                <div class="review-item">
+                    <p>{{ avaliacao.comentario }}</p>
+                    <span>{{ avaliacao.data_avaliacao|date:"d/m/Y" }}</span>
+                </div>
+                {% empty %}
+                <p style="color:#94a3b8;">Nenhuma avaliação ainda.</p>
+                {% endfor %}
+            </div>
+
+            <div class="turma_modal__footer">
+                <button class="btn btn--ghost"
+                    onclick="fecharModal('modal-{{ disciplina.id }}')">Fechar</button>
+                <button class="btn btn--primary-disabled"
+                    id="btn-confirmar-{{ disciplina.id }}" disabled>
+                    Selecione uma turma
+                </button>
+            </div>
+
         </div>
-    </div>
     </div>
 </div>
+{% endif %}
+{% endfor %}
 
 <script>
-(function () {
-    const overlay  = document.getElementById('testmodal');
-    const card     = document.getElementById('turma-card');
-    const btnConf  = document.getElementById('btn-confirmar');
+function abrirModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
 
-    let turmaSelected = false;
-    let urlAtual = '';
+function fecharModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+    document.querySelectorAll(`#${id} .turma-card`).forEach(c => c.classList.remove('turma-card--selected'));
+    const btn = document.getElementById(`btn-confirmar-${id.replace('modal-', '')}`);
+    btn.disabled    = true;
+    btn.className   = 'btn btn--primary-disabled';
+    btn.textContent = 'Selecione uma turma';
+}
 
-    window.abrirModalTurma = function (dept, nome, creds, desc, prof, sched, vagas, nota, url) {
-        document.getElementById('modal-dept').textContent       = dept;
-        document.getElementById('modal-title').textContent      = nome;
-        document.getElementById('modal-credits').textContent    = creds + ' créditos';
-        document.getElementById('modal-desc').textContent       = desc;
-        document.getElementById('modal-prof').textContent       = prof;
-        document.getElementById('modal-sched').textContent      = sched;
-        document.getElementById('modal-vagas').textContent      = vagas + ' vagas';
-        document.getElementById('modal-rating-val').textContent = nota;
+function selecionarTurma(card, url) {
+    const modal = card.closest('.turma_modal_overlay');
+    modal.querySelectorAll('.turma-card').forEach(c => c.classList.remove('turma-card--selected'));
+    card.classList.add('turma-card--selected');
 
-        urlAtual = url;
-        turmaSelected = false;
-        card.classList.remove('turma-card--selected');
-        btnConf.disabled = true;
-        btnConf.className = 'btn btn--primary-disabled';
-        btnConf.textContent = 'Selecione uma turma';
-
-        overlay.classList.add('open');
-        document.body.style.overflow = 'hidden';
-    };
-
-    function fechar() {
-        overlay.classList.remove('open');
-        document.body.style.overflow = '';
-    }
-
-    document.getElementById('btn-fechar').addEventListener('click', fechar);
-    document.getElementById('btn-fechar-x').addEventListener('click', fechar);
-
-    overlay.addEventListener('click', function (e) {
-        if (e.target === overlay) fechar();
-    });
-
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') fechar();
-    });
-
-    card.addEventListener('click', function () {
-        turmaSelected = !turmaSelected;
-        card.classList.toggle('turma-card--selected', turmaSelected);
-
-        if (turmaSelected) {
-            btnConf.disabled = false;
-            btnConf.className = 'btn btn--primary';
-            btnConf.textContent = 'Confirmar matrícula';
-        } else {
-            btnConf.disabled = true;
-            btnConf.className = 'btn btn--primary-disabled';
-            btnConf.textContent = 'Selecione uma turma';
-        }
-    });
-
-    btnConf.addEventListener('click', function () {
-        if (!turmaSelected || !urlAtual) return;
-
-        const form = document.createElement('form');
+    const id  = modal.id.replace('modal-', '');
+    const btn = document.getElementById(`btn-confirmar-${id}`);
+    btn.disabled    = false;
+    btn.className   = 'btn btn--primary';
+    btn.textContent = 'Confirmar matrícula';
+    btn.onclick = function () {
+        const form  = document.createElement('form');
         form.method = 'POST';
-        form.action = urlAtual;
-
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = 'csrfmiddlewaretoken';
-        csrf.value = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
-
+        form.action = url;
+        const csrf  = document.createElement('input');
+        csrf.type   = 'hidden';
+        csrf.name   = 'csrfmiddlewaretoken';
+        csrf.value  = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
         form.appendChild(csrf);
         document.body.appendChild(form);
         form.submit();
+    };
+}
+
+document.querySelectorAll('.turma_modal_overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+        if (e.target === overlay) fecharModal(overlay.id);
     });
-})();
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.turma_modal_overlay.open')
+            .forEach(m => fecharModal(m.id));
+    }
+});
 </script>

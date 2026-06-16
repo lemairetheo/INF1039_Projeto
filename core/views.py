@@ -217,7 +217,7 @@ def grade_view(request):
     disc_ids = matriculas.values_list('disciplina_id', flat=True)
     turmas   = Turma.objects.filter(
         disciplina_id__in=disc_ids
-    ).select_related('disciplina', 'professor').order_by('dia_semana', 'horario')
+    ).select_related('disciplina', 'professor').order_by('horario')
 
     return render(request, 'core/grade.html', {
         'turmas': turmas,
@@ -234,15 +234,30 @@ def matricula_view(request):
         Disciplina.objects.filter(id__in=matriculadas_ids)
         .aggregate(total=Sum('creditos'))['total'] or 0
     )
-    turmas = Turma.objects.filter(
+    turmas_matriculadas = Turma.objects.filter(
         disciplina_id__in=matriculadas_ids
-    ).select_related('disciplina', 'professor').order_by('dia_semana', 'horario')
+    ).select_related('disciplina', 'professor').order_by('horario')
+
+    # Lista de (disciplina, turmas) para o modal
+    disciplinas_com_turmas = [
+        (
+            d,
+            list({
+                t.id: t for t in
+                Turma.objects.filter(disciplina=d)
+                    .select_related('professor')
+                    .order_by('professor__nome', 'horario')
+            }.values())
+        )
+        for d in todas_disciplinas
+    ]
 
     context = {
         'disciplinas':                 todas_disciplinas,
         'matriculadas_ids':            matriculadas_ids,
         'total_creditos_matriculados': total_creditos,
-        'turmas':                      turmas,
+        'turmas':                      turmas_matriculadas,
+        'disciplinas_com_turmas':      disciplinas_com_turmas,
     }
     return render(request, 'core/matricula.html', context)
 

@@ -25,17 +25,6 @@
             </div>
         </div>
 
-        <div class="mb-4 flex justify-end">
-            <button
-                data-modal-target="teste-modal"
-                data-modal-toggle="teste-modal"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-                type="button"
-            >
-                TESTE
-            </button>
-        </div>
-
         <div class="filtros_container">
             <div class="busca_linha_superior">
                 <input type="text" placeholder="Buscar disciplina ou professor..." class="input_busca_full">
@@ -166,20 +155,9 @@
                             </form>
                         {% else %}
                             <button
-                                data-bs-target="testmodal"
                                 type="button"
                                 class="btn_selecionar_turma"
-                                onclick="abrirModalTurma(
-                                    '{{ d.codigo|slice:":3"|upper|escapejs }}',
-                                    '{{ d.nome|escapejs }}',
-                                    '{{ d.creditos }}',
-                                    '{{ d.descricao|escapejs }}',
-                                    '{{ d.professor.nome|escapejs }}',
-                                    '{{ d.horario_display|escapejs }}',
-                                    '{{ d.vagas_ocupadas }}/{{ d.vagas_total }}',
-                                    '{{ d.nota_media }}',
-                                    '{% url "inscrever_disciplina" d.id %}'
-                                )">
+                                onclick="abrirModal('modal-{{ d.id }}')">
                                 Selecionar turma →
                             </button>
                         {% endif %}

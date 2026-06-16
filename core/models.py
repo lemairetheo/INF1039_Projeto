@@ -146,9 +146,9 @@ class Denuncia(models.Model):
 
 # ── Turma ──────────────────────────────────────────────────────────────────
 class Turma(models.Model):
-    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='turma_disciplina')
-    professor  = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='turma_professor')
-    horario    = models.CharField(max_length=5, choices=Horario.choices)
+    disciplina  = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='turma_disciplina')
+    professor   = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='turma_professor')
+    horario     = models.CharField(max_length=5, choices=Horario.choices)
     dias_semana = models.ManyToManyField('DiaSemanaAula', related_name='turmas', blank=True)
 
     def get_dias_display(self):
@@ -156,6 +156,9 @@ class Turma(models.Model):
 
     def __str__(self):
         return f"{self.disciplina.codigo} — {self.get_horario_display()}"
+
+    class Meta:
+        unique_together = ('disciplina', 'professor', 'horario')
 
 
 class DiaSemanaAula(models.Model):

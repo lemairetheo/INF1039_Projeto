@@ -1,25 +1,27 @@
-/* ===== SCOPE ===== */
-.turma_modal_scope {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* ===== OVERLAY / BACKDROP ===== */
 .turma_modal_overlay {
     position: fixed;
     inset: 0;
     background-color: rgba(100, 116, 139, 0.35);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     padding: 1rem;
+    z-index: 9999;
 }
 
-/* ===== MODAL ===== */
+.turma_modal_overlay.open {
+    display: flex;
+}
+
+.turma_modal_scope {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: min(660px, 100%);
+}
+
 .turma_modal {
     background: #ffffff;
     border-radius: 12px;
-    width: 100%;
-    max-width: 660px;
+    width: min(660px, 100%);
     padding: 2rem 2rem 1.5rem;
     position: relative;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
