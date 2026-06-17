@@ -176,4 +176,25 @@ class DiaSemanaAula(models.Model):
         ordering = ['dia']
 
 
-    
+class SolicitacaoDisciplina(models.Model):
+    class StatusSolicitacao(models.TextChoices):
+        PENDENTE  = 'pendente',  'Pendente'
+        APROVADO  = 'aprovado',  'Aprovado'
+        REJEITADO = 'rejeitado', 'Rejeitado'
+
+    solicitante   = models.ForeignKey(User, on_delete=models.CASCADE, related_name='solicitacoes')
+    nome          = models.CharField(max_length=100)
+    codigo        = models.CharField(max_length=20)
+    creditos      = models.PositiveIntegerField()
+    periodo       = models.PositiveIntegerField()
+    justificativa = models.TextField()
+    status        = models.CharField(max_length=10, choices=StatusSolicitacao.choices, default=StatusSolicitacao.PENDENTE)
+    criado_em     = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.codigo} — {self.nome} ({self.get_status_display()})"
+
+    class Meta:
+        verbose_name = 'Solicitação de Disciplina'
+        verbose_name_plural = 'Solicitações de Disciplina'
+        ordering = ['-criado_em']

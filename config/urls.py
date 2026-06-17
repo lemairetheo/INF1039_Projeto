@@ -7,6 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home_view, name='home'),
     path('disciplinas/', views.disciplinas, name='disciplinas'),
+    path('disciplinas/solicitar/', views.solicitar_disciplina, name='solicitar_disciplina'),
     path('disciplinas/<int:pk>/', views.disciplina_detalhe, name='disciplina_detalhe'),
     path('professores/', views.professores, name='professores'),
     path('login/', auth_views.LoginView.as_view(template_name='core/login1.html', next_page='/login-redirect/'), name='login'),
@@ -27,6 +28,11 @@ urlpatterns = [
     path('historico/', views.historico_grades, name='historico_grades'),
     path('minhas-avaliacoes/<int:id_professor>', views.minhas_avaliacoes_prof, name='minhas avaliações'),
     path('disciplinas/<int:pk>/', views.disciplina_detalhe, name='disciplina_detalhe'),
+    path('admin-painel/', views.painel_admin, name='painel_admin'),
+    path('admin-painel/aprovar/<int:sol_id>/', views.admin_aprovar_solicitacao, name='admin_aprovar_solicitacao'),
+    path('admin-painel/rejeitar/<int:sol_id>/', views.admin_rejeitar_solicitacao, name='admin_rejeitar_solicitacao'),
+    path('admin-painel/deletar-avaliacao/<int:avaliacao_id>/', views.admin_deletar_avaliacao, name='admin_deletar_avaliacao'),
+    path('admin-painel/deletar-disciplina/<int:disciplina_id>/', views.admin_deletar_disciplina, name='admin_deletar_disciplina'),
 ]
 
 handler404 = 'core.views.erro_404'

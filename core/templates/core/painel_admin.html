@@ -1,0 +1,177 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Painel Admin | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/painel_admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+
+    <div class="admin-topbar">
+        <h1>Painel de Administração</h1>
+        <span class="admin-badge">Staff</span>
+    </div>
+
+    {% if messages %}
+    <div class="admin-messages">
+        {% for msg in messages %}
+        <div class="admin-alert">{{ msg }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ── Solicitações ─────────────────────────────────────────── -->
+    <section class="admin-section">
+        <h2 class="admin-section-title">
+            Solicitações de Novas Disciplinas
+            <span class="admin-count">{{ solicitacoes.count }}</span>
+        </h2>
+
+        {% if solicitacoes %}
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Disciplina</th>
+                        <th>Código</th>
+                        <th>Créditos</th>
+                        <th>Período</th>
+                        <th>Solicitante</th>
+                        <th>Justificativa</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in solicitacoes %}
+                    <tr>
+                        <td><strong>{{ s.nome }}</strong></td>
+                        <td><span class="tag-codigo">{{ s.codigo }}</span></td>
+                        <td>{{ s.creditos }}</td>
+                        <td>{{ s.periodo }}º</td>
+                        <td>{{ s.solicitante.get_full_name|default:s.solicitante.username }}</td>
+                        <td class="td-justificativa">{{ s.justificativa|truncatechars:80 }}</td>
+                        <td>
+                            <span class="status-badge status-{{ s.status }}">
+                                {{ s.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="td-actions">
+                            {% if s.status == 'pendente' %}
+                            <form method="post" action="{% url 'admin_aprovar_solicitacao' s.id %}" style="display:inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-aprovar">✓ Aprovar</button>
+                            </form>
+                            <form method="post" action="{% url 'admin_rejeitar_solicitacao' s.id %}" style="display:inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-rejeitar">✗ Rejeitar</button>
+                            </form>
+                            {% else %}
+                            <span class="td-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="admin-vazio">Nenhuma solicitação encontrada.</p>
+        {% endif %}
+    </section>
+
+    <!-- ── Avaliações ─────────────────────────────────────────────── -->
+    <section class="admin-section">
+        <h2 class="admin-section-title">
+            Avaliações
+            <span class="admin-count">{{ avaliacoes.count }}</span>
+        </h2>
+
+        {% if avaliacoes %}
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Aluno</th>
+                        <th>Disciplina</th>
+                        <th>Professor</th>
+                        <th>Nota Disc.</th>
+                        <th>Nota Prof.</th>
+                        <th>Comentário</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for av in avaliacoes %}
+                    <tr>
+                        <td>{{ av.aluno.user.get_full_name }}</td>
+                        <td>{{ av.disciplina.nome|default:"—" }}</td>
+                        <td>{{ av.professor.nome|default:"—" }}</td>
+                        <td><span class="nota {% if av.nota_disc >= 7 %}nota-boa{% elif av.nota_disc >= 5 %}nota-media{% else %}nota-ruim{% endif %}">{{ av.nota_disc }}</span></td>
+                        <td><span class="nota {% if av.nota_prof >= 7 %}nota-boa{% elif av.nota_prof >= 5 %}nota-media{% else %}nota-ruim{% endif %}">{{ av.nota_prof }}</span></td>
+                        <td class="td-justificativa">{{ av.comentario|truncatechars:60|default:"—" }}</td>
+                        <td>
+                            <form method="post" action="{% url 'admin_deletar_avaliacao' av.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-deletar" onclick="return confirm('Remover esta avaliação?')">🗑 Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="admin-vazio">Nenhuma avaliação encontrada.</p>
+        {% endif %}
+    </section>
+
+    <!-- ── Disciplinas ────────────────────────────────────────────── -->
+    <section class="admin-section">
+        <h2 class="admin-section-title">
+            Disciplinas
+            <span class="admin-count">{{ disciplinas.count }}</span>
+        </h2>
+
+        {% if disciplinas %}
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nome</th>
+                        <th>Créditos</th>
+                        <th>Período</th>
+                        <th>Status</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in disciplinas %}
+                    <tr>
+                        <td><span class="tag-codigo">{{ d.codigo }}</span></td>
+                        <td>{{ d.nome }}</td>
+                        <td>{{ d.creditos }}</td>
+                        <td>{{ d.periodo }}º</td>
+                        <td>{{ d.get_status_display }}</td>
+                        <td>
+                            <form method="post" action="{% url 'admin_deletar_disciplina' d.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-deletar" onclick="return confirm('Remover a disciplina {{ d.nome }}? Esta ação é irreversível.')">🗑 Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="admin-vazio">Nenhuma disciplina encontrada.</p>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

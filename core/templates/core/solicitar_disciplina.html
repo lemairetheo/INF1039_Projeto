@@ -1,0 +1,76 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Solicitar Nova Disciplina | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/solicitar_disciplina.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sol-container">
+    <div class="sol-card">
+        <div class="sol-header">
+            <div class="sol-icon">
+                <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div>
+                <h1>Solicitar Nova Disciplina</h1>
+                <p>Preencha os dados abaixo. Um administrador irá analisar sua solicitação.</p>
+            </div>
+        </div>
+
+        {% if messages %}
+        <div class="sol-messages">
+            {% for msg in messages %}
+            <div class="sol-alert sol-alert-{{ msg.tags }}">{{ msg }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" class="sol-form">
+            {% csrf_token %}
+
+            <div class="sol-grid">
+                <div class="sol-field">
+                    <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+                    {{ form.nome }}
+                    {% if form.nome.errors %}<span class="sol-error">{{ form.nome.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="sol-field">
+                    <label for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}</label>
+                    {{ form.codigo }}
+                    {% if form.codigo.errors %}<span class="sol-error">{{ form.codigo.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="sol-field">
+                    <label for="{{ form.creditos.id_for_label }}">{{ form.creditos.label }}</label>
+                    {{ form.creditos }}
+                    {% if form.creditos.errors %}<span class="sol-error">{{ form.creditos.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="sol-field">
+                    <label for="{{ form.periodo.id_for_label }}">{{ form.periodo.label }}</label>
+                    {{ form.periodo }}
+                    {% if form.periodo.errors %}<span class="sol-error">{{ form.periodo.errors.0 }}</span>{% endif %}
+                </div>
+            </div>
+
+            <div class="sol-field sol-full">
+                <label for="{{ form.justificativa.id_for_label }}">{{ form.justificativa.label }}</label>
+                {{ form.justificativa }}
+                {% if form.justificativa.errors %}<span class="sol-error">{{ form.justificativa.errors.0 }}</span>{% endif %}
+            </div>
+
+            <div class="sol-actions">
+                <a href="{% url 'disciplinas' %}" class="btn-cancelar">Cancelar</a>
+                <button type="submit" class="btn-enviar">Enviar solicitação</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

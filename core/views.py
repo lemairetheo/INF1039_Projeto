@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Sum, Avg
 from django.contrib import messages
-from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia, Requisito
-from .forms import UserEditForm, StudentEditForm, AvaliacaoForm, RegisterForm
+from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia, Requisito, SolicitacaoDisciplina
+from .forms import UserEditForm, StudentEditForm, AvaliacaoForm, RegisterForm, SolicitacaoDisciplinaForm
+
+def _is_admin(user):
+    return user.is_authenticated and user.is_staff
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -189,6 +192,8 @@ def login_redirect_view(request):
     """Redirect after login based on user role."""
     if not request.user.is_authenticated:
         return redirect('login')
+    if request.user.is_staff:
+        return redirect('painel_admin')
     if hasattr(request.user, 'student'):
         return redirect('perfil')
     if hasattr(request.user, 'professor'):
@@ -358,6 +363,79 @@ def minhas_avaliacoes_prof(request, id_professor):
         'nota_disciplina': nota_disciplina,
     })
 
+
+
+@login_required
+def solicitar_disciplina(request):
+    if request.method == 'POST':
+        form = SolicitacaoDisciplinaForm(request.POST)
+        if form.is_valid():
+            sol = form.save(commit=False)
+            sol.solicitante = request.user
+            sol.save()
+            messages.success(request, 'Solicitação enviada! Aguarde a análise do administrador.')
+            return redirect('disciplinas')
+    else:
+        form = SolicitacaoDisciplinaForm()
+    return render(request, 'core/solicitar_disciplina.html', {'form': form})
+
+
+@user_passes_test(_is_admin, login_url='/login/')
+def painel_admin(request):
+    solicitacoes = SolicitacaoDisciplina.objects.select_related('solicitante').all()
+    avaliacoes   = Avaliacao.objects.select_related('aluno__user', 'disciplina', 'professor').all()
+    disciplinas  = Disciplina.objects.all()
+    return render(request, 'core/painel_admin.html', {
+        'solicitacoes': solicitacoes,
+        'avaliacoes':   avaliacoes,
+        'disciplinas':  disciplinas,
+    })
+
+
+@user_passes_test(_is_admin, login_url='/login/')
+def admin_aprovar_solicitacao(request, sol_id):
+    sol = get_object_or_404(SolicitacaoDisciplina, id=sol_id)
+    if request.method == 'POST':
+        sol.status = SolicitacaoDisciplina.StatusSolicitacao.APROVADO
+        sol.save()
+        Disciplina.objects.get_or_create(
+            codigo=sol.codigo,
+            defaults={
+                'nome':     sol.nome,
+                'creditos': sol.creditos,
+                'periodo':  sol.periodo,
+            }
+        )
+        messages.success(request, f'Disciplina "{sol.nome}" aprovada e criada.')
+    return redirect('painel_admin')
+
+
+@user_passes_test(_is_admin, login_url='/login/')
+def admin_rejeitar_solicitacao(request, sol_id):
+    sol = get_object_or_404(SolicitacaoDisciplina, id=sol_id)
+    if request.method == 'POST':
+        sol.status = SolicitacaoDisciplina.StatusSolicitacao.REJEITADO
+        sol.save()
+        messages.success(request, f'Solicitação "{sol.nome}" rejeitada.')
+    return redirect('painel_admin')
+
+
+@user_passes_test(_is_admin, login_url='/login/')
+def admin_deletar_avaliacao(request, avaliacao_id):
+    avaliacao = get_object_or_404(Avaliacao, id=avaliacao_id)
+    if request.method == 'POST':
+        avaliacao.delete()
+        messages.success(request, 'Avaliação removida.')
+    return redirect('painel_admin')
+
+
+@user_passes_test(_is_admin, login_url='/login/')
+def admin_deletar_disciplina(request, disciplina_id):
+    disciplina = get_object_or_404(Disciplina, id=disciplina_id)
+    if request.method == 'POST':
+        disciplina.delete()
+        messages.success(request, f'Disciplina "{disciplina.nome}" removida.')
+    return redirect('painel_admin')
 
 
 def detalhes_disciplina(request):

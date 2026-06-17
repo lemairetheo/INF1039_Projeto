@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Student, Professor, Avaliacao, Disciplina
+from .models import Student, Professor, Avaliacao, Disciplina, SolicitacaoDisciplina
 
 
 ROLE_CHOICES = [
@@ -91,3 +91,23 @@ class AvaliacaoForm(forms.ModelForm):
             self.fields['disciplina'].queryset = Disciplina.objects.filter(
                 matricula_disciplina__aluno=student
             ).distinct()
+
+
+class SolicitacaoDisciplinaForm(forms.ModelForm):
+    class Meta:
+        model  = SolicitacaoDisciplina
+        fields = ['nome', 'codigo', 'creditos', 'periodo', 'justificativa']
+        widgets = {
+            'nome':          forms.TextInput(attrs={'placeholder': 'Ex: Inteligência Artificial'}),
+            'codigo':        forms.TextInput(attrs={'placeholder': 'Ex: INF1099'}),
+            'creditos':      forms.NumberInput(attrs={'min': 1, 'max': 12}),
+            'periodo':       forms.NumberInput(attrs={'min': 1, 'max': 10}),
+            'justificativa': forms.Textarea(attrs={'placeholder': 'Por que esta disciplina é importante?', 'rows': 4}),
+        }
+        labels = {
+            'nome':          'Nome da disciplina',
+            'codigo':        'Código',
+            'creditos':      'Créditos',
+            'periodo':       'Período sugerido',
+            'justificativa': 'Justificativa',
+        }
