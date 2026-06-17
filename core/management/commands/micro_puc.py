@@ -135,7 +135,7 @@ class Command(BaseCommand):
             df_final.fillna("", inplace=True)
             df_final = df_final[df_final["nome"] != ""]
             df_final = df_final[df_final["codigo"] != ""]
-            df_final = df_final.loc[:, df_final.columns != ""]
+            df_final = df_final[df_final.columns[df_final.columns != ""]]
             
             self.stdout.write(self.style.WARNING("Salvando dados no Banco Relacional do Django..."))
             registros_salvos = 0
@@ -146,10 +146,9 @@ class Command(BaseCommand):
                     v_codigo = str(row['codigo']).strip()
                     v_nome = str(row['nome']).strip()
                     v_nome_professor = str(row['professor']).strip() if row['professor'] != "" else "Não Informado"
-
                     v_horario_cru = str(row['horario_sala']).strip().upper()
                     
-                    # 1. Mapeamento de múltiplos dias da semana alinhado ao seu enum DiaSemana
+                    # 1. Mapeamento exato dos dias da semana baseados nas strings coletadas
                     mapa_dias = {
                         "2": DiaSemana.SEGUNDA.value,   # "SEG"
                         "3": DiaSemana.TERCA.value,     # "TER"
@@ -167,7 +166,7 @@ class Command(BaseCommand):
                     total_dias = len(codigos_dias_encontrados) if len(codigos_dias_encontrados) > 0 else 1
                     creditos_calculados = total_dias * 2
 
-                    # 2. Salva/Atualiza a Disciplina respeitando campos padrão (como status default)
+                    # 2. Salva/Atualiza a Disciplina
                     disciplina_obj, _ = Disciplina.objects.update_or_create(
                         codigo=v_codigo,
                         defaults={
@@ -178,7 +177,7 @@ class Command(BaseCommand):
                         }
                     )
 
-                    # 3. Salva/Atualiza o Professor responsável
+                    # 3. Salva/Atualiza o Professor
                     professor_obj, _ = Professor.objects.get_or_create(
                         nome=v_nome_professor,
                         defaults={
@@ -188,13 +187,13 @@ class Command(BaseCommand):
 
                     # 4. Mapeamento de múltiplos horários alinhado ao seu enum Horario
                     mapa_horarios = {
-                        "07:00": Horario.H07_09.value,  # "07-09"
-                        "09:00": Horario.H09_11.value,  # "09-11"
-                        "11:00": Horario.H11_13.value,  # "11-13"
-                        "13:00": Horario.H13_15.value,  # "13-15"
-                        "15:00": Horario.H15_17.value,  # "15-17"
-                        "17:00": Horario.H17_19.value,  # "17-19"
-                        "19:00": Horario.H19_21.value,  # "19-21"
+                        "07:00": Horario.H07_09.value,
+                        "09:00": Horario.H09_11.value,
+                        "11:00": Horario.H11_13.value,
+                        "13:00": Horario.H13_15.value,
+                        "15:00": Horario.H15_17.value,
+                        "17:00": Horario.H17_19.value,
+                        "19:00": Horario.H19_21.value,
                     }
                     
                     horarios_encontrados = []
@@ -202,10 +201,27 @@ class Command(BaseCommand):
                         if hora_inicio in v_horario_cru:
                             horarios_encontrados.append(choice_valor)
 
+                    # Fallback caso a string do horário use formato diferente (ex: "35M12")
                     if not horarios_encontrados:
-                        horarios_encontrados.append(Horario.H07_09.value)
+                        if "M12" in v_horario_cru or "M1" in v_horario_cru:
+                            horarios_encontrados.append(Horario.H07_09.value)
+                        elif "M34" in v_horario_cru or "M3" in v_horario_cru:
+                            horarios_encontrados.append(Horario.H09_11.value)
+                        elif "M56" in v_horario_cru or "M5" in v_horario_cru:
+                            horarios_encontrados.append(Horario.H11_13.value)
+                        elif "T12" in v_horario_cru or "T1" in v_horario_cru:
+                            horarios_encontrados.append(Horario.H13_15.value)
+                        elif "T34" in v_horario_cru or "T3" in v_horario_cru:
+                            horarios_encontrados.append(Horario.H15_17.value)
+                        elif "T56" in v_horario_cru or "T5" in v_horario_cru:
+                            horarios_encontrados.append(Horario.H17_19.value)
+                        elif "N12" in v_horario_cru or "N1" in v_horario_cru:
+                            horarios_encontrados.append(Horario.H19_21.value)
+                        else:
+                            # Caso padrão se não encontrar correspondência explícita
+                            horarios_encontrados.append(Horario.H07_09.value)
 
-                    # Preparação das instâncias de Dia da Semana para a relação Many-to-Many
+                    # Preparação das instâncias de Dia da Semana (obedece o unique=True do modelo)
                     dias_instancias = []
                     if codigos_dias_encontrados:
                         for cod_dia in codigos_dias_encontrados:
@@ -215,14 +231,14 @@ class Command(BaseCommand):
                         dia_padrao, _ = DiaSemanaAula.objects.get_or_create(dia=DiaSemana.SEGUNDA.value)
                         dias_instancias.append(dia_padrao)
 
-                    # 5. Criação de múltiplas turmas para respeitar a regra unique_together
+                    # 5. Criação/Atualização das turmas respeitando a regra unique_together
                     for hor_selecionado in horarios_encontrados:
                         turma_obj, _ = Turma.objects.get_or_create(
                             disciplina=disciplina_obj,
                             professor=professor_obj,
                             horario=hor_selecionado
                         )
-                        # Vincula a lista de dias identificados à turma gerada
+                        # Vincula os dias da semana coletados à tabela intermediária Many-to-Many
                         turma_obj.dias_semana.set(dias_instancias)
 
                     registros_salvos += 1
