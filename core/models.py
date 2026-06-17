@@ -101,10 +101,17 @@ class Requisito(models.Model):
 
 # ── Matricula ──────────────────────────────────────────────────────────────────
 class Matricula(models.Model):
+
+    class StatusMatricula(models.TextChoices):
+        CURSANDO  = 'cursando',  'Cursando'
+        CONCLUIDO  = 'concluido',  'Concluido'
+        TRANCADO = 'trancado', 'Trancado'
+
     aluno       = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='grades')
     disciplina  = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='matricula_disciplina')
     semestre    = models.PositiveIntegerField()
     ano         = models.PositiveIntegerField()
+    status      = models.CharField(max_length=10, choices=StatusMatricula.choices, default=StatusMatricula.CURSANDO)
 
     def __str__(self):
         return f"{self.aluno} — {self.semestre}º sem. {self.ano}"
