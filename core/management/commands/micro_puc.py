@@ -11,7 +11,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Importações oficiais do Django
 from django.core.management.base import BaseCommand
-from core.models import Disciplina, Professor, Turma, DiaSemanaAula  # Importado DiaSemanaAula
+# Importação exata conforme o seu arquivo de models
+from core.models import Disciplina, Professor, Turma, DiaSemanaAula, DiaSemana, Horario
 
 
 class Command(BaseCommand):
@@ -22,10 +23,11 @@ class Command(BaseCommand):
         # PASSO 1: CONFIGURAR E ABRIR O SITE NO NAVEGADOR (HEADLESS)
         # ==============================================================================
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")  # Executa em segundo plano (sem abrir janela)
+        chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         
         self.stdout.write(self.style.WARNING("Configurando driver do Chrome..."))
         service = ChromeService(ChromeDriverManager().install())
@@ -57,48 +59,51 @@ class Command(BaseCommand):
         pagina_atual = 1
 
         # ==============================================================================
-        # PASSO 2: LOOP PARA COLETAR OS DADOS PÁGINA POR PÁGINA (ATÉ O FIM DO SITE)
+        # PASSO 2: LOOP PARA COLETAR OS DADOS PÁGINA POR PÁGINA
         # ==============================================================================
         while True:
             self.stdout.write(f"Lendo e processando dados da página {pagina_atual} ...")
             
-            html_content = driver.page_source
-            soup = BeautifulSoup(html_content, 'html.parser')
-            tabelas_html = soup.find_all('table')
-            
-            tabela_encontrada = False
-            for tab in tabelas_html:
-                df_lista = pd.read_html(StringIO(str(tab)))
-                
-                if df_lista and len(df_lista[0].columns) >= 10:
-                    df_pagina = df_lista[0].iloc[:, :10]
-                    df_pagina.columns = ["Disciplina", "codigo", "nome", "professor", "credito", "", "", "", "", "horario_sala"]
-                    todos_os_dfs.append(df_pagina)
-                    tabela_encontrada = True
-                    break
-                    
-            if not tabela_encontrada:
-                self.stdout.write(self.style.WARNING(f"Aviso: Nenhuma tabela detectada na página {pagina_atual}."))
-
-            # --- LÓGICA DE NAVEGAÇÃO ENTRE PÁGINAS ---
-            proxima_pagina = pagina_atual + 1
             try:
-                link_proxima = driver.find_element(By.XPATH, f"//a[text()='{proxima_pagina}']")
-                driver.execute_script("arguments[0].scrollIntoView();", link_proxima)
-                time.sleep(0.5)
-                link_proxima.click()
-                pagina_atual = proxima_pagina
-                time.sleep(4)
-            except:
+                html_content = driver.page_source
+                soup = BeautifulSoup(html_content, 'html.parser')
+                tabelas_html = soup.find_all('table')
+                
+                tabela_encontrada = False
+                for tab in tabelas_html:
+                    df_lista = pd.read_html(StringIO(str(tab)))
+                    
+                    if df_lista and len(df_lista[0].columns) >= 10:
+                        df_pagina = df_lista[0].iloc[:, :10]
+                        df_pagina.columns = ["Disciplina", "codigo", "nome", "professor", "credito", "", "", "", "", "horario_sala"]
+                        todos_os_dfs.append(df_pagina)
+                        tabela_encontrada = True
+                        break
+                        
+                if not tabela_encontrada:
+                    self.stdout.write(self.style.WARNING(f"Aviso: Nenhuma tabela detectada na página {pagina_atual}."))
+
+                proxima_pagina = pagina_atual + 1
                 try:
-                    link_reticencias = driver.find_element(By.XPATH, f"//a[contains(@href, \"Page${proxima_pagina}\")]")
-                    driver.execute_script("arguments[0].scrollIntoView();", link_reticencias)
-                    link_reticencias.click()
-                    pagina_atual += 1
+                    link_proxima = driver.find_element(By.XPATH, f"//a[text()='{proxima_pagina}']")
+                    driver.execute_script("arguments[0].scrollIntoView();", link_proxima)
+                    time.sleep(0.5)
+                    link_proxima.click()
+                    pagina_atual = proxima_pagina
                     time.sleep(4)
                 except:
-                    self.stdout.write(self.style.SUCCESS("\nChegamos ao fim definitivo de todas as páginas do site!"))
-                    break
+                    try:
+                        link_reticencias = driver.find_element(By.XPATH, f"//a[contains(@href, \"Page${proxima_pagina}\")]")
+                        driver.execute_script("arguments[0].scrollIntoView();", link_reticencias)
+                        link_reticencias.click()
+                        pagina_atual += 1
+                        time.sleep(4)
+                    except:
+                        self.stdout.write(self.style.SUCCESS("\nChegamos ao fim definitivo de todas as páginas do site!"))
+                        break
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f"Erro crítico durante a paginação na página {pagina_atual}: {e}"))
+                break
 
         driver.quit()
 
@@ -112,7 +117,6 @@ class Command(BaseCommand):
             df_final["Disciplina"] = df_final["Disciplina"].astype(str)
             df_final["codigo"] = df_final["codigo"].astype(str)
             
-            # Filtros de Higienização do DataFrame
             df_final = df_final[df_final["Disciplina"].str.contains("Disciplina", na=False) == False]
             palavras_para_remover = ["Último", "Primeiro", "<<", ">>", "antigos"]
             for palavra in palavras_para_remover:
@@ -138,41 +142,38 @@ class Command(BaseCommand):
                     v_nome = str(row['nome']).strip()
                     v_nome_professor = str(row['professor']).strip() if row['professor'] != "" else "Não Informado"
 
-                    # 1. Tratamento Avançado do Horário da PUC (Ex: "2A 07:00-09:00", "4C 11:00-13:00")
                     v_horario_cru = str(row['horario_sala']).strip().upper()
                     
-                    # Mapeamento do padrão numérico da PUC para a sua classe DiaSemana
+                    # 1. MAPEAMENTO DE DIAS DA SEMANA (Usando as chaves exatas do seu TextChoices)
                     mapa_dias = {
-                        "2": "SEG",
-                        "3": "TER",
-                        "4": "QUA",
-                        "5": "QUI",
-                        "6": "SEX",
-                        "7": "SAB"
+                        "2": DiaSemana.SEGUNDA.value,   # "SEG"
+                        "3": DiaSemana.TERCA.value,     # "TER"
+                        "4": DiaSemana.QUARTA.value,    # "QUA"
+                        "5": DiaSemana.QUINTA.value,    # "QUI"
+                        "6": DiaSemana.SEXTA.value,     # "SEX"
+                        "7": DiaSemana.SABADO.value,    # "SAB"
                     }
                     
-                    # Descobre os dias da semana presentes no texto
                     codigos_dias_encontrados = []
                     for digito, sigla in mapa_dias.items():
                         if digito in v_horario_cru:
                             codigos_dias_encontrados.append(sigla)
 
-                    # --- NOVA LÓGICA DE CRÉDITOS ---
-                    # Conta a quantidade de dias encontrados. Se não achar nenhum no texto, assume o mínimo de 1 dia.
+                    # Cálculo dinâmico de créditos
                     total_dias = len(codigos_dias_encontrados) if len(codigos_dias_encontrados) > 0 else 1
                     creditos_calculados = total_dias * 2
 
-                    # 2. Salva/Atualiza a Disciplina mapeada utilizando os créditos calculados
+                    # 2. SALVA/ATUALIZA A DISCIPLINA
                     disciplina_obj, _ = Disciplina.objects.update_or_create(
                         codigo=v_codigo,
                         defaults={
                             'nome': v_nome,
-                            'creditos': creditos_calculados,  # Substituído pelo cálculo: (Dias da semana * 2)
+                            'creditos': creditos_calculados,
                             'periodo': 1,  
                         }
                     )
 
-                    # 3. Salva/Atualiza o Professor responsável
+                    # 3. SALVA/ATUALIZA O PROFESSOR
                     professor_obj, _ = Professor.objects.get_or_create(
                         nome=v_nome_professor,
                         defaults={
@@ -180,43 +181,45 @@ class Command(BaseCommand):
                         }
                     )
 
-                    # Mapeamento do intervalo de horas da PUC para o Choice do seu Model
-                    horario_selecionado = "07-09"  # Padrão caso falhe o parse
+                    # 4. MAPEAMENTO DOS HORÁRIOS DISPONÍVEIS (Baseado no seu enum Horario)
                     mapa_horarios = {
-                        "07:00": "07-09",
-                        "09:00": "09-11",
-                        "11:00": "11-13",
-                        "13:00": "13-15",
-                        "15:00": "15-17",
-                        "17:00": "17-19",
-                        "19:00": "19-21",
+                        "07:00": Horario.H07_09.value,  # "07-09"
+                        "09:00": Horario.H09_11.value,  # "09-11"
+                        "11:00": Horario.H11_13.value,  # "11-13"
+                        "13:00": Horario.H13_15.value,  # "13-15"
+                        "15:00": Horario.H15_17.value,  # "15-17"
+                        "17:00": Horario.H17_19.value,  # "17-19"
+                        "19:00": Horario.H19_21.value,  # "19-21"
                     }
                     
+                    horarios_encontrados = []
                     for hora_inicio, choice_valor in mapa_horarios.items():
                         if hora_inicio in v_horario_cru:
-                            horario_selecionado = choice_valor
-                            break
+                            horarios_encontrados.append(choice_valor)
 
-                    # 4. Cria ou atualiza a Turma vinculando as chaves estrangeiras corretas
-                    turma_obj, _ = Turma.objects.get_or_create(
-                        disciplina=disciplina_obj,
-                        professor=professor_obj,
-                        horario=horario_selecionado
-                    )
+                    # Fallback caso a string da PUC venha sem horário estruturado
+                    if not horarios_encontrados:
+                        horarios_encontrados.append(Horario.H07_09.value)
 
-                    # 5. Vincula os dias da semana coletados (Lógica ManyToMany)
+                    # Instancia os objetos de Dia da Semana para vincular no ManyToMany depois
+                    dias_projeto = []
                     if codigos_dias_encontrados:
-                        dias_projeto = []
                         for cod_dia in codigos_dias_encontrados:
                             dia_aula_obj, _ = DiaSemanaAula.objects.get_or_create(dia=cod_dia)
                             dias_projeto.append(dia_aula_obj)
-                        
-                        # Associa os dias capturados à turma
-                        turma_obj.dias_semana.set(dias_projeto)
                     else:
-                        # Fallback seguro caso não ache nenhum dia estruturado no texto
-                        dia_padrao, _ = DiaSemanaAula.objects.get_or_create(dia="SEG")
-                        turma_obj.dias_semana.set([dia_padrao])
+                        dia_padrao, _ = DiaSemanaAula.objects.get_or_create(dia=DiaSemana.SEGUNDA.value)
+                        dias_projeto.append(dia_padrao)
+
+                    # 5. GERAR AS TURMAS (Uma para cada horário distinto encontrado para respeitar unique_together)
+                    for hor_selecionado in horarios_encontrados:
+                        turma_obj, _ = Turma.objects.get_or_create(
+                            disciplina=disciplina_obj,
+                            professor=professor_obj,
+                            horario=hor_selecionado
+                        )
+                        # Associa a lista completa de dias capturados a essa turma específica
+                        turma_obj.dias_semana.set(dias_projeto)
 
                     registros_salvos += 1
 
@@ -227,12 +230,11 @@ class Command(BaseCommand):
                     ))
                     continue
 
-            # Relatório final impresso no terminal
             self.stdout.write(self.style.SUCCESS(
                 f"\n=========================================================="
                 f"\nPROCESSO CONCLUÍDO COM SUCESSO!"
                 f"\n- Total de páginas coletadas: {pagina_atual}"
-                f"\n- {registros_salvos} registros inseridos com sucesso (Mapeamento Relacional)."
+                f"\n- {registros_salvos} disciplinas processadas com sucesso."
                 f"\n- {registros_com_erro} linhas ignoradas por erros críticos."
                 f"\n=========================================================="
             ))
