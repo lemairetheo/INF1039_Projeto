@@ -9,21 +9,26 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Importações oficiais do Django
+# Importações oficiais do Django e dos seus Models Exatos
 from django.core.management.base import BaseCommand
-# Importação exata conforme o seu arquivo de models
-from core.models import Disciplina, Professor, Turma, DiaSemanaAula, DiaSemana, Horario
+from core.models import Disciplina, Professor, Turma, DiaSemanaAula, DiaSemana, Horario, Status
 
 
 class Command(BaseCommand):
     help = "Dispara o Web Scraper da PUC, varre todas as páginas e alimenta o banco relacional do Django"
 
     def handle(self, *args, **options):
+        # ------------------------------------------------------------------------------
+        # PASSO ZERO: LIMPEZA PREVENTIVA DO BANCO DE DADOS
+        # ------------------------------------------------------------------------------
+        self.stdout.write(self.style.WARNING("Limpando turmas antigas para evitar conflitos de horários repetidos..."))
+        Turma.objects.all().delete()
+
         # ==============================================================================
         # PASSO 1: CONFIGURAR E ABRIR O SITE NO NAVEGADOR (HEADLESS)
         # ==============================================================================
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--headless=new")  # Modo invisível estável
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--disable-dev-shm-usage")
@@ -144,7 +149,7 @@ class Command(BaseCommand):
 
                     v_horario_cru = str(row['horario_sala']).strip().upper()
                     
-                    # 1. MAPEAMENTO DE DIAS DA SEMANA (Usando as chaves exatas do seu TextChoices)
+                    # 1. Mapeamento de múltiplos dias da semana alinhado ao seu enum DiaSemana
                     mapa_dias = {
                         "2": DiaSemana.SEGUNDA.value,   # "SEG"
                         "3": DiaSemana.TERCA.value,     # "TER"
@@ -159,21 +164,21 @@ class Command(BaseCommand):
                         if digito in v_horario_cru:
                             codigos_dias_encontrados.append(sigla)
 
-                    # Cálculo dinâmico de créditos
                     total_dias = len(codigos_dias_encontrados) if len(codigos_dias_encontrados) > 0 else 1
                     creditos_calculados = total_dias * 2
 
-                    # 2. SALVA/ATUALIZA A DISCIPLINA
+                    # 2. Salva/Atualiza a Disciplina respeitando campos padrão (como status default)
                     disciplina_obj, _ = Disciplina.objects.update_or_create(
                         codigo=v_codigo,
                         defaults={
                             'nome': v_nome,
                             'creditos': creditos_calculados,
-                            'periodo': 1,  
+                            'periodo': 1,
+                            'status': Status.SOB_AVALIACAO.value
                         }
                     )
 
-                    # 3. SALVA/ATUALIZA O PROFESSOR
+                    # 3. Salva/Atualiza o Professor responsável
                     professor_obj, _ = Professor.objects.get_or_create(
                         nome=v_nome_professor,
                         defaults={
@@ -181,7 +186,7 @@ class Command(BaseCommand):
                         }
                     )
 
-                    # 4. MAPEAMENTO DOS HORÁRIOS DISPONÍVEIS (Baseado no seu enum Horario)
+                    # 4. Mapeamento de múltiplos horários alinhado ao seu enum Horario
                     mapa_horarios = {
                         "07:00": Horario.H07_09.value,  # "07-09"
                         "09:00": Horario.H09_11.value,  # "09-11"
@@ -197,29 +202,28 @@ class Command(BaseCommand):
                         if hora_inicio in v_horario_cru:
                             horarios_encontrados.append(choice_valor)
 
-                    # Fallback caso a string da PUC venha sem horário estruturado
                     if not horarios_encontrados:
                         horarios_encontrados.append(Horario.H07_09.value)
 
-                    # Instancia os objetos de Dia da Semana para vincular no ManyToMany depois
-                    dias_projeto = []
+                    # Preparação das instâncias de Dia da Semana para a relação Many-to-Many
+                    dias_instancias = []
                     if codigos_dias_encontrados:
                         for cod_dia in codigos_dias_encontrados:
                             dia_aula_obj, _ = DiaSemanaAula.objects.get_or_create(dia=cod_dia)
-                            dias_projeto.append(dia_aula_obj)
+                            dias_instancias.append(dia_aula_obj)
                     else:
                         dia_padrao, _ = DiaSemanaAula.objects.get_or_create(dia=DiaSemana.SEGUNDA.value)
-                        dias_projeto.append(dia_padrao)
+                        dias_instancias.append(dia_padrao)
 
-                    # 5. GERAR AS TURMAS (Uma para cada horário distinto encontrado para respeitar unique_together)
+                    # 5. Criação de múltiplas turmas para respeitar a regra unique_together
                     for hor_selecionado in horarios_encontrados:
                         turma_obj, _ = Turma.objects.get_or_create(
                             disciplina=disciplina_obj,
                             professor=professor_obj,
                             horario=hor_selecionado
                         )
-                        # Associa a lista completa de dias capturados a essa turma específica
-                        turma_obj.dias_semana.set(dias_projeto)
+                        # Vincula a lista de dias identificados à turma gerada
+                        turma_obj.dias_semana.set(dias_instancias)
 
                     registros_salvos += 1
 
@@ -234,7 +238,7 @@ class Command(BaseCommand):
                 f"\n=========================================================="
                 f"\nPROCESSO CONCLUÍDO COM SUCESSO!"
                 f"\n- Total de páginas coletadas: {pagina_atual}"
-                f"\n- {registros_salvos} disciplinas processadas com sucesso."
+                f"\n- {registros_salvos} matérias mapeadas e inseridas."
                 f"\n- {registros_com_erro} linhas ignoradas por erros críticos."
                 f"\n=========================================================="
             ))
