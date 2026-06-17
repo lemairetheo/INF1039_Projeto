@@ -1,0 +1,28 @@
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+    <span class="pagination-info">
+        {{ page_obj.start_index }}–{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+    </span>
+    <div class="pagination-controls">
+        {% if page_obj.has_previous %}
+        <a href="?{{ param_name }}={{ page_obj.previous_page_number }}&{{ extra_params }}#{{ section_id }}" class="page-btn">‹</a>
+        {% else %}
+        <span class="page-btn disabled">‹</span>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="page-btn active">{{ num }}</span>
+            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+            <a href="?{{ param_name }}={{ num }}&{{ extra_params }}#{{ section_id }}" class="page-btn">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?{{ param_name }}={{ page_obj.next_page_number }}&{{ extra_params }}#{{ section_id }}" class="page-btn">›</a>
+        {% else %}
+        <span class="page-btn disabled">›</span>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

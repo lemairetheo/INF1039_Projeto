@@ -55,9 +55,7 @@
                         <td>{{ s.solicitante.get_full_name|default:s.solicitante.username }}</td>
                         <td class="td-justificativa">{{ s.justificativa|truncatechars:80 }}</td>
                         <td>
-                            <span class="status-badge status-{{ s.status }}">
-                                {{ s.get_status_display }}
-                            </span>
+                            <span class="status-badge status-{{ s.status }}">{{ s.get_status_display }}</span>
                         </td>
                         <td class="td-actions">
                             {% if s.status == 'pendente' %}
@@ -84,13 +82,30 @@
     </section>
 
     <!-- ── Avaliações ─────────────────────────────────────────────── -->
-    <section class="admin-section">
+    <section class="admin-section" id="avaliacoes">
         <h2 class="admin-section-title">
             Avaliações
-            <span class="admin-count">{{ avaliacoes.count }}</span>
+            <span class="admin-count">{{ av_page.paginator.count }}</span>
         </h2>
 
-        {% if avaliacoes %}
+        <form method="get" class="admin-filters" id="form-av">
+            <input type="hidden" name="disc_busca"   value="{{ disc_busca }}">
+            <input type="hidden" name="disc_status"  value="{{ disc_status }}">
+            <input type="hidden" name="disc_periodo" value="{{ disc_periodo }}">
+            <input type="hidden" name="disc_page"    value="{{ disc_page.number }}">
+            <div class="filters-row">
+                <input type="text" name="av_disciplina" value="{{ av_disciplina }}"
+                       placeholder="Filtrar por disciplina..." class="filter-input">
+                <input type="number" name="av_nota_min" value="{{ av_nota_min }}"
+                       placeholder="Nota mín." min="0" max="10" step="0.1" class="filter-input filter-small">
+                <input type="number" name="av_nota_max" value="{{ av_nota_max }}"
+                       placeholder="Nota máx." min="0" max="10" step="0.1" class="filter-input filter-small">
+                <button type="submit" class="btn-filtrar">Filtrar</button>
+                <a href="?disc_busca={{ disc_busca }}&disc_status={{ disc_status }}&disc_periodo={{ disc_periodo }}" class="btn-limpar">Limpar</a>
+            </div>
+        </form>
+
+        {% if av_page.object_list %}
         <div class="admin-table-wrapper">
             <table class="admin-table">
                 <thead>
@@ -105,7 +120,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for av in avaliacoes %}
+                    {% for av in av_page %}
                     <tr>
                         <td>{{ av.aluno.user.get_full_name }}</td>
                         <td>{{ av.disciplina.nome|default:"—" }}</td>
@@ -124,19 +139,47 @@
                 </tbody>
             </table>
         </div>
+
+        {% include 'core/partials/pagination.html' with page_obj=av_page param_name='av_page' section_id='avaliacoes' extra_params='av_disciplina='|add:av_disciplina|add:'&av_nota_min='|add:av_nota_min|add:'&av_nota_max='|add:av_nota_max|add:'&disc_busca='|add:disc_busca|add:'&disc_status='|add:disc_status|add:'&disc_periodo='|add:disc_periodo %}
+
         {% else %}
         <p class="admin-vazio">Nenhuma avaliação encontrada.</p>
         {% endif %}
     </section>
 
     <!-- ── Disciplinas ────────────────────────────────────────────── -->
-    <section class="admin-section">
+    <section class="admin-section" id="disciplinas">
         <h2 class="admin-section-title">
             Disciplinas
-            <span class="admin-count">{{ disciplinas.count }}</span>
+            <span class="admin-count">{{ disc_page.paginator.count }}</span>
         </h2>
 
-        {% if disciplinas %}
+        <form method="get" class="admin-filters" id="form-disc">
+            <input type="hidden" name="av_disciplina" value="{{ av_disciplina }}">
+            <input type="hidden" name="av_nota_min"   value="{{ av_nota_min }}">
+            <input type="hidden" name="av_nota_max"   value="{{ av_nota_max }}">
+            <input type="hidden" name="av_page"       value="{{ av_page.number }}">
+            <div class="filters-row">
+                <input type="text" name="disc_busca" value="{{ disc_busca }}"
+                       placeholder="Buscar por nome ou código..." class="filter-input">
+                <select name="disc_status" class="filter-select">
+                    <option value="">Todos os status</option>
+                    {% for val, label in status_choices %}
+                    <option value="{{ val }}" {% if disc_status == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select name="disc_periodo" class="filter-select filter-small">
+                    <option value="">Todos os períodos</option>
+                    {% for p in periodos %}
+                    <option value="{{ p }}" {% if disc_periodo == p|stringformat:"s" %}selected{% endif %}>{{ p }}º período</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-filtrar">Filtrar</button>
+                <a href="?av_disciplina={{ av_disciplina }}&av_nota_min={{ av_nota_min }}&av_nota_max={{ av_nota_max }}" class="btn-limpar">Limpar</a>
+            </div>
+        </form>
+
+        {% if disc_page.object_list %}
         <div class="admin-table-wrapper">
             <table class="admin-table">
                 <thead>
@@ -150,7 +193,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for d in disciplinas %}
+                    {% for d in disc_page %}
                     <tr>
                         <td><span class="tag-codigo">{{ d.codigo }}</span></td>
                         <td>{{ d.nome }}</td>
@@ -160,7 +203,7 @@
                         <td>
                             <form method="post" action="{% url 'admin_deletar_disciplina' d.id %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn-deletar" onclick="return confirm('Remover a disciplina {{ d.nome }}? Esta ação é irreversível.')">🗑 Remover</button>
+                                <button type="submit" class="btn-deletar" onclick="return confirm('Remover {{ d.nome }}?')">🗑 Remover</button>
                             </form>
                         </td>
                     </tr>
@@ -168,6 +211,9 @@
                 </tbody>
             </table>
         </div>
+
+        {% include 'core/partials/pagination.html' with page_obj=disc_page param_name='disc_page' section_id='disciplinas' extra_params='av_disciplina='|add:av_disciplina|add:'&av_nota_min='|add:av_nota_min|add:'&av_nota_max='|add:av_nota_max|add:'&disc_busca='|add:disc_busca|add:'&disc_status='|add:disc_status|add:'&disc_periodo='|add:disc_periodo %}
+
         {% else %}
         <p class="admin-vazio">Nenhuma disciplina encontrada.</p>
         {% endif %}

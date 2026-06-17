@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Sum, Avg
+from django.db.models import Sum, Avg, Q
 from django.contrib import messages
+from django.core.paginator import Paginator
 from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia, Requisito, SolicitacaoDisciplina
 from .forms import UserEditForm, StudentEditForm, AvaliacaoForm, RegisterForm, SolicitacaoDisciplinaForm
 
@@ -383,12 +384,49 @@ def solicitar_disciplina(request):
 @user_passes_test(_is_admin, login_url='/login/')
 def painel_admin(request):
     solicitacoes = SolicitacaoDisciplina.objects.select_related('solicitante').all()
-    avaliacoes   = Avaliacao.objects.select_related('aluno__user', 'disciplina', 'professor').all()
-    disciplinas  = Disciplina.objects.all()
+
+    # ── Filtros avaliações ──
+    av_qs = Avaliacao.objects.select_related('aluno__user', 'disciplina', 'professor')
+    av_disciplina = request.GET.get('av_disciplina', '').strip()
+    av_nota_min   = request.GET.get('av_nota_min', '').strip()
+    av_nota_max   = request.GET.get('av_nota_max', '').strip()
+    if av_disciplina:
+        av_qs = av_qs.filter(disciplina__nome__icontains=av_disciplina)
+    if av_nota_min:
+        av_qs = av_qs.filter(nota_disc__gte=av_nota_min)
+    if av_nota_max:
+        av_qs = av_qs.filter(nota_disc__lte=av_nota_max)
+
+    # ── Filtros disciplinas ──
+    disc_qs     = Disciplina.objects.all()
+    disc_busca  = request.GET.get('disc_busca', '').strip()
+    disc_status = request.GET.get('disc_status', '').strip()
+    disc_periodo = request.GET.get('disc_periodo', '').strip()
+    if disc_busca:
+        disc_qs = disc_qs.filter(Q(nome__icontains=disc_busca) | Q(codigo__icontains=disc_busca))
+    if disc_status:
+        disc_qs = disc_qs.filter(status=disc_status)
+    if disc_periodo:
+        disc_qs = disc_qs.filter(periodo=disc_periodo)
+
+    # ── Paginação ──
+    av_page   = Paginator(av_qs, 10).get_page(request.GET.get('av_page'))
+    disc_page = Paginator(disc_qs, 10).get_page(request.GET.get('disc_page'))
+
+    from .models import Status
     return render(request, 'core/painel_admin.html', {
-        'solicitacoes': solicitacoes,
-        'avaliacoes':   avaliacoes,
-        'disciplinas':  disciplinas,
+        'solicitacoes':  solicitacoes,
+        'av_page':       av_page,
+        'disc_page':     disc_page,
+        'status_choices': Status.choices,
+        'periodos':      range(1, 11),
+        # valores dos filtros para repopular os campos
+        'av_disciplina': av_disciplina,
+        'av_nota_min':   av_nota_min,
+        'av_nota_max':   av_nota_max,
+        'disc_busca':    disc_busca,
+        'disc_status':   disc_status,
+        'disc_periodo':  disc_periodo,
     })
 
 

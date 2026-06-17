@@ -178,3 +178,99 @@
     text-align: center;
     padding: 20px 0;
 }
+
+/* ── Filtros ── */
+.admin-filters { margin-bottom: 16px; }
+
+.filters-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-input,
+.filter-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-dark-blue);
+    background: #f8fafc;
+    font-family: var(--font-family);
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    background: #fff;
+}
+
+.filter-input       { width: 220px; }
+.filter-input.filter-small { width: 110px; }
+.filter-select      { width: 170px; }
+.filter-select.filter-small { width: 130px; }
+
+.btn-filtrar {
+    padding: 8px 18px;
+    background: var(--primary-blue);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-filtrar:hover { opacity: .85; }
+
+.btn-limpar {
+    padding: 8px 14px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    background: #fff;
+}
+.btn-limpar:hover { background: #f1f5f9; }
+
+/* ── Paginação ── */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.pagination-info {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--text-dark-blue);
+    background: #f8fafc;
+    border: 1px solid var(--border-light);
+    transition: background .12s;
+}
+.page-btn:hover       { background: #e2e8f0; }
+.page-btn.active      { background: var(--primary-blue); color: #fff; border-color: var(--primary-blue); }
+.page-btn.disabled    { color: #cbd5e1; cursor: default; pointer-events: none; }
