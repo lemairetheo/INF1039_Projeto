@@ -43,21 +43,29 @@ def home_view(request):
 
 
 def disciplinas(request):
-    # Captura o termo digitado no campo de busca
+    # Captura os termos enviados pelo formulário HTML
     search_query = request.GET.get('search', '').strip()
+    dept_query = request.GET.get('departamento', '').strip()
     
-    todas = Disciplina.objects.all()
+    # Otimiza o carregamento trazendo as turmas e professores vinculados em uma única consulta
+    todas = Disciplina.objects.prefetch_related('turma_disciplina__professor').all()
     
-    # Se houver uma busca, filtra por nome ou código da disciplina
+    # Filtro unificado: busca por Nome, Código da disciplina OU Nome do Professor
     if search_query:
         todas = todas.filter(
             Q(nome__icontains=search_query) | 
-            Q(codigo__icontains=search_query)
-        )
+            Q(codigo__icontains=search_query) |
+            Q(turma_disciplina__professor__nome__icontains=search_query)
+        ).distinct() # Evita duplicar disciplinas que possuem mais de uma turma/professor
+        
+    # Filtro opcional por Departamento (verifica se o código começa com as letras informadas)
+    if dept_query:
+        todas = todas.filter(codigo__istartswith=dept_query)
         
     return render(request, 'core/disciplinas.html', {
         'disciplinas': todas,
-        'search_query': search_query  # Retorna o termo para manter no input do HTML
+        'search_query': search_query,
+        'dept_query': dept_query
     })
 
 
@@ -74,21 +82,21 @@ def disciplina_detalhe(request, pk):
     })
 
 
-def professores(request):
-    # Captura o termo digitado no campo de busca
+def professores(request):  
+    # Captura o termo digitado na página de professores
     search_query = request.GET.get('search', '').strip()
     
     todos = Professor.objects.prefetch_related(
         'turma_professor__disciplina', 'avaliacoes'
     ).all()
     
-    # Se houver uma busca, filtra pelo nome do professor
+    # Filtra pelo nome do professor
     if search_query:
         todos = todos.filter(nome__icontains=search_query)
         
     return render(request, 'core/professores.html', {
         'professores': todos,
-        'search_query': search_query  # Retorna o termo para manter no input do HTML
+        'search_query': search_query
     })
 
 
