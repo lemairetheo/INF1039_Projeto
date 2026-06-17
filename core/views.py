@@ -43,8 +43,22 @@ def home_view(request):
 
 
 def disciplinas(request):
+    # Captura o termo digitado no campo de busca
+    search_query = request.GET.get('search', '').strip()
+    
     todas = Disciplina.objects.all()
-    return render(request, 'core/disciplinas.html', {'disciplinas': todas})
+    
+    # Se houver uma busca, filtra por nome ou código da disciplina
+    if search_query:
+        todas = todas.filter(
+            Q(nome__icontains=search_query) | 
+            Q(codigo__icontains=search_query)
+        )
+        
+    return render(request, 'core/disciplinas.html', {
+        'disciplinas': todas,
+        'search_query': search_query  # Retorna o termo para manter no input do HTML
+    })
 
 
 def disciplina_detalhe(request, pk):
@@ -61,10 +75,21 @@ def disciplina_detalhe(request, pk):
 
 
 def professores(request):
+    # Captura o termo digitado no campo de busca
+    search_query = request.GET.get('search', '').strip()
+    
     todos = Professor.objects.prefetch_related(
         'turma_professor__disciplina', 'avaliacoes'
     ).all()
-    return render(request, 'core/professores.html', {'professores': todos})
+    
+    # Se houver uma busca, filtra pelo nome do professor
+    if search_query:
+        todos = todos.filter(nome__icontains=search_query)
+        
+    return render(request, 'core/professores.html', {
+        'professores': todos,
+        'search_query': search_query  # Retorna o termo para manter no input do HTML
+    })
 
 
 def avaliacoes(request):
@@ -122,7 +147,7 @@ def editar_perfil(request):
         if user_form.is_valid() and student_form.is_valid():
             user_form.save()
             student_form.save()
-            messages.success(request, 'Perfil atualizado com sucesso!')
+            messages.success(request, 'Perfil updated com sucesso!')
             return redirect('perfil')
     else:
         user_form    = UserEditForm(instance=request.user)
@@ -339,7 +364,6 @@ def historico_grades(request):
     return render(request, 'core/historico.html', context)
 
 
-
 def minhas_avaliacoes_prof(request, id_professor):
     professor = get_object_or_404(Professor, id=id_professor)
 
@@ -363,7 +387,6 @@ def minhas_avaliacoes_prof(request, id_professor):
         'nota_professor': nota_professor,
         'nota_disciplina': nota_disciplina,
     })
-
 
 
 @login_required
