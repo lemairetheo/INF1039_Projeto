@@ -31,9 +31,9 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-**4. Apply database migrations**
+**4. Apply database migrations and web scraper**
 ```bash
-python manage.py migrate
+python manage.py setup_db
 ```
 
 **5. (Optional) Create an admin superuser**
@@ -82,9 +82,9 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-**4. Aplicar as migrações do banco de dados**
+**4. Aplicar as migrações do banco de dados e web scrapper**
 ```bash
-python manage.py migrate
+python manage.py setup_db
 ```
 
 **5. (Opcional) Criar um superusuário para o admin**
