@@ -1,0 +1,135 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ curriculo.nome }} | Painel Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/painel_admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+
+    <div class="admin-topbar">
+        <a href="{% url 'painel_admin' %}#curriculos" class="btn-voltar-admin">← Currículos</a>
+        <div>
+            <h1>{{ curriculo.nome }}</h1>
+            <span class="admin-badge">{{ curriculo.codigo }}</span>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="admin-messages">
+        {% for msg in messages %}
+        <div class="admin-alert">{{ msg }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ── Resumo ── -->
+    <div class="cur-resumo">
+        <div class="cur-resumo-item">
+            <span class="cur-resumo-val">{{ items.count }}</span>
+            <span class="cur-resumo-label">Disciplinas</span>
+        </div>
+        <div class="cur-resumo-item">
+            <span class="cur-resumo-val">{{ curriculo.total_creditos_obrigatorios }}</span>
+            <span class="cur-resumo-label">Créditos obrigatórios</span>
+        </div>
+        <div class="cur-resumo-item">
+            <span class="cur-resumo-val">{{ curriculo.total_creditos_optativos }}</span>
+            <span class="cur-resumo-label">Créditos optativos</span>
+        </div>
+        <div class="cur-resumo-item">
+            <span class="cur-resumo-val">{{ curriculo.estudantes.count }}</span>
+            <span class="cur-resumo-label">Estudantes</span>
+        </div>
+    </div>
+
+    <!-- ── Tabela de disciplinas ── -->
+    <div class="admin-section">
+        <h2 class="admin-section-title">Disciplinas do Currículo</h2>
+
+        {% if items %}
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nome</th>
+                        <th>Período</th>
+                        <th>Tipo</th>
+                        <th>Créditos</th>
+                        <th>Editar</th>
+                        <th>Remover</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td><span class="tag-codigo">{{ item.disciplina.codigo }}</span></td>
+                        <td>{{ item.disciplina.nome }}</td>
+                        <td>
+                            <form method="post" action="{% url 'admin_curriculo_update_item' item.id %}" class="inline-form">
+                                {% csrf_token %}
+                                <select name="periodo_recomendado" class="inline-select">
+                                    {% for p in periodos %}
+                                    <option value="{{ p }}" {% if item.periodo_recomendado == p %}selected{% endif %}>{{ p }}º</option>
+                                    {% endfor %}
+                                </select>
+                        </td>
+                        <td>
+                                <select name="tipo" class="inline-select">
+                                    {% for val, label in tipo_choices %}
+                                    <option value="{{ val }}" {% if item.tipo == val %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                        </td>
+                        <td>{{ item.disciplina.creditos }}</td>
+                        <td>
+                                <button type="submit" class="btn-salvar">💾 Salvar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'admin_curriculo_remove_item' item.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-deletar" onclick="return confirm('Remover {{ item.disciplina.nome }} do currículo?')">🗑</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="admin-vazio">Nenhuma disciplina vinculada ainda.</p>
+        {% endif %}
+    </div>
+
+    <!-- ── Adicionar disciplina ── -->
+    <div class="admin-section">
+        <h2 class="admin-section-title">Adicionar Disciplina</h2>
+        <form method="post" action="{% url 'admin_curriculo_add_item' curriculo.id %}" class="add-disc-form">
+            {% csrf_token %}
+            <select name="disciplina" class="filter-select add-select-wide" required>
+                <option value="">— Selecione uma disciplina —</option>
+                {% for d in todas_disc %}
+                <option value="{{ d.id }}">{{ d.codigo }} — {{ d.nome }}</option>
+                {% endfor %}
+            </select>
+            <select name="tipo" class="filter-select">
+                {% for val, label in tipo_choices %}
+                <option value="{{ val }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+            <select name="periodo_recomendado" class="filter-select filter-small">
+                {% for p in periodos %}
+                <option value="{{ p }}">{{ p }}º período</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-filtrar">+ Adicionar</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -445,6 +445,8 @@ def painel_admin(request):
     disc_page = Paginator(disc_qs, 10).get_page(request.GET.get('disc_page'))
 
     from .models import Status
+    curriculos = Curriculo.objects.prefetch_related('items').all()
+
     return render(request, 'core/painel_admin.html', {
         'solicitacoes':  solicitacoes,
         'av_page':       av_page,
@@ -458,6 +460,7 @@ def painel_admin(request):
         'disc_busca':    disc_busca,
         'disc_status':   disc_status,
         'disc_periodo':  disc_periodo,
+        'curriculos':    curriculos,
     })
 
 
@@ -505,6 +508,62 @@ def admin_deletar_disciplina(request, disciplina_id):
         disciplina.delete()
         messages.success(request, f'Disciplina "{disciplina.nome}" removida.')
     return redirect('painel_admin')
+
+
+@user_passes_test(_is_admin, login_url='/login/')
+def admin_curriculo_detalhe(request, cur_id):
+    curriculo  = get_object_or_404(Curriculo, id=cur_id)
+    todas_disc = Disciplina.objects.order_by('codigo')
+    items      = curriculo.items.select_related('disciplina').order_by('periodo_recomendado', 'tipo', 'disciplina__nome')
+    return render(request, 'core/admin_curriculo.html', {
+        'curriculo':   curriculo,
+        'items':       items,
+        'todas_disc':  todas_disc,
+        'tipo_choices': CurriculoItem.Tipo.choices,
+        'periodos':    range(1, 9),
+    })
+
+
+@user_passes_test(_is_admin, login_url='/login/')
+def admin_curriculo_add_item(request, cur_id):
+    curriculo = get_object_or_404(Curriculo, id=cur_id)
+    if request.method == 'POST':
+        disc_id = request.POST.get('disciplina')
+        tipo    = request.POST.get('tipo')
+        periodo = request.POST.get('periodo_recomendado')
+        disc    = get_object_or_404(Disciplina, id=disc_id)
+        _, created = CurriculoItem.objects.get_or_create(
+            curriculo=curriculo, disciplina=disc,
+            defaults={'tipo': tipo, 'periodo_recomendado': periodo}
+        )
+        if created:
+            messages.success(request, f'"{disc.nome}" adicionada ao currículo.')
+        else:
+            messages.warning(request, f'"{disc.nome}" já está neste currículo.')
+    return redirect('admin_curriculo_detalhe', cur_id=cur_id)
+
+
+@user_passes_test(_is_admin, login_url='/login/')
+def admin_curriculo_remove_item(request, item_id):
+    item = get_object_or_404(CurriculoItem, id=item_id)
+    cur_id = item.curriculo_id
+    if request.method == 'POST':
+        nome = item.disciplina.nome
+        item.delete()
+        messages.success(request, f'"{nome}" removida do currículo.')
+    return redirect('admin_curriculo_detalhe', cur_id=cur_id)
+
+
+@user_passes_test(_is_admin, login_url='/login/')
+def admin_curriculo_update_item(request, item_id):
+    item = get_object_or_404(CurriculoItem, id=item_id)
+    cur_id = item.curriculo_id
+    if request.method == 'POST':
+        item.tipo               = request.POST.get('tipo', item.tipo)
+        item.periodo_recomendado = int(request.POST.get('periodo_recomendado', item.periodo_recomendado))
+        item.save()
+        messages.success(request, f'"{item.disciplina.nome}" atualizada.')
+    return redirect('admin_curriculo_detalhe', cur_id=cur_id)
 
 
 @login_required

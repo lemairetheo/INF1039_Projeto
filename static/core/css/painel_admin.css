@@ -179,6 +179,184 @@
     padding: 20px 0;
 }
 
+/* ── Onglets ── */
+.admin-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border-light);
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color .15s;
+}
+.tab-btn:hover { color: var(--text-dark-blue); }
+.tab-btn.active {
+    color: var(--primary-blue);
+    border-bottom-color: var(--primary-blue);
+}
+
+.tab-count {
+    background: #f1f5f9;
+    color: var(--text-muted);
+    padding: 1px 7px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.tab-btn.active .tab-count {
+    background: #eff6ff;
+    color: var(--primary-blue);
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Currículos grid ── */
+.cur-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    padding: 4px 0;
+}
+
+.cur-card {
+    background: #fff;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 24px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: box-shadow .15s, border-color .15s;
+}
+.cur-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    border-color: #bfdbfe;
+}
+
+.cur-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cur-codigo {
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: monospace;
+    color: var(--primary-blue);
+    background: #eff6ff;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.cur-count {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.cur-nome {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-deep-blue);
+}
+
+.cur-desc {
+    font-size: 0.83rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.cur-creditos {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+.cur-sep { color: #cbd5e1; }
+
+/* ── Detalhe currículo ── */
+.btn-voltar-admin {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+}
+.btn-voltar-admin:hover { color: var(--primary-blue); }
+
+.cur-resumo {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.cur-resumo-item {
+    background: #fff;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.cur-resumo-val {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-deep-blue);
+}
+.cur-resumo-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.inline-form { display: contents; }
+.inline-select {
+    padding: 5px 8px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    font-size: 0.82rem;
+    background: #f8fafc;
+    font-family: var(--font-family);
+}
+.inline-select:focus { outline: none; border-color: var(--primary-blue); }
+
+.btn-salvar {
+    padding: 5px 10px;
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.btn-salvar:hover { background: #dcfce7; }
+
+.add-disc-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.add-select-wide { width: 340px; }
+
 /* ── Filtros ── */
 .admin-filters { margin-bottom: 16px; }
 

@@ -34,6 +34,10 @@ urlpatterns = [
     path('admin-painel/rejeitar/<int:sol_id>/', views.admin_rejeitar_solicitacao, name='admin_rejeitar_solicitacao'),
     path('admin-painel/deletar-avaliacao/<int:avaliacao_id>/', views.admin_deletar_avaliacao, name='admin_deletar_avaliacao'),
     path('admin-painel/deletar-disciplina/<int:disciplina_id>/', views.admin_deletar_disciplina, name='admin_deletar_disciplina'),
+    path('admin-painel/curriculos/<int:cur_id>/', views.admin_curriculo_detalhe, name='admin_curriculo_detalhe'),
+    path('admin-painel/curriculos/<int:cur_id>/add/', views.admin_curriculo_add_item, name='admin_curriculo_add_item'),
+    path('admin-painel/curriculos/item/<int:item_id>/remover/', views.admin_curriculo_remove_item, name='admin_curriculo_remove_item'),
+    path('admin-painel/curriculos/item/<int:item_id>/editar/', views.admin_curriculo_update_item, name='admin_curriculo_update_item'),
 ]
 
 handler404 = 'core.views.erro_404'
