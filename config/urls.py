@@ -26,6 +26,7 @@ urlpatterns = [
     path('avaliacoes/', views.avaliacoes, name='Avaliações'),
     path('avaliacoes/reportar/<int:avaliacao_id>/', views.reportar_avaliacoes, name='Reportar Avaliação'),
     path('historico/', views.historico_grades, name='historico_grades'),
+    path('progressao/', views.progressao_academica, name='progressao_academica'),
     path('minhas-avaliacoes/<int:id_professor>', views.minhas_avaliacoes_prof, name='minhas avaliações'),
     path('disciplinas/<int:pk>/', views.disciplina_detalhe, name='disciplina_detalhe'),
     path('admin-painel/', views.painel_admin, name='painel_admin'),

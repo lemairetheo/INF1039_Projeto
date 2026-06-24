@@ -1,0 +1,121 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Progressão Acadêmica | Academic Curator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/progressao.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="prog-container">
+
+{% if sem_curriculo %}
+<div class="prog-empty">
+    <span class="prog-empty-icon">📋</span>
+    <h2>Nenhum currículo vinculado</h2>
+    <p>Seu perfil ainda não possui um currículo associado. Entre em contato com a administração.</p>
+</div>
+{% else %}
+
+<!-- ── Cabeçalho ─────────────────────────────────────────────────────── -->
+<div class="prog-header">
+    <div class="prog-header-info">
+        <span class="prog-curso-badge">{{ curriculo.codigo }}</span>
+        <h1>{{ curriculo.nome }}</h1>
+        <p class="prog-descricao">{{ curriculo.descricao }}</p>
+    </div>
+</div>
+
+<!-- ── Barras de progresso ───────────────────────────────────────────── -->
+<div class="prog-stats">
+    <div class="prog-stat-card">
+        <div class="prog-stat-header">
+            <span class="prog-stat-label">Obrigatórias</span>
+            <span class="prog-stat-frac">{{ stats.obrig_ok }} / {{ stats.obrig_total }} créditos</span>
+        </div>
+        <div class="prog-bar-bg">
+            <div class="prog-bar-fill prog-bar-obrig" style="width: {{ obrig_pct }}%"></div>
+        </div>
+        <span class="prog-pct">{{ obrig_pct }}%</span>
+    </div>
+    <div class="prog-stat-card">
+        <div class="prog-stat-header">
+            <span class="prog-stat-label">Optativas</span>
+            <span class="prog-stat-frac">{{ stats.optat_ok }} / {{ stats.optat_total }} créditos</span>
+        </div>
+        <div class="prog-bar-bg">
+            <div class="prog-bar-fill prog-bar-optat" style="width: {{ optat_pct }}%"></div>
+        </div>
+        <span class="prog-pct">{{ optat_pct }}%</span>
+    </div>
+</div>
+
+<!-- ── Legenda ───────────────────────────────────────────────────────── -->
+<div class="prog-legenda">
+    <span class="leg-item"><span class="leg-dot dot-concluido"></span>Concluído</span>
+    <span class="leg-item"><span class="leg-dot dot-cursando"></span>Cursando</span>
+    <span class="leg-item"><span class="leg-dot dot-disponivel"></span>Disponível</span>
+    <span class="leg-item"><span class="leg-dot dot-bloqueado"></span>Bloqueado</span>
+    <span class="leg-item"><span class="leg-dot dot-optativa"></span>Optativa</span>
+</div>
+
+<!-- ── Grade por período ─────────────────────────────────────────────── -->
+{% for periodo, disciplinas in periodos %}
+<section class="prog-periodo">
+    <div class="periodo-titulo">
+        <span class="periodo-num">{{ periodo }}º Período</span>
+        <span class="periodo-count">{{ disciplinas|length }} disciplinas</span>
+    </div>
+
+    <div class="periodo-grid">
+        <!-- Obrigatórias -->
+        {% for d in disciplinas %}
+        {% if d.tipo == 'obrigatoria' %}
+        <div class="disc-card disc-{{ d.status }}">
+            <div class="disc-card-top">
+                <span class="disc-codigo">{{ d.disciplina.codigo }}</span>
+                <span class="disc-status-icon">
+                    {% if d.status == 'concluido' %}✅
+                    {% elif d.status == 'cursando' %}🔵
+                    {% elif d.status == 'disponivel' %}⚪
+                    {% else %}🔒{% endif %}
+                </span>
+            </div>
+            <p class="disc-nome">{{ d.disciplina.nome }}</p>
+            <div class="disc-footer">
+                <span class="disc-creditos">{{ d.disciplina.creditos }} créditos</span>
+                <span class="disc-tipo-tag tag-obrig">Obrigatória</span>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        <!-- Optativas -->
+        {% for d in disciplinas %}
+        {% if d.tipo == 'optativa' %}
+        <div class="disc-card disc-optativa disc-{{ d.status }}">
+            <div class="disc-card-top">
+                <span class="disc-codigo">{{ d.disciplina.codigo }}</span>
+                <span class="disc-status-icon">
+                    {% if d.status == 'concluido' %}✅
+                    {% elif d.status == 'cursando' %}🔵
+                    {% elif d.status == 'disponivel' %}⚪
+                    {% else %}🔒{% endif %}
+                </span>
+            </div>
+            <p class="disc-nome">{{ d.disciplina.nome }}</p>
+            <div class="disc-footer">
+                <span class="disc-creditos">{{ d.disciplina.creditos }} créditos</span>
+                <span class="disc-tipo-tag tag-optat">Optativa</span>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</section>
+{% endfor %}
+
+{% endif %}
+</div>
+{% endblock %}

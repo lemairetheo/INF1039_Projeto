@@ -1,0 +1,201 @@
+.prog-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 24px;
+}
+
+/* ── Empty state ── */
+.prog-empty {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--text-muted);
+}
+.prog-empty-icon { font-size: 3rem; display: block; margin-bottom: 16px; }
+.prog-empty h2   { font-size: 1.3rem; color: var(--text-dark-blue); margin-bottom: 8px; }
+
+/* ── Header ── */
+.prog-header {
+    margin-bottom: 28px;
+}
+.prog-curso-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: #eff6ff;
+    color: var(--primary-blue);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    margin-bottom: 8px;
+    font-family: monospace;
+}
+.prog-header h1 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--text-deep-blue);
+    margin-bottom: 4px;
+}
+.prog-descricao {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* ── Barras de progresso ── */
+.prog-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.prog-stat-card {
+    background: #fff;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 20px 24px;
+}
+.prog-stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.prog-stat-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-dark-blue);
+}
+.prog-stat-frac {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+.prog-bar-bg {
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+.prog-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width .4s ease;
+}
+.prog-bar-obrig { background: var(--primary-blue); }
+.prog-bar-optat { background: #7c3aed; }
+.prog-pct {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+/* ── Legenda ── */
+.prog-legenda {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+.leg-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+.leg-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.dot-concluido  { background: #16a34a; }
+.dot-cursando   { background: #2563eb; }
+.dot-disponivel { background: #94a3b8; border: 2px solid #cbd5e1; }
+.dot-bloqueado  { background: #e2e8f0; border: 2px solid #cbd5e1; }
+.dot-optativa   { background: #7c3aed; }
+
+/* ── Período ── */
+.prog-periodo {
+    margin-bottom: 36px;
+}
+.periodo-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.periodo-num {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-deep-blue);
+}
+.periodo-count {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+.periodo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+/* ── Disciplina card ── */
+.disc-card {
+    background: #fff;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: box-shadow .15s;
+}
+.disc-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.07); }
+
+.disc-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.disc-codigo {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    font-family: monospace;
+}
+.disc-status-icon { font-size: 0.9rem; }
+.disc-nome {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dark-blue);
+    line-height: 1.3;
+    flex: 1;
+}
+.disc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+}
+.disc-creditos {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.disc-tipo-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+}
+.tag-obrig { background: #eff6ff; color: var(--primary-blue); }
+.tag-optat { background: #f5f3ff; color: #7c3aed; }
+
+/* ── Status visuais ── */
+.disc-concluido  { border-left: 3px solid #16a34a; }
+.disc-cursando   { border-left: 3px solid #2563eb; }
+.disc-disponivel { border-left: 3px solid #94a3b8; }
+.disc-bloqueado  { border-left: 3px solid #e2e8f0; opacity: .6; }
+.disc-optativa.disc-disponivel { border-left: 3px solid #7c3aed; }

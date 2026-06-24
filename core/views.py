@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Sum, Avg, Q
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia, Requisito, SolicitacaoDisciplina
+from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia, Requisito, SolicitacaoDisciplina, Curriculo, CurriculoItem
 from .forms import UserEditForm, StudentEditForm, AvaliacaoForm, RegisterForm, SolicitacaoDisciplinaForm
 
 def _is_admin(user):
@@ -505,6 +505,72 @@ def admin_deletar_disciplina(request, disciplina_id):
         disciplina.delete()
         messages.success(request, f'Disciplina "{disciplina.nome}" removida.')
     return redirect('painel_admin')
+
+
+@login_required
+def progressao_academica(request):
+    student = get_object_or_404(Student, user=request.user)
+    curriculo = student.curriculo
+
+    if not curriculo:
+        return render(request, 'core/progressao.html', {'sem_curriculo': True})
+
+    items = curriculo.items.select_related('disciplina').order_by('periodo_recomendado', 'tipo', 'disciplina__nome')
+
+    matriculas_map = {m.disciplina_id: m for m in Matricula.objects.filter(aluno=student)}
+    concluidas_ids = {did for did, m in matriculas_map.items() if m.status == Matricula.StatusMatricula.CONCLUIDO}
+
+    periodos = {}
+    stats = {'obrig_total': 0, 'obrig_ok': 0, 'optat_total': 0, 'optat_ok': 0}
+
+    for item in items:
+        p = item.periodo_recomendado
+        if p not in periodos:
+            periodos[p] = []
+
+        matricula = matriculas_map.get(item.disciplina_id)
+        if matricula:
+            status = matricula.status  # cursando / concluido / trancado
+        else:
+            prereqs = item.disciplina.grupos_requisitos.prefetch_related('disciplinas').filter(tipo='PRE')
+            bloqueado = False
+            for grupo in prereqs:
+                ids = list(grupo.disciplinas.values_list('id', flat=True))
+                if grupo.operador == 'AND' and not all(i in concluidas_ids for i in ids):
+                    bloqueado = True
+                    break
+                if grupo.operador == 'OR' and not any(i in concluidas_ids for i in ids):
+                    bloqueado = True
+                    break
+            status = 'bloqueado' if bloqueado else 'disponivel'
+
+        periodos[p].append({
+            'disciplina': item.disciplina,
+            'tipo':       item.tipo,
+            'status':     status,
+        })
+
+        cred = item.disciplina.creditos
+        if item.tipo == CurriculoItem.Tipo.OBRIGATORIA:
+            stats['obrig_total'] += cred
+            if status == 'concluido':
+                stats['obrig_ok'] += cred
+        else:
+            stats['optat_total'] += cred
+            if status == 'concluido':
+                stats['optat_ok'] += cred
+
+    obrig_pct = round(stats['obrig_ok'] / stats['obrig_total'] * 100) if stats['obrig_total'] else 0
+    optat_pct = round(stats['optat_ok'] / stats['optat_total'] * 100) if stats['optat_total'] else 0
+
+    return render(request, 'core/progressao.html', {
+        'student':   student,
+        'curriculo': curriculo,
+        'periodos':  sorted(periodos.items()),
+        'stats':     stats,
+        'obrig_pct': obrig_pct,
+        'optat_pct': optat_pct,
+    })
 
 
 def detalhes_disciplina(request):

@@ -25,10 +25,48 @@ class Status(models.TextChoices):
     SOB_AVALIACAO = "Sob avaliaçao"
 
 
+# ── Currículo ─────────────────────────────────────────────────────────────────
+class Curriculo(models.Model):
+    codigo      = models.CharField(max_length=20, unique=True)
+    nome        = models.CharField(max_length=100)
+    descricao   = models.TextField(blank=True, null=True)
+    total_creditos_obrigatorios = models.PositiveIntegerField(default=0)
+    total_creditos_optativos    = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.codigo} — {self.nome}"
+
+    class Meta:
+        verbose_name = 'Currículo'
+        verbose_name_plural = 'Currículos'
+        ordering = ['codigo']
+
+
+class CurriculoItem(models.Model):
+    class Tipo(models.TextChoices):
+        OBRIGATORIA = 'obrigatoria', 'Obrigatória'
+        OPTATIVA    = 'optativa',    'Optativa'
+
+    curriculo           = models.ForeignKey(Curriculo, on_delete=models.CASCADE, related_name='items')
+    disciplina          = models.ForeignKey('Disciplina', on_delete=models.CASCADE, related_name='curriculo_items')
+    tipo                = models.CharField(max_length=15, choices=Tipo.choices)
+    periodo_recomendado = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.curriculo.codigo} / {self.disciplina.codigo} ({self.get_tipo_display()})"
+
+    class Meta:
+        verbose_name = 'Item de Currículo'
+        verbose_name_plural = 'Itens de Currículo'
+        unique_together = ('curriculo', 'disciplina')
+        ordering = ['periodo_recomendado', 'tipo', 'disciplina__nome']
+
+
 # ── Usuario (Aluno) ────────────────────────────────────────────────────────────
 class Student(models.Model):
     user       = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student')
     matricula  = models.CharField(max_length=20, unique=True)
+    curriculo  = models.ForeignKey('Curriculo', on_delete=models.SET_NULL, null=True, blank=True, related_name='estudantes')
     bio        = models.TextField(blank=True, null=True)
     foto       = models.ImageField(upload_to='students/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
