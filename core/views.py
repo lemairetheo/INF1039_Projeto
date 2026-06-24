@@ -304,7 +304,7 @@ def matricula_view(request):
 @login_required
 def inscrever_disciplina(request, disciplina_id):
     disciplina = get_object_or_404(Disciplina, id=disciplina_id)
-    student    = Student.objects.first()
+    student    = get_object_or_404(Student, user=request.user) if request.user.is_authenticated else Student.objects.first()
 
     if request.method == 'POST':
         Matricula.objects.get_or_create(
@@ -312,7 +312,8 @@ def inscrever_disciplina(request, disciplina_id):
             disciplina=disciplina,
             defaults={'semestre': 1, 'ano': 2026}
         )
-    return redirect('matricula')
+    next_url = request.POST.get('next') or request.GET.get('next') or 'matricula'
+    return redirect(next_url)
 
 
 @login_required

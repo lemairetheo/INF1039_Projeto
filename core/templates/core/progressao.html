@@ -87,6 +87,13 @@
                 <span class="disc-creditos">{{ d.disciplina.creditos }} créditos</span>
                 <span class="disc-tipo-tag tag-obrig">Obrigatória</span>
             </div>
+            {% if d.status == 'disponivel' %}
+            <form method="post" action="{% url 'inscrever_disciplina' d.disciplina.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="progressao_academica">
+                <button type="submit" class="btn-inscrever-prog">+ Inscrever-se</button>
+            </form>
+            {% endif %}
         </div>
         {% endif %}
         {% endfor %}
@@ -109,6 +116,13 @@
                 <span class="disc-creditos">{{ d.disciplina.creditos }} créditos</span>
                 <span class="disc-tipo-tag tag-optat">Optativa</span>
             </div>
+            {% if d.status == 'disponivel' %}
+            <form method="post" action="{% url 'inscrever_disciplina' d.disciplina.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="progressao_academica">
+                <button type="submit" class="btn-inscrever-prog btn-inscrever-optat">+ Inscrever-se</button>
+            </form>
+            {% endif %}
         </div>
         {% endif %}
         {% endfor %}

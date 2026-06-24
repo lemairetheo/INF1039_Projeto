@@ -199,3 +199,19 @@
 .disc-disponivel { border-left: 3px solid #94a3b8; }
 .disc-bloqueado  { border-left: 3px solid #e2e8f0; opacity: .6; }
 .disc-optativa.disc-disponivel { border-left: 3px solid #7c3aed; }
+
+.btn-inscrever-prog {
+    width: 100%;
+    margin-top: 8px;
+    padding: 7px 0;
+    background: var(--primary-blue);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s;
+}
+.btn-inscrever-prog:hover { opacity: .85; }
+.btn-inscrever-optat { background: #7c3aed; }
