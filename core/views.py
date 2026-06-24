@@ -251,12 +251,12 @@ def professor_perfil(request):
 
 @login_required
 def grade_view(request):
-    student  = Student.objects.first()
-    matriculas = Matricula.objects.filter(aluno=student, semestre=1, ano=2026)
-    disc_ids = matriculas.values_list('disciplina_id', flat=True)
-    turmas   = Turma.objects.filter(
+    student    = get_object_or_404(Student, user=request.user)
+    matriculas = Matricula.objects.filter(aluno=student)
+    disc_ids   = matriculas.values_list('disciplina_id', flat=True)
+    turmas     = Turma.objects.filter(
         disciplina_id__in=disc_ids
-    ).select_related('disciplina', 'professor').order_by('horario')
+    ).select_related('disciplina', 'professor').prefetch_related('dias_semana').order_by('horario')
 
     return render(request, 'core/grade.html', {
         'turmas': turmas,
@@ -266,8 +266,8 @@ def grade_view(request):
 
 def matricula_view(request):
     todas_disciplinas = Disciplina.objects.all()
-    student           = Student.objects.first()
-    matriculas        = Matricula.objects.filter(aluno=student, semestre=1, ano=2026)
+    student           = get_object_or_404(Student, user=request.user) if request.user.is_authenticated else Student.objects.first()
+    matriculas        = Matricula.objects.filter(aluno=student)
     matriculadas_ids  = list(matriculas.values_list('disciplina_id', flat=True))
     total_creditos    = (
         Disciplina.objects.filter(id__in=matriculadas_ids)
@@ -319,7 +319,7 @@ def inscrever_disciplina(request, disciplina_id):
 @login_required
 def cancelar_inscricao(request, disciplina_id):
     disciplina = get_object_or_404(Disciplina, id=disciplina_id)
-    student    = Student.objects.first()
+    student    = get_object_or_404(Student, user=request.user)
     if request.method == 'POST':
         Matricula.objects.filter(aluno=student, disciplina=disciplina).delete()
     return redirect('matricula')
