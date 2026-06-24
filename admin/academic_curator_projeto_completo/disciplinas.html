@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Disciplinas - Academic Curator</title>
+    <link rel="stylesheet" href="disciplinas_style.css">
+</head>
+<body>
+
+    <main class="container">
+        <a href="#" class="back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Painel
+        </a>
+
+        <header class="page-header">
+            <div>
+                <h1 class="page-title">Gerenciar Disciplinas</h1>
+                <p class="page-description">Cadastre, edite e remova disciplinas oferecidas.</p>
+            </div>
+            <button class="btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Nova disciplina
+            </button>
+        </header>
+
+        <section class="filter-card">
+            <div class="filter-grid">
+                <div class="form-group search-group">
+                    <label class="form-label">BUSCAR</label>
+                    <input type="text" class="form-input" placeholder="Título, professor ou departamento">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">DEPARTAMENTO</label>
+                    <div class="select-wrapper">
+                        <select class="form-select">
+                            <option>Todos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">STATUS</label>
+                    <div class="select-wrapper">
+                        <select class="form-select">
+                            <option>Todos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>DISCIPLINA</th>
+                        <th>DEPARTAMENTO</th>
+                        <th>PROFESSOR</th>
+                        <th>CRÉDITOS</th>
+                        <th>ALUNOS</th>
+                        <th>STATUS</th>
+                        <th class="text-right">AÇÕES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-bold text-dark">Álgebra Linear</td>
+                        <td class="text-muted">MAT</td>
+                        <td>Dra. Helena Vasconcelos</td>
+                        <td class="font-bold">4</td>
+                        <td>20/35</td>
+                        <td><span class="badge badge-active">ATIVA</span></td>
+                        <td class="text-right actions-cell">
+                            <a href="#" class="action-edit">Editar</a>
+                            <a href="#" class="action-delete">Excluir</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-dark">Banco de Dados</td>
+                        <td class="text-muted">INF</td>
+                        <td>Dr. Marcelo Fontes</td>
+                        <td class="font-bold">4</td>
+                        <td>22/40</td>
+                        <td><span class="badge badge-active">ATIVA</span></td>
+                        <td class="text-right actions-cell">
+                            <a href="#" class="action-edit">Editar</a>
+                            <a href="#" class="action-delete">Excluir</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-dark">Cálculo I</td>
+                        <td class="text-muted">MAT</td>
+                        <td>Dra. Helena Vasconcelos</td>
+                        <td class="font-bold">4</td>
+                        <td>12/40</td>
+                        <td><span class="badge badge-active">ATIVA</span></td>
+                        <td class="text-right actions-cell">
+                            <a href="#" class="action-edit">Editar</a>
+                            <a href="#" class="action-delete">Excluir</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-dark">Cálculo II</td>
+                        <td class="text-muted">MAT</td>
+                        <td>Dr. Ricardo Monteiro</td>
+                        <td class="font-bold">4</td>
+                        <td>8/40</td>
+                        <td><span class="badge badge-active">ATIVA</span></td>
+                        <td class="text-right actions-cell">
+                            <a href="#" class="action-edit">Editar</a>
+                            <a href="#" class="action-delete">Excluir</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-dark">Circuitos Elétricos</td>
+                        <td class="text-muted">CTC</td>
+                        <td>Dr. Eduardo Tavares</td>
+                        <td class="font-bold">4</td>
+                        <td>14/35</td>
+                        <td><span class="badge badge-active">ATIVA</span></td>
+                        <td class="text-right actions-cell">
+                            <a href="#" class="action-edit">Editar</a>
+                            <a href="#" class="action-delete">Excluir</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-dark">Engenharia de Software</td>
+                        <td class="text-muted">INF</td>
+                        <td>Dessio Pinto</td>
+                        <td class="font-bold">4</td>
+                        <td>15/35</td>
+                        <td><span class="badge badge-active">ATIVA</span></td>
+                        <td class="text-right actions-cell">
+                            <a href="#" class="action-edit">Editar</a>
+                            <a href="#" class="action-delete">Excluir</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+</body>
+</html>
