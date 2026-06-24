@@ -514,13 +514,37 @@ def admin_deletar_disciplina(request, disciplina_id):
 def admin_curriculo_detalhe(request, cur_id):
     curriculo  = get_object_or_404(Curriculo, id=cur_id)
     todas_disc = Disciplina.objects.order_by('codigo')
-    items      = curriculo.items.select_related('disciplina').order_by('periodo_recomendado', 'tipo', 'disciplina__nome')
+    items      = curriculo.items.select_related('disciplina')
+
+    f_periodo = request.GET.get('periodo', '').strip()
+    f_tipo    = request.GET.get('tipo', '').strip()
+    f_busca   = request.GET.get('busca', '').strip()
+    f_creditos = request.GET.get('creditos', '').strip()
+
+    if f_periodo:
+        items = items.filter(periodo_recomendado=f_periodo)
+    if f_tipo:
+        items = items.filter(tipo=f_tipo)
+    if f_busca:
+        items = items.filter(
+            Q(disciplina__nome__icontains=f_busca) | Q(disciplina__codigo__icontains=f_busca)
+        )
+    if f_creditos:
+        items = items.filter(disciplina__creditos=f_creditos)
+
+    items = items.order_by('periodo_recomendado', 'tipo', 'disciplina__nome')
+
     return render(request, 'core/admin_curriculo.html', {
-        'curriculo':   curriculo,
-        'items':       items,
-        'todas_disc':  todas_disc,
+        'curriculo':    curriculo,
+        'items':        items,
+        'todas_disc':   todas_disc,
         'tipo_choices': CurriculoItem.Tipo.choices,
-        'periodos':    range(1, 9),
+        'periodos':     range(1, 9),
+        'f_periodo':    f_periodo,
+        'f_tipo':       f_tipo,
+        'f_busca':      f_busca,
+        'f_creditos':   f_creditos,
+        'total_items':  curriculo.items.count(),
     })
 
 

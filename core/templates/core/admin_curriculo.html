@@ -46,9 +46,42 @@
         </div>
     </div>
 
+    <!-- ── Filtros ── -->
+    <div class="admin-section">
+        <form method="get" class="admin-filters">
+            <div class="filters-row">
+                <input type="text" name="busca" value="{{ f_busca }}"
+                       placeholder="Buscar nome ou código..." class="filter-input">
+                <select name="periodo" class="filter-select filter-small">
+                    <option value="">Todos os períodos</option>
+                    {% for p in periodos %}
+                    <option value="{{ p }}" {% if f_periodo == p|stringformat:"s" %}selected{% endif %}>{{ p }}º período</option>
+                    {% endfor %}
+                </select>
+                <select name="tipo" class="filter-select">
+                    <option value="">Todos os tipos</option>
+                    {% for val, label in tipo_choices %}
+                    <option value="{{ val }}" {% if f_tipo == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select name="creditos" class="filter-select filter-small">
+                    <option value="">Todos os créditos</option>
+                    <option value="2"  {% if f_creditos == "2" %}selected{% endif %}>2 créditos</option>
+                    <option value="4"  {% if f_creditos == "4" %}selected{% endif %}>4 créditos</option>
+                    <option value="6"  {% if f_creditos == "6" %}selected{% endif %}>6 créditos</option>
+                </select>
+                <button type="submit" class="btn-filtrar">Filtrar</button>
+                <a href="?" class="btn-limpar">Limpar</a>
+            </div>
+        </form>
+    </div>
+
     <!-- ── Tabela de disciplinas ── -->
     <div class="admin-section">
-        <h2 class="admin-section-title">Disciplinas do Currículo</h2>
+        <h2 class="admin-section-title">
+            Disciplinas do Currículo
+            <span class="admin-count">{{ items|length }} / {{ total_items }}</span>
+        </h2>
 
         {% if items %}
         <div class="admin-table-wrapper">
