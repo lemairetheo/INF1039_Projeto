@@ -253,13 +253,19 @@ def professor_perfil(request):
 def grade_view(request):
     student    = get_object_or_404(Student, user=request.user)
     matriculas = Matricula.objects.filter(aluno=student)
-    disc_ids   = matriculas.values_list('disciplina_id', flat=True)
+    disc_ids   = list(matriculas.values_list('disciplina_id', flat=True))
     turmas     = Turma.objects.filter(
         disciplina_id__in=disc_ids
     ).select_related('disciplina', 'professor').prefetch_related('dias_semana').order_by('horario')
 
+    disc_com_turma_ids = turmas.values_list('disciplina_id', flat=True)
+    disc_sem_turma = Disciplina.objects.filter(
+        id__in=disc_ids
+    ).exclude(id__in=disc_com_turma_ids)
+
     return render(request, 'core/grade.html', {
-        'turmas': turmas,
+        'turmas':        turmas,
+        'disc_sem_turma': disc_sem_turma,
         'has_matriculas': matriculas.exists(),
     })
 

@@ -22,23 +22,15 @@
     </header>
 
     <section class="secao_grade">
-        {% if has_matriculas and turmas %}
+        {% if has_matriculas %}
+            {% if turmas %}
             <div class="grade_wrapper">
-                <div class="grid_header_dias">
-                    <div class="espaco_hora"></div>
-                    <div class="dia_label">SEG</div>
-                    <div class="dia_label">TER</div>
-                    <div class="dia_label">QUA</div>
-                    <div class="dia_label">QUI</div>
-                    <div class="dia_label">SEX</div>
-                </div>
-
                 <table style="width:100%; border-collapse:collapse; margin-top: 8px;">
                     <thead>
                         <tr style="background:#f1f5f9;">
-                            <th style="padding:10px; text-align:left; width:110px;">Disciplina</th>
+                            <th style="padding:10px; text-align:left;">Disciplina</th>
                             <th style="padding:10px; text-align:left;">Professor</th>
-                            <th style="padding:10px; text-align:left;">Dia</th>
+                            <th style="padding:10px; text-align:left;">Dias</th>
                             <th style="padding:10px; text-align:left;">Horário</th>
                         </tr>
                     </thead>
@@ -51,9 +43,56 @@
                             <td style="padding:10px;">{{ t.get_horario_display }}</td>
                         </tr>
                         {% endfor %}
+                        {% for d in disc_sem_turma %}
+                        <tr style="border-bottom:1px solid #e2e8f0; opacity:.7;">
+                            <td style="padding:10px; font-weight:600;">{{ d.nome }}</td>
+                            <td style="padding:10px; color:#94a3b8;">—</td>
+                            <td style="padding:10px; color:#94a3b8;">—</td>
+                            <td style="padding:10px;">
+                                <span style="display:inline-block; padding:2px 8px; background:#fef9c3; color:#854d0e; border-radius:20px; font-size:.78rem; font-weight:600;">Horário a definir</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% elif disc_sem_turma %}
+            <div class="grade_wrapper">
+                <table style="width:100%; border-collapse:collapse; margin-top: 8px;">
+                    <thead>
+                        <tr style="background:#f1f5f9;">
+                            <th style="padding:10px; text-align:left;">Disciplina</th>
+                            <th style="padding:10px; text-align:left;">Professor</th>
+                            <th style="padding:10px; text-align:left;">Dias</th>
+                            <th style="padding:10px; text-align:left;">Horário</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in disc_sem_turma %}
+                        <tr style="border-bottom:1px solid #e2e8f0; opacity:.7;">
+                            <td style="padding:10px; font-weight:600;">{{ d.nome }}</td>
+                            <td style="padding:10px; color:#94a3b8;">—</td>
+                            <td style="padding:10px; color:#94a3b8;">—</td>
+                            <td style="padding:10px;">
+                                <span style="display:inline-block; padding:2px 8px; background:#fef9c3; color:#854d0e; border-radius:20px; font-size:.78rem; font-weight:600;">Horário a definir</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card_vazio">
+                <div class="icone_central">
+                    <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="#cbd5e1">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2>Sua grade está vazia</h2>
+                <p>Você ainda não se matriculou em nenhuma disciplina para este semestre.</p>
+                <a href="{% url 'matricula' %}" class="botao_acao">Adicionar Disciplinas</a>
+            </div>
+            {% endif %}
         {% else %}
             <div class="card_vazio">
                 <div class="icone_central">
