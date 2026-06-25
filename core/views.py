@@ -37,33 +37,33 @@ class _VirtualGrade:
 
 
 # ── Views ──────────────────────────────────────────────────────────────────────
-
+ 
 def home_view(request):
     return render(request, 'core/Homepage.html')
 
 
 def disciplinas(request):
-    # Captura os termos enviados pelo formulário HTML
     search_query = request.GET.get('search', '').strip()
     dept_query = request.GET.get('departamento', '').strip()
     
-    # Otimiza o carregamento trazendo as turmas e professores vinculados em uma única consulta
     todas = Disciplina.objects.prefetch_related('turma_disciplina__professor').all()
     
-    # Filtro unificado: busca por Nome, Código da disciplina OU Nome do Professor
     if search_query:
         todas = todas.filter(
             Q(nome__icontains=search_query) | 
             Q(codigo__icontains=search_query) |
             Q(turma_disciplina__professor__nome__icontains=search_query)
-        ).distinct() # Evita duplicar disciplinas que possuem mais de uma turma/professor
+        ).distinct()
         
-    # Filtro opcional por Departamento (verifica se o código começa com as letras informadas)
     if dept_query:
         todas = todas.filter(codigo__istartswith=dept_query)
         
+    paginator = Paginator(todas, 5)
+    page_number = request.GET.get('page')
+    disciplinas_paginadas = paginator.get_page(page_number)
+        
     return render(request, 'core/disciplinas.html', {
-        'disciplinas': todas,
+        'disciplinas': disciplinas_paginadas,
         'search_query': search_query,
         'dept_query': dept_query
     })
@@ -93,15 +93,26 @@ def professores(request):
     # Filtra pelo nome do professor
     if search_query:
         todos = todos.filter(nome__icontains=search_query)
+    
+    paginator = Paginator(todos, 3 ) #o certo é 15, mas como n tem professor suficiente coloquei menos só para testar
+    page_number = request.GET.get('page')
+    professores_paginados = paginator.get_page(page_number)
         
     return render(request, 'core/professores.html', {
-        'professores': todos,
+        'professores': professores_paginados, 
         'search_query': search_query
     })
 
 
 def avaliacoes(request):
-    return render(request, 'core/avaliacoes.html')
+    todas = Avaliacao.objects.all()
+    paginator = Paginator(todas, 5)
+    page_number = request.GET.get('page')
+    avaliacoes_paginadas = paginator.get_page(page_number)
+    
+    return render(request, 'core/avaliacoes.html', {
+        'avaliacoes': avaliacoes_paginadas
+    })
 
 
 #@login_required

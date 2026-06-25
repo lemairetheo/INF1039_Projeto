@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}Professores | Academic Curator{% endblock %}
-
+ 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/professores.css' %}">
 {% endblock %}
@@ -83,4 +83,32 @@
     </div>
     {% endfor %}
 </section>
+
+{% if professores.has_other_pages %}
+<div class="paginacao_container">
+    
+    {% if professores.number > 1 %}
+        <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="botao_paginacao fixo">&laquo; Primeiro</a>
+    {% else %}
+        <span class="botao_paginacao fixo desabilitado">&laquo; Primeiro</span>
+    {% endif %}
+
+    <div class="botoes_numericos">
+        {% for num in professores.paginator.page_range %}
+            {% if professores.number == num %}
+                <span class="botao_paginacao ativo">{{ num }}</span>
+            {% elif num > professores.number|add:-3 and num < professores.number|add:3 %}
+                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" class="botao_paginacao">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if professores.number < professores.paginator.num_pages %}
+        <a href="?page={{ professores.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="botao_paginacao fixo">Último &raquo;</a>
+    {% else %}
+        <span class="botao_paginacao fixo desabilitado">Último &raquo;</span>
+    {% endif %}
+
+</div>
+{% endif %}
 {% endblock %}

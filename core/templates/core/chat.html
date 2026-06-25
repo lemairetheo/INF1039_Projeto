@@ -1,0 +1,113 @@
+<button id="ia-chat-toggle-btn">
+  <span id="ia-icon-robot">🤖</span>
+  <span id="ia-icon-close" class="ia-hidden">&times;</span>
+</button>
+
+<div id="ia-chat-window" class="ia-hidden">
+  <div class="ia-chat-header">
+    <span class="ia-header-avatar">🤖</span>
+    <div class="ia-chat-header-title">
+      <h2>Assistente de Grade</h2>
+      <span>IA para ajudar na sua matrícula</span>
+    </div>
+  </div>
+
+  <div class="ia-chat-body">
+    <div class="ia-chat-welcome">
+      <div class="ia-academic-cap">🎓</div>
+      <p>Olá! Posso te ajudar a montar sua grade horária. O que deseja saber?</p>
+    </div>
+    
+    <div class="ia-chat-suggestions">
+      <button type="button" class="ia-btn-sugestao">Monte uma grade ideal para mim</button>
+      <button type="button" class="ia-btn-sugestao">Quais disciplinas têm melhor avaliação?</button>
+      <button type="button" class="ia-btn-sugestao">Há conflitos na minha grade?</button>
+    </div>
+  </div> <div class="ia-chat-footer">
+    <input type="text" id="ia-chat-input" placeholder="Pergunte sobre sua grade...">
+    <button id="ia-send-btn" class="ia-disabled" disabled>
+      <svg viewBox="0 0 24 24" width="18" height="18">
+        <path fill="currentColor" d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const toggleBtn = document.getElementById('ia-chat-toggle-btn');
+    const iconRobot = document.getElementById('ia-icon-robot');
+    const iconClose = document.getElementById('ia-icon-close');
+    const windowChat = document.getElementById('ia-chat-window');
+    const inputChat = document.getElementById('ia-chat-input');
+    const btnSend = document.getElementById('ia-send-btn');
+    const bodyChat = document.querySelector('.ia-chat-body');
+    const botoesSugestao = document.querySelectorAll('.ia-btn-sugestao');
+
+    function scrollBodyToBottom() {
+      bodyChat.scrollTop = bodyChat.scrollHeight;
+    }
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = windowChat.classList.toggle('ia-hidden');
+      if (isHidden) {
+        iconRobot.classList.remove('ia-hidden');
+        iconClose.classList.add('ia-hidden');
+      } else {
+        iconRobot.classList.add('ia-hidden');
+        iconClose.classList.remove('ia-hidden');
+        scrollBodyToBottom();
+      }
+    });
+    inputChat.addEventListener('input', () => {
+      if (inputChat.value.trim().length > 0) {
+        btnSend.classList.remove('ia-disabled');
+        btnSend.classList.add('ia-active');
+        btnSend.removeAttribute('disabled');
+      } else {
+        btnSend.classList.remove('ia-active');
+        btnSend.classList.add('ia-disabled');
+        btnSend.setAttribute('disabled', 'true');
+      }
+    });
+    function processarEnvio(texto) {
+      if (!texto || texto.trim().length === 0) return;
+
+      const msgUser = document.createElement('div');
+      msgUser.className = 'ia-chat-message ia-user-message';
+      msgUser.innerHTML = `<p>${texto.trim()}</p>`;
+      bodyChat.appendChild(msgUser);
+
+      inputChat.value = '';
+      btnSend.className = 'ia-disabled';
+      btnSend.setAttribute('disabled', 'true');
+      scrollBodyToBottom();
+
+      setTimeout(() => {
+        const msgAI = document.createElement('div');
+        msgAI.className = 'ia-chat-message ia-ai-message';
+        msgAI.innerHTML = `
+          <span class="ia-message-avatar">🤖</span>
+          <div class="ia-message-content">
+            <p>Não posso fazer isto no momento.</p>
+          </div>
+        `;
+        bodyChat.appendChild(msgAI);
+        scrollBodyToBottom();
+      }, 1000);
+    }
+    btnSend.addEventListener('click', () => processarEnvio(inputChat.value));
+
+    inputChat.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') processarEnvio(inputChat.value);
+    });
+    botoesSugestao.forEach(botao => {
+      botao.addEventListener('click', function () {
+        if (inputChat) {
+          inputChat.value = this.innerText.trim();
+          inputChat.dispatchEvent(new Event('input'));
+          inputChat.focus();
+        }
+      });
+    });
+  })();
+</script>

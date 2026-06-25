@@ -34,16 +34,13 @@
     {% endif %}
 </header>
 
-<!-- Formulário unificado de busca e filtro por departamento -->
 <form method="GET" action="{% url 'disciplinas' %}">
-    
     <div class="caixa_busca">
         <span class="icone">
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
         </span>
-        <!-- Mantém o valor digitado após recarregar a busca -->
         <input type="text" name="search" value="{{ search_query|default:'' }}" placeholder="Buscar por nome, código ou professor...">
     </div>
 
@@ -60,9 +57,8 @@
             <button type="submit" style="cursor: pointer; padding: 8px 16px; border: none; border-radius: 4px; background-color: #007bff; color: white; font-weight: bold;">
                 Filtrar
             </button>
-        </div>
+        </div> 
     </div>
-
 </form>
 
 <section class="grade_disciplinas">
@@ -101,4 +97,30 @@
     </div>
     {% endfor %}
 </section>
+
+{% if disciplinas.has_other_pages %}
+<div class="paginacao_container">
+    {% if disciplinas.number > 1 %}
+        <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if dept_query %}&departamento={{ dept_query }}{% endif %}" class="botao_paginacao fixo">&laquo; Primeiro</a>
+    {% else %}
+        <span class="botao_paginacao fixo desabilitado">&laquo; Primeiro</span>
+    {% endif %}
+
+    <div class="botoes_numericos">
+        {% for num in disciplinas.paginator.page_range %}
+            {% if disciplinas.number == num %}
+                <span class="botao_paginacao ativo">{{ num }}</span>
+            {% elif num > disciplinas.number|add:-3 and num < disciplinas.number|add:3 %}
+                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if dept_query %}&departamento={{ dept_query }}{% endif %}" class="botao_paginacao">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if disciplinas.number < disciplinas.paginator.num_pages %}
+        <a href="?page={{ disciplinas.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if dept_query %}&departamento={{ dept_query }}{% endif %}" class="botao_paginacao fixo">Último &raquo;</a>
+    {% else %}
+        <span class="botao_paginacao fixo desabilitado">Último &raquo;</span>
+    {% endif %}
+</div>
+{% endif %}
 {% endblock %}

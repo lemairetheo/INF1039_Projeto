@@ -8,7 +8,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="container_principal"> <header class="cabecalho">
+<div class="container_principal"> 
+    <header class="cabecalho">
         <div class="texto_cabecalho">
             <div class="row_titulo">
                 <h1>Avaliações</h1>
@@ -59,33 +60,38 @@
     </section>
 
     <div class="contador_avaliacoes">
-        <span>15 avaliação(ões)</span>
+        <span>{{ avaliacoes.paginator.count }} avaliação(ões)</span>
     </div>
 
     <section class="grade_avaliacoes">
+        {% for avaliacao in avaliacoes %}
         <article class="card_avaliacao">
             <header class="avaliacao_header">
                 <div class="tags_info">
-                    <span class="tag_disciplina">Cálculo 1</span>
-                    <span class="tag_professor">Dra. Helena Vasconcelos</span>
+                    <span class="tag_disciplina">{{ avaliacao.disciplina.nome }}</span>
+                    <span class="tag_professor">{{ avaliacao.professor.nome }}</span>
                 </div>
-                <span class="data_postagem">20/05/2026</span>
+                <span class="data_postagem">{{ avaliacao.data_criacao|date:"d/m/Y" }}</span>
             </header>
 
             <div class="notas_projeto">
                 <div class="nota_bloco">
                     <label>Professor:</label>
-                    <span class="estrelas">★★★★★</span>
+                    <span class="estrelas">
+                        {% if avaliacao.nota_professor == 5 %}★★★★★{% elif avaliacao.nota_professor == 4 %}★★★★☆{% elif avaliacao.nota_professor == 3 %}★★★☆☆{% elif avaliacao.nota_professor == 2 %}★★☆☆☆{% else %}★☆☆☆☆{% endif %}
+                    </span>
                 </div>
 
                 <div class="nota_bloco">
-                    <label>Disciplina:</label>
-                    <span class="estrelas">★★★☆☆</span>
+                    <label>Disciplina:</label> 
+                    <span class="estrelas">
+                        {% if avaliacao.nota_disciplina == 5 %}★★★★★{% elif avaliacao.nota_disciplina == 4 %}★★★★☆{% elif avaliacao.nota_disciplina == 3 %}★★★☆☆{% elif avaliacao.nota_disciplina == 2 %}★★☆☆☆{% else %}★☆☆☆☆{% endif %}
+                    </span>
                 </div>
             </div>
 
             <div class="comentario_texto">
-                <p>"A professora explica muito bem, mas a matéria exige muita dedicação e exercícios extras"</p>
+                <p>"{{ avaliacao.comentario }}"</p>
             </div>
 
             <footer class="avaliacao_acoes">
@@ -95,93 +101,44 @@
                     </svg>
                 </button>
 
-                <a href="{% url 'Reportar Avaliação' 1 %}" class="botao_denunciar">
+                <a href="{% url 'Reportar Avaliação' avaliacao.pk %}" class="botao_denunciar">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
                     </svg>
                 </a>
             </footer>
         </article>
-
-        <article class="card_avaliacao">
-            <header class="avaliacao_header">
-                <div class="tags_info">
-                    <span class="tag_disciplina">Química Geral</span>
-                    <span class="tag_professor">Dra. Beatriz Carvalho</span>
-                </div>
-                <span class="data_postagem">18/05/2026</span>
-            </header>
-
-            <div class="notas_projeto">
-                <div class="nota_bloco">
-                    <label>Professor:</label>
-                    <span class="estrelas">★★★★☆</span>
-                </div>
-
-                <div class="nota_bloco">
-                    <label>Disciplina:</label>
-                    <span class="estrelas">★★★★★</span>
-                </div>
-            </div>
-
-            <div class="comentario_texto">
-                <p>"Aulas dinâmicas e laboratoriais interessantes. O conteúdo é bem distribuído ao longo do período"</p>
-            </div>
-
-            <footer class="avaliacao_acoes">
-                <button class="botao_util">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-                    </svg>
-                </button>
-
-                <a href="{% url 'Reportar Avaliação' 2 %}" class="botao_denunciar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
-                    </svg>
-                </a>
-            </footer>
-        </article>
-
-        <article class="card_avaliacao">
-            <header class="avaliacao_header">
-                <div class="tags_info">
-                    <span class="tag_disciplina">Inteligência Artificial</span>
-                    <span class="tag_professor">Dra. Camila Ribeiro</span>
-                </div>
-                <span class="data_postagem">15/05/2026</span>
-            </header>
-
-            <div class="notas_projeto">
-                <div class="nota_bloco">
-                    <label>Professor:</label>
-                    <span class="estrelas">★★★★★</span>
-                </div>
-
-                <div class="nota_bloco">
-                    <label>Disciplina:</label>
-                    <span class="estrelas">★★★★★</span>
-                </div>
-            </div>
-
-            <div class="comentario_texto">
-                <p>"Excelente didática para temas complexos como redes neurais. Os projetos práticos ajudam muito a fixar"</p>
-            </div>
-
-            <footer class="avaliacao_acoes">
-                <button class="botao_util">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-                    </svg>
-                </button>
-
-                <a href="{% url 'Reportar Avaliação' 3 %}" class="botao_denunciar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>
-                    </svg>
-                </a>
-            </footer>
-        </article>
+        {% empty %}
+        <div class="no-results-area" style="text-align: center; padding: 40px; color: #64748b;">
+            <p class="no-results-text">Nenhuma avaliação encontrada.</p>
+        </div>
+        {% endfor %}
     </section>
+
+    {% if avaliacoes.has_other_pages %}
+    <div class="paginacao_container">
+        {% if avaliacoes.number > 1 %}
+            <a href="?page=1" class="botao_paginacao fixo">&laquo; Primeiro</a>
+        {% else %}
+            <span class="botao_paginacao fixo desabilitado">&laquo; Primeiro</span>
+        {% endif %}
+
+        <div class="botoes_numericos">
+            {% for num in avaliacoes.paginator.page_range %}
+                {% if avaliacoes.number == num %}
+                    <span class="botao_paginacao ativo">{{ num }}</span>
+                {% elif num > avaliacoes.number|add:-3 and num < avaliacoes.number|add:3 %}
+                    <a href="?page={{ num }}" class="botao_paginacao">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if avaliacoes.number < avaliacoes.paginator.num_pages %}
+            <a href="?page={{ avaliacoes.paginator.num_pages }}" class="botao_paginacao fixo">Último &raquo;</a>
+        {% else %}
+            <span class="botao_paginacao fixo desabilitado">Último &raquo;</span>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
