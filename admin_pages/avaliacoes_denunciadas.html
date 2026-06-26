@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliações Denunciadas - Academic Curator</title>
+    <link rel="stylesheet" href="avaliacoes_style.css">
+</head>
+<body>
+
+    <main class="container">
+        <!-- Botão Voltar -->
+        <a href="#" class="back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Painel
+        </a>
+
+        <!-- Cabeçalho do Conteúdo -->
+        <h1 class="page-title">Avaliações Denunciadas</h1>
+        <p class="page-description">Revise denúncias e decida se a avaliação deve permanecer publicada.</p>
+
+        <!-- Filtros / Abas -->
+        <div class="filter-group">
+            <button class="filter-btn active" data-status="pending">Pendentes</button>
+            <button class="filter-btn" data-status="approved">Aprovadas</button>
+            <button class="filter-btn" data-status="cancelled">Canceladas</button>
+        </div>
+
+        <!-- Lista de Avaliações -->
+        <section class="reviews-list">
+
+            <!-- 1. AVALIAÇÃO PENDENTE -->
+            <article class="content-card status-pending" data-card-status="pending">
+                <div class="card-header">
+                    <span class="badge badge-pending">Pendente</span>
+                    <span class="report-reason"><strong>Motivo:</strong> Linguagem imprópria</span>
+                </div>
+                <div class="card-body">
+                    <p class="review-text">"O professor é um completo incompetente e a didática dele é horrível, não serve para dar aula."</p>
+                    <small class="review-meta">Denunciado por: João Silva • Alvo: Prof. Carlos (Cálculo I)</small>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-approve">Manter Avaliação</button>
+                    <button class="btn btn-reject">Remover</button>
+                </div>
+            </article>
+
+            <!-- 2. AVALIAÇÃO CONCLUÍDA / APROVADA -->
+            <article class="content-card status-approved" data-card-status="approved">
+                <div class="card-header">
+                    <span class="badge badge-approved">Aprovada</span>
+                    <span class="report-reason"><strong>Motivo:</strong> Difamação</span>
+                </div>
+                <div class="card-body">
+                    <p class="review-text">"Achei a cobrança na prova desproporcional ao conteúdo dado em sala, a maioria da sala reprovou."</p>
+                    <small class="review-meta">Denunciado por: Admin_02 • Alvo: Profa. Ana (Estrutura de Dados)</small>
+                </div>
+                <div class="card-actions">
+                    <span class="action-result text-success">Mantida no sistema pelo moderador</span>
+                </div>
+            </article>
+
+            <!-- 3. AVALIAÇÃO CANCELADA / REMOVIDA -->
+            <article class="content-card status-cancelled" data-card-status="cancelled">
+                <div class="card-header">
+                    <span class="badge badge-cancelled">Cancelada</span>
+                    <span class="report-reason"><strong>Motivo:</strong> Spam / Cópia</span>
+                </div>
+                <div class="card-body">
+                    <p class="review-text">"teste teste teste teste teste teste teste teste teste teste teste teste"</p>
+                    <small class="review-meta">Denunciado por: Sistema Autônomo • Alvo: Matéria (Álgebra Linear)</small>
+                </div>
+                <div class="card-actions">
+                    <span class="action-result text-danger">Removida pelo moderador</span>
+                </div>
+            </article>
+
+            <!-- Estado Vazio Dinâmico -->
+            <div class="empty-state" id="emptyState">
+                <p class="empty-state-text">Nenhuma avaliação nesta categoria.</p>
+            </div>
+
+        </section>
+    </main>
+
+    <script src="avaliacoes_script.js"></script>
+</body>
+</html>
