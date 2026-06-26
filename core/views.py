@@ -39,7 +39,24 @@ class _VirtualGrade:
 # ── Views ──────────────────────────────────────────────────────────────────────
  
 def home_view(request):
-    return render(request, 'core/Homepage.html')
+    search_query = request.GET.get('search', '').strip()
+    todas = Disciplina.objects.prefetch_related('turma_disciplina__professor').all().order_by('codigo')
+    
+    if search_query:
+        todas = todas.filter(
+            Q(nome__icontains=search_query) | 
+            Q(codigo__icontains=search_query) |
+            Q(turma_disciplina__professor__nome__icontains=search_query)
+        ).distinct()
+        
+    tem_mais = todas.count() > 15
+    disciplinas_limitadas = todas[:15]
+        
+    return render(request, 'core/Homepage.html', {
+        'disciplinas': disciplinas_limitadas,
+        'search_query': search_query,
+        'tem_mais': tem_mais
+    })
 
 
 def disciplinas(request):

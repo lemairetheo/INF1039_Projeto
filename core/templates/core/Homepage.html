@@ -18,25 +18,83 @@
         </h2>
     </header>
 
-    <section class="search-container">
+    <form class="search-container" method="GET" action="">
         <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <input type="text" class="search-input" placeholder="Buscar cursos, professores ou departamentos...">
-    </section>
+        <input type="text" name="search" value="{{ search_query|default:'' }}" class="search-input" placeholder="Buscar cursos, professores ou departamentos...">
+        <button type="submit" style="display: none;">Buscar</button>
+    </form>
 
     <section>
-        <h3 class="section-title">Cursos Disponíveis</h3>
-        <p class="section-subtitle">Curados para a excelência acadêmica.</p>
-
-        <div class="no-results-area">
-            <svg class="no-results-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 10l4 4m0-4l-4 4" />
-            </svg>
-            <p class="no-results-text">Nenhum curso encontrado.</p>
+        <div class="section-header-wrapper">
+            <div>
+                <h3 class="section-title">Cursos Disponíveis</h3>
+                <p class="section-subtitle">Curados para a excelência acadêmica.</p>
+            </div>
+            <a href="{% url 'matricula' %}" class="link-portal">Portal de Matrícula &rarr;</a>
         </div>
-    </section>
 
+        <div class="courses-grid">
+            {% for disciplina in disciplinas %}
+            <article class="course-card">
+                <div class="card-header">
+                    <h3 class="course-title">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M4 19h16v2H4v-2zm16-14v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5c0-1.1.9-2 2-2h12a2 2 0 012 2zm-8 0H6v10h6V5zm2 0v10h4V5h-4z"/>
+                        </svg>
+                        <a href="{% url 'disciplina_detalhe' disciplina.pk %}" style="text-decoration:none; color:inherit;">
+                            {{ disciplina.codigo }} - {{ disciplina.nome }}
+                        </a>
+                    </h3>
+                    <span class="badge_status">Vagas disponíveis</span>
+                </div>
+        
+                <div class="card-tags">
+                    <span class="tag_departamento">{{ disciplina.codigo|slice:":3" }}</span>
+                    <span class="info_extra">{{ disciplina.creditos }} créditos • Período {{ disciplina.periodo|default:"-" }}</span>
+                </div>
+        
+                <div class="course-body">
+                    <p class="prof-name">
+                        {% with disciplina.turma_disciplina.first as t %}
+                            {% if t %}Prof(a). {{ t.professor.nome }}{% else %}Professor a definir{% endif %}
+                        {% endwith %}
+                    </p>
+                    <p class="course-desc">
+                        {{ disciplina.descricao|default:"Descrição não informada pelo departamento."|truncatechars:70 }}
+                    </p>
+                </div>
+        
+                <div class="course-schedule">
+                    <svg class="clock-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Horário não informado pelo departamento
+                </div>
+        
+                <div class="card-footer">
+                    <span class="vacancies-text">Sem vagas</span> 
+                    <a href="{% url 'matricula' %}" class="btn-matricular">Matricular</a>
+                </div>
+            </article>
+            {% empty %}
+            <div class="no-results-area" style="grid-column: 1 / -1;">
+                <svg class="no-results-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 10l4 4m0-4l-4 4" />
+                </svg>
+                <p class="no-results-text">Nenhum curso, professor ou departamento encontrado.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if tem_mais %}
+        <div class="ver-mais-container">
+            <a href="{% url 'disciplinas' %}" class="btn-ver-mais">Ver todas as disciplinas</a>
+        </div>
+        {% endif %}
+
+    </section>
 </main>
 {% endblock %}

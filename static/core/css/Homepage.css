@@ -1,141 +1,117 @@
-/* style.css */
-
-/* Definição de Variáveis CSS - Cores Exatas da Imagem */
 :root {
-    --bg-main: #f8fafc; /* Azul/cinza muito claro de fundo */
-    --text-deep-blue: #0f172a; /* Azul marinho profundo dos títulos */
-    --text-dark-blue: #1e293b; /* Azul escuro secundário */
-    --primary-blue: #023c7c; /* Azul principal (botões, ícones) */
-    --tag-peach: #ffedd5; /* Tom pêssego suave da tag */
-    --tag-text: #a16207; /* Texto da tag pêssego */
-    --text-muted: #64748b; /* Cinza para textos secundários */
-    --input-bg: #ffffff; /* Fundo branco puro para o input */
-    --border-light: #e2e8f0; /* Borda leve dos elementos */
-    
-    /* Tipografia (font-family) simulando a imagem */
+    --bg-main: #f8fafc;
+    --text-deep-blue: #0f172a;
+    --text-dark-blue: #1e293b;
+    --primary-blue: #093696;
+    --tag-peach: #ffedd5;
+    --tag-text: #a16207;
+    --text-muted: #64748b;
+    --input-bg: #ffffff;
+    --border-light: #e2e8f0;
     --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Configurações Globais */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-family); background-color: var(--bg-main); color: var(--text-dark-blue); line-height: 1.5; }
 
-body {
-    font-family: var(--font-family);
-    background-color: var(--bg-main);
-    color: var(--text-dark-blue);
-    line-height: 1.5;
-}
+.content-wrapper { max-width: 1100px; margin: 0 auto; padding: 60px 24px 40px; }
 
-/* Container Principal de Conteúdo */
-.content-wrapper {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 60px 20px 0;
-}
-
-/* --- Hero Section --- */
 .academic-tag {
-    display: inline-block;
-    background-color: var(--tag-peach);
-    color: var(--tag-text);
-    text-transform: uppercase;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 99px;
-    letter-spacing: 0.1em;
-    margin-bottom: 24px;
+    display: inline-block; background-color: var(--tag-peach); color: var(--tag-text);
+    text-transform: uppercase; font-size: 0.7rem; font-weight: 700; padding: 6px 12px;
+    border-radius: 99px; letter-spacing: 0.1em; margin-bottom: 24px;
 }
+.main-title { font-size: 3.5rem; font-weight: 800; color: var(--text-deep-blue); line-height: 1.1; margin-bottom: 40px; letter-spacing: -0.04em; }
+.main-title span { font-style: italic; }
 
-.main-title {
-    font-size: 3.5rem;
-    font-weight: 800;
-    color: var(--text-deep-blue);
-    line-height: 1.1;
-    margin-bottom: 40px;
-    letter-spacing: -0.04em;
-}
-
-.main-title span {
-    font-style: italic; /* Aplica o itálico apenas na parte final */
-}
-
-/* --- Campo de Busca (Input) --- */
 .search-container {
-    background-color: var(--input-bg);
-    border: 1px solid var(--border-light);
-    border-radius: 99px;
+    background-color: var(--input-bg); border: 1px solid var(--border-light);
+    border-radius: 99px; display: flex; align-items: center; padding: 12px 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 60px;
+}
+.search-icon { width: 20px; height: 20px; color: var(--text-muted); margin-right: 16px; }
+.search-input { flex: 1; border: none; font-size: 1.1rem; color: var(--text-dark-blue); outline: none; background: transparent;}
+.search-input::placeholder { color: var(--text-muted); }
+
+.section-header-wrapper { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
+.section-title { font-size: 1.5rem; font-weight: 700; color: var(--text-deep-blue); margin-bottom: 4px; }
+.section-subtitle { font-size: 1rem; color: var(--text-muted); margin: 0; }
+.link-portal { color: var(--text-deep-blue); font-weight: 700; text-decoration: none; font-size: 0.95rem; }
+.link-portal:hover { text-decoration: underline; }
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.course-card {
+    background-color: #ffffff; border: 1px solid var(--border-light);
+    border-radius: 12px; padding: 24px; display: flex; flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); transition: transform 0.2s, box-shadow 0.2s;
+}
+.course-card:hover {
+    transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; }
+.course-title {
+    color: var(--text-deep-blue); font-size: 1.1rem; font-weight: 700;
+    display: flex; align-items: center; gap: 8px; line-height: 1.3; margin: 0;
+}
+.course-title svg { flex-shrink: 0; color: var(--text-deep-blue); }
+.badge_status {
+    background-color: #f0fdf4; color: #22c55e; border: 1px solid #bbf7d0;
+    padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; white-space: nowrap;
+}
+
+.card-tags { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.tag_departamento {
+    background-color: #3f51b5; color: #ffffff; padding: 3px 8px;
+    border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+}
+.info_extra { color: var(--text-muted); font-size: 0.8rem; }
+
+.course-body { flex: 1; margin-bottom: 16px; }
+.prof-name { color: var(--text-dark-blue); font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+.course-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.4; }
+
+.course-schedule {
+    display: flex; align-items: center; gap: 8px; color: var(--text-muted);
+    font-size: 0.85rem; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;
+}
+.clock-icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+.card-footer { display: flex; justify-content: space-between; align-items: center; }
+.vacancies-text { color: #b91c1c; font-size: 0.85rem; font-weight: 700; }
+.btn-matricular {
+    background-color: var(--text-deep-blue); color: #ffffff; padding: 8px 24px;
+    border-radius: 20px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: 0.2s;
+}
+.btn-matricular:hover { background-color: var(--primary-blue); }
+
+.no-results-area { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 60px 0; }
+.no-results-icon { width: 64px; height: 64px; color: var(--border-light); margin-bottom: 20px; }
+.no-results-text { color: var(--text-muted); font-size: 1.1rem; }
+
+.ver-mais-container {
     display: flex;
-    align-items: center;
-    padding: 12px 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Sombra suave */
-    margin-bottom: 60px;
+    justify-content: center;
+    margin-top: 40px;
 }
-
-.search-icon {
-    width: 20px;
-    height: 20px;
-    color: var(--text-muted);
-    margin-right: 16px;
-}
-
-.search-input {
-    flex: 1;
-    border: none;
-    font-size: 1.1rem;
-    color: var(--text-dark-blue);
-    outline: none; /* Remove a borda azul padrão do navegador ao focar */
-}
-
-.search-input::placeholder {
-    color: var(--text-muted);
-}
-
-/* --- Seção de Listagem (Cursos) --- */
-.section-title {
-    font-size: 1.5rem;
-    font-weight: 700;
+.btn-ver-mais {
+    background-color: var(--bg-main);
     color: var(--text-deep-blue);
-    margin-bottom: 8px;
-}
-
-.section-subtitle {
+    border: 2px solid var(--border-light);
+    padding: 12px 32px;
+    border-radius: 99px;
+    text-decoration: none;
     font-size: 1rem;
-    color: var(--text-muted);
-    margin-bottom: 60px;
+    font-weight: 700;
+    transition: all 0.2s ease;
 }
-
-/* --- Área de Estado Vazio (Nenhum curso) --- */
-.no-results-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-top: 80px;
-}
-
-.no-results-icon {
-    width: 80px;
-    height: 80px;
-    color: var(--border-light); /* Ícone cinza claro */
-    margin-bottom: 30px;
-}
-
-.no-results-text {
-    color: var(--text-muted);
-    font-size: 1.1rem;
-}
-
-/* Rodapé */
-footer {
-    margin-top: 100px;
-    padding: 2rem 0;
-    border-top: 1px solid var(--border-light);
-    color: var(--text-muted);
-    text-align: center;
-    font-size: 0.875rem;
+.btn-ver-mais:hover {
+    border-color: var(--text-deep-blue);
+    background-color: #ffffff;
 }
