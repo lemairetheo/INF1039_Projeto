@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliações Denunciadas - Academic Curator</title>
+    <link rel="stylesheet" href="/static/css/avaliacoes_style.css">
+</head>
+<body>
+
+    <main class="container">
+        <a href="{% url 'painel_admin' %}" class="back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Painel
+        </a>
+
+        <h1 class="page-title">Avaliações Denunciadas</h1>
+        <p class="page-description">Revise denúncias e decida se a avaliação deve permanecer publicada ou ser excluída.</p>
+
+        <div class="filter-group">
+            <button class="filter-btn active" data-status="pending">Pendentes</button>
+            <button class="filter-btn" data-status="approved">Mantidas (Aprovadas)</button>
+            <button class="filter-btn" data-status="cancelled">Removidas</button>
+        </div>
+
+        <section class="reviews-list">
+            {% for denuncia in denuncias %}
+            <article class="content-card {% if denuncia.status == 'pendente' %}status-pending{% elif denuncia.status == 'resolvida' %}status-approved{% else %}status-cancelled{% endif %}" 
+                     data-card-status="{% if denuncia.status == 'pendente' %}pending{% elif denuncia.status == 'resolvida' %}approved{% else %}cancelled{% endif %}">
+                
+                <div class="card-header">
+                    {% if denuncia.status == 'pendente' %}
+                        <span class="badge badge-pending">Pendente</span>
+                    {% elif denuncia.status == 'resolvida' %}
+                        <span class="badge badge-approved">Mantida</span>
+                    {% else %}
+                        <span class="badge badge-cancelled">Removida</span>
+                    {% endif %}
+                    <span class="report-reason"><strong>Motivo:</strong> {{ denuncia.motivo }}</span>
+                </div>
+
+                <div class="card-body">
+                    <p class="review-text">"{{ denuncia.avaliacao.comentario }}"</p>
+                    <small class="review-meta">
+                        Denunciado por: {{ denuncia.reclamante.username }} • Alvo: {{ denuncia.avaliacao.professor.nome }} ({{ denuncia.avaliacao.turma.disciplina.nome }})
+                    </small>
+                </div>
+
+                <div class="card-actions">
+                    {% if denuncia.status == 'pendente' %}
+                        <form action="{% url 'admin_aprovar_solicitacao' denuncia.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-approve">Manter Avaliação</button>
+                        </form>
+                        <form action="{% url 'admin_deletar_avaliacao' denuncia.avaliacao.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-reject" onclick="return confirm('Tem certeza que deseja apagar permanentemente esta avaliação?');">Remover do Sistema</button>
+                        </form>
+                    {% elif denuncia.status == 'resolvida' %}
+                        <span class="action-result text-success">Mantida no sistema pelo moderador</span>
+                    {% else %}
+                        <span class="action-result text-danger">Removida pelo moderador</span>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+
+            <div class="empty-state" id="emptyState">
+                <p class="empty-state-text">Nenhuma avaliação cadastrada nesta categoria.</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/avaliacoes_script.js"></script>
+</body>
+</html>
