@@ -110,6 +110,16 @@ urlpatterns = [
         name="admin_avaliacao_rejeitar",
     ),
     path("admin-disciplinas/", views.admin_disciplinas, name="admin_disciplinas"),
+    path(
+        "admin-disciplinas/<int:disciplina_id>/aprovar/",
+        views.admin_aprovar_disciplina_geral,
+        name="admin_aprovar_disciplina_geral",
+    ),
+    path(
+        "admin-disciplinas/<int:disciplina_id>/remover/",
+        views.admin_remover_disciplina_geral,
+        name="admin_remover_disciplina_geral",
+    ),
     # Validação de Disciplinas
     path(
         "admin-validar-disciplinas/",
