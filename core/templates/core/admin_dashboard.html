@@ -1,138 +1,250 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Administrador - Academic Curator</title>
-    <link rel="stylesheet" href="{% static 'core/css/admin_style.css' %}">
-</head>
-<body>
+{% extends 'core/base.html' %}
+{% load static %}
 
-    <main class="container">
-        <header class="dashboard-header">
-            <h1 class="page-title">Painel do Administrador</h1>
-            <p class="page-description">Visão geral institucional e controles administrativos.</p>
-        </header>
+{% block title %}Painel Admin | Academic Curator{% endblock %}
 
-        <section class="stats-grid">
-            <div class="stat-card card-blue">
-                <div class="card-content">
-                    <span class="stat-label">TOTAL DE MATRÍCULAS</span>
-                    <span class="stat-number">{{ total_matriculas }}</span>
-                </div>
-                <svg class="card-watermark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
-                </svg>
-            </div>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/admin_stylesheet.css' %}">
+{% endblock %}
 
-            <div class="stat-card card-white">
-                <span class="stat-label label-muted">TOTAL DE ESTUDANTES</span>
-                <span class="stat-number color-blue">{{ total_estudantes }}</span>
-            </div>
+{% block content %}
+<div class="admin-container">
 
-            <div class="stat-card card-white card-border-left">
-                <span class="stat-label label-muted">AVALIAÇÃO MÉDIA</span>
-                <div class="stat-number-group">
-                    <span class="stat-number">{{ avaliacao_media }}</span>
-                    <svg class="star-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                    </svg>
-                </div>
-            </div>
-        </section>
+    <div class="admin-topbar">
+        <h1>Painel de Administração</h1>
+        <span class="admin-badge">Staff</span>
+    </div>
 
-        <section class="dashboard-section">
-            <h2 class="section-title">Solicitações de Professor</h2>
-            {% for sol in solicitacoes_recentes %}
-            <div class="info-card">
-                <div class="card-row">
-                    <div>
-                        <h3 class="item-name">{{ sol.solicitante.get_full_name|default:sol.solicitante.username }}</h3>
-                        <p class="item-sub">{{ sol.solicitante.email }}</p>
-                    </div>
-                    <span class="badge badge-{% if sol.status == 'aprovado' %}approved{% elif sol.status == 'rejeitado' %}danger{% else %}pending{% endif %}">
-                        {{ sol.get_status_display|upper }}
-                    </span>
-                </div>
-                <div class="card-footer-info">
-                    <p>Enviado em {{ sol.criado_em|date:"d/m/Y" }}</p>
-                    <p class="text-muted">{{ sol.nome }} ({{ sol.codigo }})</p>
-                </div>
-            </div>
-            {% empty %}
-            <div class="empty-state-card">
-                <p class="empty-state-text">Nenhuma solicitação pendente.</p>
-            </div>
-            {% endfor %}
-        </section>
+    {% if messages %}
+    <div class="admin-messages">
+        {% for msg in messages %}
+        <div class="admin-alert">{{ msg }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-        <section class="dashboard-section">
-            <div class="section-header-row">
-                <h2 class="section-title">Moderação de Avaliações</h2>
-                <span class="badge badge-danger">{{ avaliacoes_pendentes_count }} ocultas</span>
-            </div>
-            {% if avaliacoes_pendentes_count > 0 %}
-            <div class="info-card">
-                <p>{{ avaliacoes_pendentes_count }} avaliação(ões) aguardando moderação.</p>
+    <!-- ── Abas ─────────────────────────────────────────────────────── -->
+    <div class="admin-tabs">
+        <button class="tab-btn active" data-tab="solicitacoes">
+            Solicitações
+            <span class="tab-count">{{ solicitacoes.count }}</span>
+        </button>
+        <button class="tab-btn" data-tab="avaliacoes">
+            Avaliações
+            <span class="tab-count">{{ av_page.paginator.count }}</span>
+        </button>
+        <button class="tab-btn" data-tab="disciplinas">
+            Disciplinas
+            <span class="tab-count">{{ disc_page.paginator.count }}</span>
+        </button>
+        <button class="tab-btn" data-tab="curriculos">
+            Currículos
+            <span class="tab-count">{{ curriculos.count }}</span>
+        </button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- ABA: Solicitações                                             -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div class="tab-content active" id="tab-solicitacoes">
+        <div class="admin-section">
+            {% if solicitacoes %}
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Disciplina</th><th>Código</th><th>Créd.</th><th>Período</th>
+                            <th>Solicitante</th><th>Justificativa</th><th>Status</th><th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in solicitacoes %}
+                        <tr>
+                            <td><strong>{{ s.nome }}</strong></td>
+                            <td><span class="tag-codigo">{{ s.codigo }}</span></td>
+                            <td>{{ s.creditos }}</td>
+                            <td>{{ s.periodo }}º</td>
+                            <td>{{ s.solicitante.get_full_name|default:s.solicitante.username }}</td>
+                            <td class="td-justificativa">{{ s.justificativa|truncatechars:80 }}</td>
+                            <td><span class="status-badge status-{{ s.status }}">{{ s.get_status_display }}</span></td>
+                            <td class="td-actions">
+                                {% if s.status == 'pendente' %}
+                                <form method="post" action="{% url 'admin_aprovar_solicitacao' s.id %}" style="display:inline">
+                                    {% csrf_token %}<button type="submit" class="btn-aprovar">✓ Aprovar</button>
+                                </form>
+                                <form method="post" action="{% url 'admin_rejeitar_solicitacao' s.id %}" style="display:inline">
+                                    {% csrf_token %}<button type="submit" class="btn-rejeitar">✗ Rejeitar</button>
+                                </form>
+                                {% else %}<span class="td-muted">—</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             {% else %}
-            <div class="empty-state-card">
-                <p class="empty-state-text">Nenhuma avaliação aguardando moderação.</p>
-            </div>
+            <p class="admin-vazio">Nenhuma solicitação encontrada.</p>
             {% endif %}
-        </section>
+        </div>
+    </div>
 
-        <section class="dashboard-section">
-            <h2 class="section-title">Cursos Ativos</h2>
-            <div class="course-list">
-                {% for disc in disciplinas_ativas %}
-                <div class="info-card course-card">
-                    <div class="course-main">
-                        <div class="course-badge-row">
-                            <span class="badge badge-tag-{{ disc.codigo|slice:":3"|lower }}">{{ disc.codigo|slice:":3" }}</span>
-                            <span class="course-credits">{{ disc.creditos }} créditos</span>
-                        </div>
-                        <h3 class="course-name">{{ disc.nome }}</h3>
-                        {% if disc.turma_disciplina.first %}
-                        <p class="course-teacher">{{ disc.turma_disciplina.first.professor.nome }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="course-stats">
-                        <span class="ratio-number">{{ disc.alunos_matriculados }}/{{ disc.vagas_totais }}</span>
-                        <span class="ratio-label">estudantes</span>
-                    </div>
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- ABA: Avaliações                                               -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div class="tab-content" id="tab-avaliacoes">
+        <div class="admin-section" id="avaliacoes">
+            <form method="get" class="admin-filters">
+                <input type="hidden" name="disc_busca"   value="{{ disc_busca }}">
+                <input type="hidden" name="disc_status"  value="{{ disc_status }}">
+                <input type="hidden" name="disc_periodo" value="{{ disc_periodo }}">
+                <input type="hidden" name="disc_page"    value="{{ disc_page.number }}">
+                <div class="filters-row">
+                    <input type="text" name="av_disciplina" value="{{ av_disciplina }}" placeholder="Filtrar por disciplina..." class="filter-input">
+                    <input type="number" name="av_nota_min" value="{{ av_nota_min }}" placeholder="Nota mín." min="0" max="10" step="0.1" class="filter-input filter-small">
+                    <input type="number" name="av_nota_max" value="{{ av_nota_max }}" placeholder="Nota máx." min="0" max="10" step="0.1" class="filter-input filter-small">
+                    <button type="submit" class="btn-filtrar">Filtrar</button>
+                    <a href="?disc_busca={{ disc_busca }}&disc_status={{ disc_status }}&disc_periodo={{ disc_periodo }}" class="btn-limpar">Limpar</a>
                 </div>
-                {% empty %}
-                <div class="empty-state-card">
-                    <p class="empty-state-text">Nenhuma disciplina ativa.</p>
+            </form>
+
+            {% if av_page.object_list %}
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>Aluno</th><th>Disciplina</th><th>Professor</th><th>Nota Disc.</th><th>Nota Prof.</th><th>Comentário</th><th>Ação</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for av in av_page %}
+                        <tr>
+                            <td>{{ av.aluno.user.get_full_name }}</td>
+                            <td>{{ av.disciplina.nome|default:"—" }}</td>
+                            <td>{{ av.professor.nome|default:"—" }}</td>
+                            <td><span class="nota {% if av.nota_disc >= 7 %}nota-boa{% elif av.nota_disc >= 5 %}nota-media{% else %}nota-ruim{% endif %}">{{ av.nota_disc }}</span></td>
+                            <td><span class="nota {% if av.nota_prof >= 7 %}nota-boa{% elif av.nota_prof >= 5 %}nota-media{% else %}nota-ruim{% endif %}">{{ av.nota_prof }}</span></td>
+                            <td class="td-justificativa">{{ av.comentario|truncatechars:60|default:"—" }}</td>
+                            <td>
+                                <form method="post" action="{% url 'admin_deletar_avaliacao' av.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-deletar" onclick="return confirm('Remover esta avaliação?')">🗑 Remover</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'core/partials/pagination.html' with page_obj=av_page param_name='av_page' section_id='avaliacoes' extra_params='av_disciplina='|add:av_disciplina|add:'&av_nota_min='|add:av_nota_min|add:'&av_nota_max='|add:av_nota_max|add:'&disc_busca='|add:disc_busca|add:'&disc_status='|add:disc_status|add:'&disc_periodo='|add:disc_periodo %}
+            {% else %}
+            <p class="admin-vazio">Nenhuma avaliação encontrada.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- ABA: Disciplinas                                              -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div class="tab-content" id="tab-disciplinas">
+        <div class="admin-section" id="disciplinas">
+            <form method="get" class="admin-filters">
+                <input type="hidden" name="av_disciplina" value="{{ av_disciplina }}">
+                <input type="hidden" name="av_nota_min"   value="{{ av_nota_min }}">
+                <input type="hidden" name="av_nota_max"   value="{{ av_nota_max }}">
+                <input type="hidden" name="av_page"       value="{{ av_page.number }}">
+                <div class="filters-row">
+                    <input type="text" name="disc_busca" value="{{ disc_busca }}" placeholder="Buscar por nome ou código..." class="filter-input">
+                    <select name="disc_status" class="filter-select">
+                        <option value="">Todos os status</option>
+                        {% for val, label in status_choices %}
+                        <option value="{{ val }}" {% if disc_status == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="disc_periodo" class="filter-select filter-small">
+                        <option value="">Todos os períodos</option>
+                        {% for p in periodos %}
+                        <option value="{{ p }}" {% if disc_periodo == p|stringformat:"s" %}selected{% endif %}>{{ p }}º período</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-filtrar">Filtrar</button>
+                    <a href="?av_disciplina={{ av_disciplina }}&av_nota_min={{ av_nota_min }}&av_nota_max={{ av_nota_max }}" class="btn-limpar">Limpar</a>
                 </div>
-                {% endfor %}
-            </div>
-        </section>
+            </form>
 
-        <section class="dashboard-section">
-            <h2 class="section-title">Gerenciamento</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
-                <a href="/admin-validar-disciplinas/" class="info-card" style="text-decoration: none; color: inherit; transition: transform 0.2s;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #0f2d59;">Validar Disciplinas</h3>
-                    <p style="margin: 0; color: #64748b; font-size: 14px;">Aprove ou rejeite disciplinas pendentes</p>
-                </a>
-                <a href="/admin-denuncias-disciplinas/" class="info-card" style="text-decoration: none; color: inherit; transition: transform 0.2s;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #0f2d59;">Denúncias de Disciplinas</h3>
-                    <p style="margin: 0; color: #64748b; font-size: 14px;">Gerencie denúncias de disciplinas</p>
-                </a>
-                <a href="/admin-validar-professores/" class="info-card" style="text-decoration: none; color: inherit; transition: transform 0.2s;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #0f2d59;">Validar Professores</h3>
-                    <p style="margin: 0; color: #64748b; font-size: 14px;">Aprove ou rejeite professores</p>
-                </a>
-                <a href="/admin-disciplinas/" class="info-card" style="text-decoration: none; color: inherit; transition: transform 0.2s;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #0f2d59;">Gerenciar Disciplinas</h3>
-                    <p style="margin: 0; color: #64748b; font-size: 14px;">Veja e gerencie todas as disciplinas</p>
-                </a>
+            {% if disc_page.object_list %}
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>Código</th><th>Nome</th><th>Créditos</th><th>Período</th><th>Status</th><th>Ação</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for d in disc_page %}
+                        <tr>
+                            <td><span class="tag-codigo">{{ d.codigo }}</span></td>
+                            <td>{{ d.nome }}</td>
+                            <td>{{ d.creditos }}</td>
+                            <td>{{ d.periodo }}º</td>
+                            <td>{{ d.get_status_display }}</td>
+                            <td>
+                                <form method="post" action="{% url 'admin_deletar_disciplina' d.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-deletar" onclick="return confirm('Remover {{ d.nome }}?')">🗑 Remover</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        </section>
-    </main>
+            {% include 'core/partials/pagination.html' with page_obj=disc_page param_name='disc_page' section_id='disciplinas' extra_params='av_disciplina='|add:av_disciplina|add:'&av_nota_min='|add:av_nota_min|add:'&av_nota_max='|add:av_nota_max|add:'&disc_busca='|add:disc_busca|add:'&disc_status='|add:disc_status|add:'&disc_periodo='|add:disc_periodo %}
+            {% else %}
+            <p class="admin-vazio">Nenhuma disciplina encontrada.</p>
+            {% endif %}
+        </div>
+    </div>
 
-</body>
-</html>
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- ABA: Currículos                                               -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div class="tab-content" id="tab-curriculos">
+        <div class="cur-grid">
+            {% for cur in curriculos %}
+            <a href="{% url 'admin_curriculo_detalhe' cur.id %}" class="cur-card">
+                <div class="cur-card-top">
+                    <span class="cur-codigo">{{ cur.codigo }}</span>
+                    <span class="cur-count">{{ cur.items.count }} disciplinas</span>
+                </div>
+                <h3 class="cur-nome">{{ cur.nome }}</h3>
+                <p class="cur-desc">{{ cur.descricao|truncatechars:90 }}</p>
+                <div class="cur-creditos">
+                    <span>{{ cur.total_creditos_obrigatorios }} créditos obrigatórios</span>
+                    <span class="cur-sep">·</span>
+                    <span>{{ cur.total_creditos_optativos }} optativos</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+const tabBtns    = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+
+// Restaura a aba ativa via hash (#avaliacoes, #disciplinas, etc.)
+const hash = window.location.hash.replace('#', '');
+if (hash) activate(hash);
+
+tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        history.replaceState(null, '', '#' + target);
+        activate(target);
+    });
+});
+
+function activate(target) {
+    tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === target));
+    tabContents.forEach(c => c.classList.toggle('active', c.id === 'tab-' + target));
+}
+</script>
+{% endblock %}
