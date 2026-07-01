@@ -150,7 +150,7 @@ def reportar_avaliacoes(request, avaliacao_id):
             descricao=descricao
         )
         messages.success(request, 'Avaliação reportada com sucesso! Analisaremos o caso.')
-        return redirect('Avaliações') 
+        return redirect('avaliacoes') 
     return render(request, 'core/reportar-avaliacoes.html', {'avaliacao': avaliacao})
 
 
@@ -183,7 +183,7 @@ def editar_perfil(request):
         if user_form.is_valid() and student_form.is_valid():
             user_form.save()
             student_form.save()
-            messages.success(request, 'Perfil updated com sucesso!')
+            messages.success(request, 'Perfil atualizado com sucesso!')
             return redirect('perfil')
     else:
         user_form    = UserEditForm(instance=request.user)
@@ -251,10 +251,6 @@ def register_view(request):
 
 
 def login_redirect_view(request):
-    """
-    Ponto central de redirecionamento pós-login. Intercepta se o usuário é 
-    administrador (is_staff) ou usuário comum do sistema de forma transparente.
-    """
     if not request.user.is_authenticated:
         return redirect('login')
     if request.user.is_staff:
@@ -479,7 +475,6 @@ def detalhes_disciplina(request):
 
 @user_passes_test(_is_admin, login_url='/login/')
 def painel_admin(request):
-    """Página principal do Administrador (admin.html) alimentando os cards estatísticos"""
     total_matriculas = Matricula.objects.count()
     total_estudantes = Student.objects.count()
     total_denuncias  = Denuncia.objects.count()
@@ -499,31 +494,27 @@ def painel_admin(request):
 
 @user_passes_test(_is_admin, login_url='/login/')
 def admin_avaliacoes(request):
-    """Listagem de avaliações gerais no painel (avaliacoes.html)"""
     todas_av = Avaliacao.objects.select_related('aluno__user', 'disciplina', 'professor').all()
     paginator = Paginator(todas_av, 10)
     page_number = request.GET.get('page')
     avaliacoes_paginadas = paginator.get_page(page_number)
-    return render(request, 'core/avaliacoes.html', {'avaliacoes': avaliacoes_paginadas})
+    return render(request, 'core/admin_panel_avaliacoes.html', {'avaliacoes': avaliacoes_paginadas})
 
 
 @user_passes_test(_is_admin, login_url='/login/')
 def admin_avaliacoes_denunciadas(request):
-    """Moderação de denúncias de avaliações com script dinâmico (avaliacoes_denunciadas.html)"""
     denuncias = Denuncia.objects.select_related('avaliacao__aluno__user', 'avaliacao__disciplina').all()
     return render(request, 'core/avaliacoes_denunciadas.html', {'denuncias': denuncias})
 
 
 @user_passes_test(_is_admin, login_url='/login/')
 def admin_gerenciar_disciplinas(request):
-    """Controle e tabela de disciplinas ofertadas (disciplinas.html)"""
     disciplinas_list = Disciplina.objects.all().order_by('codigo')
-    return render(request, 'core/disciplinas.html', {'disciplinas': disciplinas_list})
+    return render(request, 'core/admin_panel_disciplinas.html', {'disciplinas': disciplinas_list})
 
 
 @user_passes_test(_is_admin, login_url='/login/')
 def painel_admin_legado(request):
-    """Antiga view painel_admin mantendo todas as filtragens de currículo e solicitações"""
     solicitacoes = SolicitacaoDisciplina.objects.select_related('solicitante').all()
 
     av_qs = Avaliacao.objects.select_related('aluno__user', 'disciplina', 'professor')
@@ -584,7 +575,7 @@ def admin_aprovar_solicitacao(request, sol_id):
             }
         )
         messages.success(request, f'Disciplina "{sol.nome}" aprovada e criada.')
-    return redirect('painel_admin_legado')
+    return redirect('painel_admin')
 
 
 @user_passes_test(_is_admin, login_url='/login/')
@@ -594,7 +585,7 @@ def admin_rejeitar_solicitacao(request, sol_id):
         sol.status = SolicitacaoDisciplina.StatusSolicitacao.REJEITADO
         sol.save()
         messages.success(request, f'Solicitação "{sol.nome}" rejeitada.')
-    return redirect('painel_admin_legado')
+    return redirect('painel_admin')
 
 
 @user_passes_test(_is_admin, login_url='/login/')
@@ -603,7 +594,7 @@ def admin_deletar_avaliacao(request, avaliacao_id):
     if request.method == 'POST':
         avaliacao.delete()
         messages.success(request, 'Avaliação removida.')
-    return redirect('painel_admin_legado')
+    return redirect('painel_admin')
 
 
 @user_passes_test(_is_admin, login_url='/login/')
@@ -612,7 +603,7 @@ def admin_deletar_disciplina(request, disciplina_id):
     if request.method == 'POST':
         disciplina.delete()
         messages.success(request, f'Disciplina "{disciplina.nome}" removida.')
-    return redirect('painel_admin_legado')
+    return redirect('painel_admin')
 
 
 @user_passes_test(_is_admin, login_url='/login/')
@@ -644,7 +635,7 @@ def admin_curriculo_detalhe(request, cur_id):
         'tipo_choices': CurriculoItem.Tipo.choices,
         'periodos':      range(1, 9),
         'f_periodo':    f_periodo,
-                'f_tipo':       f_tipo,
+        'f_tipo':       f_tipo,
         'f_busca':      f_busca,
         'f_creditos':    f_creditos,
         'total_items':  curriculo.items.count(),
