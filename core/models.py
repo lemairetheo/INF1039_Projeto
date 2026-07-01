@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Avg
 
+
 class DiaSemana(models.TextChoices):
     SEGUNDA = "SEG", "Segunda-feira"
     TERCA = "TER", "Terça-feira"
@@ -9,6 +10,7 @@ class DiaSemana(models.TextChoices):
     QUINTA = "QUI", "Quinta-feira"
     SEXTA = "SEX", "Sexta-feira"
     SABADO = "SAB", "Sábado"
+
 
 class Horario(models.TextChoices):
     H07_09 = "07-09", "07:00 - 09:00"
@@ -18,7 +20,8 @@ class Horario(models.TextChoices):
     H15_17 = "15-17", "15:00 - 17:00"
     H17_19 = "17-19", "17:00 - 19:00"
     H19_21 = "19-21", "19:00 - 21:00"
- 
+
+
 class Status(models.TextChoices):
     APROVADO = "aprovado"
     CANCELADO = "cancelado"
@@ -27,72 +30,96 @@ class Status(models.TextChoices):
 
 # ── Currículo ─────────────────────────────────────────────────────────────────
 class Curriculo(models.Model):
-    codigo      = models.CharField(max_length=20, unique=True)
-    nome        = models.CharField(max_length=100)
-    descricao   = models.TextField(blank=True, null=True)
+    codigo = models.CharField(max_length=20, unique=True)
+    nome = models.CharField(max_length=100)
+    descricao = models.TextField(blank=True, null=True)
     total_creditos_obrigatorios = models.PositiveIntegerField(default=0)
-    total_creditos_optativos    = models.PositiveIntegerField(default=0)
+    total_creditos_optativos = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.codigo} — {self.nome}"
 
     class Meta:
-        verbose_name = 'Currículo'
-        verbose_name_plural = 'Currículos'
-        ordering = ['codigo']
+        verbose_name = "Currículo"
+        verbose_name_plural = "Currículos"
+        ordering = ["codigo"]
 
 
 class CurriculoItem(models.Model):
     class Tipo(models.TextChoices):
-        OBRIGATORIA = 'obrigatoria', 'Obrigatória'
-        OPTATIVA    = 'optativa',    'Optativa'
+        OBRIGATORIA = "obrigatoria", "Obrigatória"
+        OPTATIVA = "optativa", "Optativa"
 
-    curriculo           = models.ForeignKey(Curriculo, on_delete=models.CASCADE, related_name='items')
-    disciplina          = models.ForeignKey('Disciplina', on_delete=models.CASCADE, related_name='curriculo_items')
-    tipo                = models.CharField(max_length=15, choices=Tipo.choices)
+    curriculo = models.ForeignKey(
+        Curriculo, on_delete=models.CASCADE, related_name="items"
+    )
+    disciplina = models.ForeignKey(
+        "Disciplina", on_delete=models.CASCADE, related_name="curriculo_items"
+    )
+    tipo = models.CharField(max_length=15, choices=Tipo.choices)
     periodo_recomendado = models.PositiveIntegerField()
 
     def __str__(self):
         return f"{self.curriculo.codigo} / {self.disciplina.codigo} ({self.get_tipo_display()})"
 
     class Meta:
-        verbose_name = 'Item de Currículo'
-        verbose_name_plural = 'Itens de Currículo'
-        unique_together = ('curriculo', 'disciplina')
-        ordering = ['periodo_recomendado', 'tipo', 'disciplina__nome']
+        verbose_name = "Item de Currículo"
+        verbose_name_plural = "Itens de Currículo"
+        unique_together = ("curriculo", "disciplina")
+        ordering = ["periodo_recomendado", "tipo", "disciplina__nome"]
 
 
 # ── Usuario (Aluno) ────────────────────────────────────────────────────────────
 class Student(models.Model):
-    user       = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student')
-    matricula  = models.CharField(max_length=20, unique=True)
-    curriculo  = models.ForeignKey('Curriculo', on_delete=models.SET_NULL, null=True, blank=True, related_name='estudantes')
-    bio        = models.TextField(blank=True, null=True)
-    foto       = models.ImageField(upload_to='students/', blank=True, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student")
+    matricula = models.CharField(max_length=20, unique=True)
+    curriculo = models.ForeignKey(
+        "Curriculo",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="estudantes",
+    )
+    bio = models.TextField(blank=True, null=True)
+    foto = models.ImageField(upload_to="students/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.matricula})"
 
     class Meta:
-        verbose_name = 'Student'
-        verbose_name_plural = 'Students'
-        ordering = ['user__last_name']
+        verbose_name = "Student"
+        verbose_name_plural = "Students"
+        ordering = ["user__last_name"]
 
 
 # ── Professor ──────────────────────────────────────────────────────────────────
 class Professor(models.Model):
-    user         = models.OneToOneField(User, on_delete=models.CASCADE, related_name='professor', null=True, blank=True)
-    nome         = models.CharField(max_length=100)
+    class StatusProfessor(models.TextChoices):
+        PENDENTE = "pendente", "Pendente"
+        APROVADO = "aprovado", "Aprovado"
+        REJEITADO = "rejeitado", "Rejeitado"
+
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="professor", null=True, blank=True
+    )
+    nome = models.CharField(max_length=100)
     departamento = models.CharField(max_length=100)
+    status = models.CharField(
+        max_length=10, choices=StatusProfessor.choices, default=StatusProfessor.PENDENTE
+    )
+    documento = models.FileField(
+        upload_to="professores/documentos/", blank=True, null=True
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.nome} ({self.departamento})"
 
     class Meta:
-        verbose_name = 'Professor'
-        verbose_name_plural = 'Professores'
-        ordering = ['nome']
+        verbose_name = "Professor"
+        verbose_name_plural = "Professores"
+        ordering = ["nome"]
 
 
 # ── Disciplina ─────────────────────────────────────────────────────────────────
@@ -102,36 +129,48 @@ class Disciplina(models.Model):
     creditos = models.PositiveIntegerField()
     periodo = models.PositiveIntegerField()
     quantidade_turmas = models.PositiveIntegerField(default=1)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.SOB_AVALIACAO)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.SOB_AVALIACAO
+    )
     ementa = models.TextField(blank=True, null=True)
 
     @property
     def nota_media(self):
-        media = self.avaliacoes.aggregate(media=Avg('nota_disc'))['media']
+        media = self.avaliacoes.aggregate(media=Avg("nota_disc"))["media"]
         if media is None:
             return 0.0
         return round(float(media), 1)
 
     @property
     def pre_requisitos(self):
-        return self.grupos_requisitos.filter(tipo='PRE')
+        return self.grupos_requisitos.filter(tipo="PRE")
 
     @property
     def co_requisitos(self):
-        return self.grupos_requisitos.filter(tipo='CO')
-        
+        return self.grupos_requisitos.filter(tipo="CO")
+
     def __str__(self):
         return f"{self.codigo} - {self.nome}"
 
 
 # ── Requisitos ──────────────────────────────────────────────────────────────────
 class Requisito(models.Model):
-    TIPO_CHOICES = [('PRE', 'Pré-requisito'), ('CO', 'Co-requisito'),]
-    OPERADOR_CHOICES = [('AND', 'E'), ('OR', 'OU'),]
-    disciplina_principal = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='grupos_requisitos')
+    TIPO_CHOICES = [
+        ("PRE", "Pré-requisito"),
+        ("CO", "Co-requisito"),
+    ]
+    OPERADOR_CHOICES = [
+        ("AND", "E"),
+        ("OR", "OU"),
+    ]
+    disciplina_principal = models.ForeignKey(
+        Disciplina, on_delete=models.CASCADE, related_name="grupos_requisitos"
+    )
     tipo = models.CharField(max_length=3, choices=TIPO_CHOICES)
-    operador = models.CharField(max_length=3, choices=OPERADOR_CHOICES, default='AND')
-    disciplinas = models.ManyToManyField(Disciplina, related_name='compoem_grupos',blank=True)
+    operador = models.CharField(max_length=3, choices=OPERADOR_CHOICES, default="AND")
+    disciplinas = models.ManyToManyField(
+        Disciplina, related_name="compoem_grupos", blank=True
+    )
 
     def __str__(self):
         return f"{self.get_tipo_display()} ({self.get_operador_display()}) para {self.disciplina_principal.codigo}"
@@ -139,33 +178,43 @@ class Requisito(models.Model):
 
 # ── Matricula ──────────────────────────────────────────────────────────────────
 class Matricula(models.Model):
-
     class StatusMatricula(models.TextChoices):
-        CURSANDO  = 'cursando',  'Cursando'
-        CONCLUIDO  = 'concluido',  'Concluido'
-        TRANCADO = 'trancado', 'Trancado'
+        CURSANDO = "cursando", "Cursando"
+        CONCLUIDO = "concluido", "Concluido"
+        TRANCADO = "trancado", "Trancado"
 
-    aluno       = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='grades')
-    disciplina  = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='matricula_disciplina')
-    semestre    = models.PositiveIntegerField()
-    ano         = models.PositiveIntegerField()
-    status      = models.CharField(max_length=10, choices=StatusMatricula.choices, default=StatusMatricula.CURSANDO)
+    aluno = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="grades")
+    disciplina = models.ForeignKey(
+        Disciplina, on_delete=models.CASCADE, related_name="matricula_disciplina"
+    )
+    semestre = models.PositiveIntegerField()
+    ano = models.PositiveIntegerField()
+    status = models.CharField(
+        max_length=10, choices=StatusMatricula.choices, default=StatusMatricula.CURSANDO
+    )
 
     def __str__(self):
         return f"{self.aluno} — {self.semestre}º sem. {self.ano}"
 
     class Meta:
-        verbose_name = 'Matricula'
-        verbose_name_plural = 'Matriculas'
-        ordering = ['-ano', '-semestre']
+        verbose_name = "Matricula"
+        verbose_name_plural = "Matriculas"
+        ordering = ["-ano", "-semestre"]
+
 
 # ── Avaliação ──────────────────────────────────────────────────────────────────
 class Avaliacao(models.Model):
-    aluno      = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='avaliacoes')
-    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='avaliacoes', null=True)
-    professor  = models.ForeignKey(Professor, on_delete=models.CASCADE, related_name='avaliacoes', null=True)
-    nota_disc  = models.DecimalField(max_digits=4, decimal_places=2)
-    nota_prof  = models.DecimalField(max_digits=4, decimal_places=2)
+    aluno = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name="avaliacoes"
+    )
+    disciplina = models.ForeignKey(
+        Disciplina, on_delete=models.CASCADE, related_name="avaliacoes", null=True
+    )
+    professor = models.ForeignKey(
+        Professor, on_delete=models.CASCADE, related_name="avaliacoes", null=True
+    )
+    nota_disc = models.DecimalField(max_digits=4, decimal_places=2)
+    nota_prof = models.DecimalField(max_digits=4, decimal_places=2)
     comentario = models.TextField(blank=True, null=True)
     data_avaliacao = models.DateTimeField(auto_now_add=True)
 
@@ -173,37 +222,74 @@ class Avaliacao(models.Model):
         return f"{self.aluno} | {self.disciplina} | {self.nota_disc} | {self.nota_prof}"
 
     class Meta:
-        verbose_name = 'Avaliação'
-        verbose_name_plural = 'Avaliações'
-        ordering = ['disciplina', 'aluno']
+        verbose_name = "Avaliação"
+        verbose_name_plural = "Avaliações"
+        ordering = ["disciplina", "aluno"]
 
 
 # ── Denuncia ──────────────────────────────────────────────────────────────────
 class Denuncia(models.Model):
-    avaliacao = models.ForeignKey(Avaliacao, on_delete=models.CASCADE, related_name='denuncias')
+    avaliacao = models.ForeignKey(
+        Avaliacao, on_delete=models.CASCADE, related_name="denuncias"
+    )
     motivo = models.CharField(max_length=50)
     descricao = models.TextField(blank=True, null=True)
-    data_denuncia = [models.DateTimeField(auto_now_add=True)]
+    data_denuncia = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Denúncia ({self.motivo}) - Avaliação ID: {self.avaliacao.id}"
 
 
+# ── Denúncia de Disciplina ─────────────────────────────────────────────────────
+class DenunciaDisciplina(models.Model):
+    class StatusDenuncia(models.TextChoices):
+        PENDENTE = "pendente", "Pendente"
+        VALIDADO = "validado", "Validado"
+        REJEITADO = "rejeitado", "Rejeitado"
+
+    disciplina = models.ForeignKey(
+        Disciplina, on_delete=models.CASCADE, related_name="denuncias_disciplina"
+    )
+    denunciante = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="denuncias_disciplina"
+    )
+    motivo = models.CharField(max_length=50)
+    descricao = models.TextField(blank=True, null=True)
+    status = models.CharField(
+        max_length=10, choices=StatusDenuncia.choices, default=StatusDenuncia.PENDENTE
+    )
+    data_denuncia = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Denúncia ({self.motivo}) - Disciplina: {self.disciplina.nome}"
+
+    class Meta:
+        verbose_name = "Denúncia de Disciplina"
+        verbose_name_plural = "Denúncias de Disciplinas"
+        ordering = ["-data_denuncia"]
+
+
 # ── Turma ──────────────────────────────────────────────────────────────────
 class Turma(models.Model):
-    disciplina  = models.ForeignKey(Disciplina, on_delete=models.CASCADE, related_name='turma_disciplina')
-    professor   = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='turma_professor')
-    horario     = models.CharField(max_length=5, choices=Horario.choices)
-    dias_semana = models.ManyToManyField('DiaSemanaAula', related_name='turmas', blank=True)
+    disciplina = models.ForeignKey(
+        Disciplina, on_delete=models.CASCADE, related_name="turma_disciplina"
+    )
+    professor = models.ForeignKey(
+        "Professor", on_delete=models.CASCADE, related_name="turma_professor"
+    )
+    horario = models.CharField(max_length=5, choices=Horario.choices)
+    dias_semana = models.ManyToManyField(
+        "DiaSemanaAula", related_name="turmas", blank=True
+    )
 
     def get_dias_display(self):
-        return ', '.join(d.get_dia_display() for d in self.dias_semana.all())
+        return ", ".join(d.get_dia_display() for d in self.dias_semana.all())
 
     def __str__(self):
         return f"{self.disciplina.codigo} — {self.get_horario_display()}"
 
     class Meta:
-        unique_together = ('disciplina', 'professor', 'horario')
+        unique_together = ("disciplina", "professor", "horario")
 
 
 class DiaSemanaAula(models.Model):
@@ -216,30 +302,36 @@ class DiaSemanaAula(models.Model):
         return self.get_dia_display()
 
     class Meta:
-        verbose_name = 'Dia da Semana'
-        verbose_name_plural = 'Dias da Semana'
-        ordering = ['dia']
+        verbose_name = "Dia da Semana"
+        verbose_name_plural = "Dias da Semana"
+        ordering = ["dia"]
 
 
 class SolicitacaoDisciplina(models.Model):
     class StatusSolicitacao(models.TextChoices):
-        PENDENTE  = 'pendente',  'Pendente'
-        APROVADO  = 'aprovado',  'Aprovado'
-        REJEITADO = 'rejeitado', 'Rejeitado'
+        PENDENTE = "pendente", "Pendente"
+        APROVADO = "aprovado", "Aprovado"
+        REJEITADO = "rejeitado", "Rejeitado"
 
-    solicitante   = models.ForeignKey(User, on_delete=models.CASCADE, related_name='solicitacoes')
-    nome          = models.CharField(max_length=100)
-    codigo        = models.CharField(max_length=20)
-    creditos      = models.PositiveIntegerField()
-    periodo       = models.PositiveIntegerField()
+    solicitante = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="solicitacoes"
+    )
+    nome = models.CharField(max_length=100)
+    codigo = models.CharField(max_length=20)
+    creditos = models.PositiveIntegerField()
+    periodo = models.PositiveIntegerField()
     justificativa = models.TextField()
-    status        = models.CharField(max_length=10, choices=StatusSolicitacao.choices, default=StatusSolicitacao.PENDENTE)
-    criado_em     = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=10,
+        choices=StatusSolicitacao.choices,
+        default=StatusSolicitacao.PENDENTE,
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.codigo} — {self.nome} ({self.get_status_display()})"
 
     class Meta:
-        verbose_name = 'Solicitação de Disciplina'
-        verbose_name_plural = 'Solicitações de Disciplina'
-        ordering = ['-criado_em']
+        verbose_name = "Solicitação de Disciplina"
+        verbose_name_plural = "Solicitações de Disciplina"
+        ordering = ["-criado_em"]
