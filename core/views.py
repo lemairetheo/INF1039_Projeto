@@ -4,14 +4,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Sum, Avg, Q
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.core.exceptions import PermissionDenied
-from .models import (
-    Disciplina, Professor, Matricula, Turma, Avaliacao, Student, 
-    Denuncia, Requisito, SolicitacaoDisciplina, Curriculo, CurriculoItem, Status
-)
-from .forms import (
-    UserEditForm, StudentEditForm, AvaliacaoForm, RegisterForm, SolicitacaoDisciplinaForm
-)
+from .models import Disciplina, Professor, Matricula, Turma, Avaliacao, Student, Denuncia, Requisito, SolicitacaoDisciplina, Curriculo, CurriculoItem
+from .forms import UserEditForm, StudentEditForm, AvaliacaoForm, RegisterForm, SolicitacaoDisciplinaForm
 
 def _is_admin(user):
     return user.is_authenticated and user.is_staff
@@ -42,8 +36,8 @@ class _VirtualGrade:
         return self._disciplinas
 
 
-# ── Views Públicas e Comuns ───────────────────────────────────────────────────
-
+# ── Views ──────────────────────────────────────────────────────────────────────
+ 
 def home_view(request):
     search_query = request.GET.get('search', '').strip()
     todas = Disciplina.objects.prefetch_related('turma_disciplina__professor').all().order_by('codigo')
@@ -106,13 +100,18 @@ def disciplina_detalhe(request, pk):
 
 
 def professores(request):  
+    # Captura o termo digitado na página de professores
     search_query = request.GET.get('search', '').strip()
-    todos = Professor.objects.prefetch_related('turma_professor__disciplina', 'avaliacoes').all()
     
+    todos = Professor.objects.prefetch_related(
+        'turma_professor__disciplina', 'avaliacoes'
+    ).all()
+    
+    # Filtra pelo nome do professor
     if search_query:
         todos = todos.filter(nome__icontains=search_query)
     
-    paginator = Paginator(todos, 3)  
+    paginator = Paginator(todos, 3 ) #o certo é 15, mas como n tem professor suficiente coloquei menos só para testar
     page_number = request.GET.get('page')
     professores_paginados = paginator.get_page(page_number)
         
@@ -133,6 +132,7 @@ def avaliacoes(request):
     })
 
 
+#@login_required
 def reportar_avaliacoes(request, avaliacao_id):
     avaliacao = get_object_or_404(Avaliacao, id=avaliacao_id)
 
@@ -150,7 +150,7 @@ def reportar_avaliacoes(request, avaliacao_id):
             descricao=descricao
         )
         messages.success(request, 'Avaliação reportada com sucesso! Analisaremos o caso.')
-        return redirect('avaliacoes') 
+        return redirect('Avaliações') 
     return render(request, 'core/reportar-avaliacoes.html', {'avaliacao': avaliacao})
 
 
@@ -158,12 +158,12 @@ def erro_404(request, exception=None):
     return render(request, 'core/erro_404.html', status=404)
 
 
-# ── Views Autenticadas (Alunos/Professores) ───────────────────────────────────
-
 @login_required
 def perfil(request):
     student = get_object_or_404(Student, user=request.user)
-    disciplinas_aluno = Disciplina.objects.filter(matricula_disciplina__aluno=student).distinct()
+    disciplinas_aluno = Disciplina.objects.filter(
+        matricula_disciplina__aluno=student
+    ).distinct()
     avaliacoes_aluno = student.avaliacoes.select_related('disciplina').all()
     total_creditos   = disciplinas_aluno.aggregate(total=Sum('creditos'))['total'] or 0
     return render(request, 'core/perfil.html', {
@@ -183,7 +183,7 @@ def editar_perfil(request):
         if user_form.is_valid() and student_form.is_valid():
             user_form.save()
             student_form.save()
-            messages.success(request, 'Perfil atualizado com sucesso!')
+            messages.success(request, 'Perfil updated com sucesso!')
             return redirect('perfil')
     else:
         user_form    = UserEditForm(instance=request.user)
@@ -251,6 +251,7 @@ def register_view(request):
 
 
 def login_redirect_view(request):
+    """Redirect after login based on user role."""
     if not request.user.is_authenticated:
         return redirect('login')
     if request.user.is_staff:
@@ -310,6 +311,7 @@ def matricula_view(request):
         disciplina_id__in=matriculadas_ids
     ).select_related('disciplina', 'professor').order_by('horario')
 
+    # Lista de (disciplina, turmas) para o modal
     disciplinas_com_turmas = [
         (
             d,
@@ -368,6 +370,7 @@ def historico_grades(request):
 
     matriculas = aluno.grades.select_related('disciplina').order_by('-ano', '-semestre')
 
+    # Group by (ano, semestre) → build virtual grade objects
     from collections import defaultdict
     grade_dict = defaultdict(list)
     order      = []
@@ -382,6 +385,7 @@ def historico_grades(request):
         for (ano, sem), discs in ((k, grade_dict[k]) for k in order)
     ]
 
+    # Determine active grade
     grade_id  = request.GET.get('grade_id')
     grade_ativa = None
     if grade_id:
@@ -405,12 +409,19 @@ def historico_grades(request):
 
 def minhas_avaliacoes_prof(request, id_professor):
     professor = get_object_or_404(Professor, id=id_professor)
+
     avaliacoes = Avaliacao.objects.filter(professor=professor)
     qtd_avaliacoes = avaliacoes.count()
+
     disciplinas = Disciplina.objects.filter(turma_disciplina__professor=professor).distinct()
 
-    nota_professor = avaliacoes.aggregate(media=Avg('nota_prof'))['media'] or 0
-    nota_disciplina = avaliacoes.aggregate(media=Avg('nota_disc'))['media'] or 0
+    nota_professor = avaliacoes.aggregate(media=Avg('nota_prof'))['media']
+    nota_disciplina = avaliacoes.aggregate(media=Avg('nota_disc'))['media']
+
+    if nota_professor == None:
+        nota_professor = 0
+    if nota_disciplina == None:
+        nota_disciplina = 0
         
     return render(request, 'core/minhas-avaliacoes-prof.html', {
         'disciplinas': disciplinas,
@@ -436,87 +447,11 @@ def solicitar_disciplina(request):
     return render(request, 'core/solicitar_disciplina.html', {'form': form})
 
 
-@login_required
-def detalhes_disciplina(request):
-    disciplina = {
-        "id": 1,
-        "nome": "Cálculo I",
-        "creditos": 4,
-        "descricao": "Limites, derivadas e integrais de funções de uma variável.",
-        "departamento": "MAT",
-    }
-    turmas = [
-        {
-            "id": 1,
-            "professor": {"nome": "Dra. Helena Vasconcelos"},
-            "horario": "SEG 09:00–11:00, QUA 09:00–11:00",
-            "vagas_ocupadas": 28,
-            "vagas_totais": 40,
-            "nota_media": 4.5,
-        },
-        {
-            "id": 2,
-            "professor": {"nome": "Dr. Ricardo Almeida"},
-            "horario": "TER 13:00–15:00, QUI 13:00–15:00",
-            "vagas_ocupadas": 34,
-            "vagas_totais": 40,
-            "nota_media": 4.2,
-        }
-    ]
-    avaliacoes = [
-        {"data": "29/04/2026", "comentario": "Matéria pesada, mas a professora explica muito bem."},
-        {"data": "17/04/2026", "comentario": "As listas ajudam bastante. Exige dedicação semanal."}
-    ]
-    context = {"disciplina": disciplina, "turmas": turmas, "avaliacoes": avaliacoes}
-    return render(request, "core/matricula_turma.html", context)
-
-
-# ── Área de Controle do Administrador (Staff Only) ─────────────────────────────
-
 @user_passes_test(_is_admin, login_url='/login/')
 def painel_admin(request):
-    total_matriculas = Matricula.objects.count()
-    total_estudantes = Student.objects.count()
-    total_denuncias  = Denuncia.objects.count()
-    
-    solicitacoes = SolicitacaoDisciplina.objects.filter(status='PENDENTE').select_related('solicitante')[:5]
-    disciplinas_list = Disciplina.objects.all().order_by('codigo')[:5]
-
-    context = {
-        'total_matriculas': total_matriculas,
-        'total_estudantes': total_estudantes,
-        'total_denuncias': total_denuncias,
-        'solicitacoes': solicitacoes,
-        'disciplinas': disciplinas_list,
-    }
-    return render(request, 'core/admin.html', context)
-
-
-@user_passes_test(_is_admin, login_url='/login/')
-def admin_avaliacoes(request):
-    todas_av = Avaliacao.objects.select_related('aluno__user', 'disciplina', 'professor').all()
-    paginator = Paginator(todas_av, 10)
-    page_number = request.GET.get('page')
-    avaliacoes_paginadas = paginator.get_page(page_number)
-    return render(request, 'core/admin_panel_avaliacoes.html', {'avaliacoes': avaliacoes_paginadas})
-
-
-@user_passes_test(_is_admin, login_url='/login/')
-def admin_avaliacoes_denunciadas(request):
-    denuncias = Denuncia.objects.select_related('avaliacao__aluno__user', 'avaliacao__disciplina').all()
-    return render(request, 'core/avaliacoes_denunciadas.html', {'denuncias': denuncias})
-
-
-@user_passes_test(_is_admin, login_url='/login/')
-def admin_gerenciar_disciplinas(request):
-    disciplinas_list = Disciplina.objects.all().order_by('codigo')
-    return render(request, 'core/admin_panel_disciplinas.html', {'disciplinas': disciplinas_list})
-
-
-@user_passes_test(_is_admin, login_url='/login/')
-def painel_admin_legado(request):
     solicitacoes = SolicitacaoDisciplina.objects.select_related('solicitante').all()
 
+    # ── Filtros avaliações ──
     av_qs = Avaliacao.objects.select_related('aluno__user', 'disciplina', 'professor')
     av_disciplina = request.GET.get('av_disciplina', '').strip()
     av_nota_min   = request.GET.get('av_nota_min', '').strip()
@@ -528,6 +463,7 @@ def painel_admin_legado(request):
     if av_nota_max:
         av_qs = av_qs.filter(nota_disc__lte=av_nota_max)
 
+    # ── Filtros disciplinas ──
     disc_qs     = Disciplina.objects.all()
     disc_busca  = request.GET.get('disc_busca', '').strip()
     disc_status = request.GET.get('disc_status', '').strip()
@@ -539,17 +475,20 @@ def painel_admin_legado(request):
     if disc_periodo:
         disc_qs = disc_qs.filter(periodo=disc_periodo)
 
+    # ── Paginação ──
     av_page   = Paginator(av_qs, 10).get_page(request.GET.get('av_page'))
     disc_page = Paginator(disc_qs, 10).get_page(request.GET.get('disc_page'))
 
+    from .models import Status
     curriculos = Curriculo.objects.prefetch_related('items').all()
 
     return render(request, 'core/painel_admin.html', {
         'solicitacoes':  solicitacoes,
         'av_page':       av_page,
         'disc_page':     disc_page,
-        'status_choices': Status.choices if hasattr(Status, 'choices') else [],
+        'status_choices': Status.choices,
         'periodos':      range(1, 11),
+        # valores dos filtros para repopular os campos
         'av_disciplina': av_disciplina,
         'av_nota_min':   av_nota_min,
         'av_nota_max':   av_nota_max,
@@ -622,7 +561,9 @@ def admin_curriculo_detalhe(request, cur_id):
     if f_tipo:
         items = items.filter(tipo=f_tipo)
     if f_busca:
-        items = items.filter(Q(disciplina__nome__icontains=f_busca) | Q(disciplina__codigo__icontains=f_busca))
+        items = items.filter(
+            Q(disciplina__nome__icontains=f_busca) | Q(disciplina__codigo__icontains=f_busca)
+        )
     if f_creditos:
         items = items.filter(disciplina__creditos=f_creditos)
 
@@ -631,13 +572,13 @@ def admin_curriculo_detalhe(request, cur_id):
     return render(request, 'core/admin_curriculo.html', {
         'curriculo':    curriculo,
         'items':        items,
-        'todas_disc':    todas_disc,
+        'todas_disc':   todas_disc,
         'tipo_choices': CurriculoItem.Tipo.choices,
-        'periodos':      range(1, 9),
+        'periodos':     range(1, 9),
         'f_periodo':    f_periodo,
         'f_tipo':       f_tipo,
         'f_busca':      f_busca,
-        'f_creditos':    f_creditos,
+        'f_creditos':   f_creditos,
         'total_items':  curriculo.items.count(),
     })
 
@@ -693,6 +634,7 @@ def progressao_academica(request):
         return render(request, 'core/progressao.html', {'sem_curriculo': True})
 
     items = curriculo.items.select_related('disciplina').order_by('periodo_recomendado', 'tipo', 'disciplina__nome')
+
     matriculas_map = {m.disciplina_id: m for m in Matricula.objects.filter(aluno=student)}
     concluidas_ids = {did for did, m in matriculas_map.items() if m.status == Matricula.StatusMatricula.CONCLUIDO}
 
@@ -706,7 +648,7 @@ def progressao_academica(request):
 
         matricula = matriculas_map.get(item.disciplina_id)
         if matricula:
-            status = matricula.status
+            status = matricula.status  # cursando / concluido / trancado
         else:
             prereqs = item.disciplina.grupos_requisitos.prefetch_related('disciplinas').filter(tipo='PRE')
             bloqueado = False
@@ -722,8 +664,8 @@ def progressao_academica(request):
 
         periodos[p].append({
             'disciplina': item.disciplina,
-            'tipo':        item.tipo,
-            'status':      status,
+            'tipo':       item.tipo,
+            'status':     status,
         })
 
         cred = item.disciplina.creditos
@@ -747,3 +689,49 @@ def progressao_academica(request):
         'obrig_pct': obrig_pct,
         'optat_pct': optat_pct,
     })
+
+
+def detalhes_disciplina(request):
+    disciplina = {
+        "id": 1,
+        "nome": "Cálculo I",
+        "creditos": 4,
+        "descricao": "Limites, derivadas e integrais de funções de uma variável.",
+        "departamento": "MAT",
+    }
+
+    turmas = [
+        {
+            "id": 1,
+            "professor": {"nome": "Dra. Helena Vasconcelos"},
+            "horario": "SEG 09:00–11:00, QUA 09:00–11:00",
+            "vagas_ocupadas": 28,
+            "vagas_totais": 40,
+            "nota_media": 4.5,
+        },
+        {
+            "id": 2,
+            "professor": {"nome": "Dr. Ricardo Almeida"},
+            "horario": "TER 13:00–15:00, QUI 13:00–15:00",
+            "vagas_ocupadas": 34,
+            "vagas_totais": 40,
+            "nota_media": 4.2,
+        },
+        {
+            "id": 3,
+            "professor": {"nome": "Prof. Fernanda Costa"},
+            "horario": "SEG 19:00–21:00, QUA 19:00–21:00",
+            "vagas_ocupadas": 15,
+            "vagas_totais": 40,
+            "nota_media": 4.8,
+        },
+    ]
+
+    avaliacoes = [
+        {"data": "29/04/2026", "comentario": "Matéria pesada, mas a professora explica muito bem."},
+        {"data": "17/04/2026", "comentario": "As listas ajudam bastante. Exige dedicação semanal."},
+        {"data": "05/04/2026", "comentario": "Provas difíceis, porém coerentes com o conteúdo."},
+    ]
+
+    context = {"disciplina": disciplina, "turmas": turmas, "avaliacoes": avaliacoes}
+    return render(request, "core/matricula_turma.html", context)
