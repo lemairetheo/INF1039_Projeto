@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Sum, Avg, Q
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.core.exceptions import PermissionDenied
 from .models import (
     Disciplina, Professor, Matricula, Turma, Avaliacao, Student, 
     Denuncia, Requisito, SolicitacaoDisciplina, Curriculo, CurriculoItem, Status
@@ -111,7 +112,7 @@ def professores(request):
     if search_query:
         todos = todos.filter(nome__icontains=search_query)
     
-    paginator = Paginator(todos, 3)  # Ajustável conforme quantidade necessária
+    paginator = Paginator(todos, 3)  
     page_number = request.GET.get('page')
     professores_paginados = paginator.get_page(page_number)
         
@@ -182,7 +183,7 @@ def editar_perfil(request):
         if user_form.is_valid() and student_form.is_valid():
             user_form.save()
             student_form.save()
-            messages.success(request, 'Perfil atualizado com sucesso!')
+            messages.success(request, 'Perfil updated com sucesso!')
             return redirect('perfil')
     else:
         user_form    = UserEditForm(instance=request.user)
@@ -250,6 +251,10 @@ def register_view(request):
 
 
 def login_redirect_view(request):
+    """
+    Ponto central de redirecionamento pós-login. Intercepta se o usuário é 
+    administrador (is_staff) ou usuário comum do sistema de forma transparente.
+    """
     if not request.user.is_authenticated:
         return redirect('login')
     if request.user.is_staff:
@@ -474,8 +479,22 @@ def detalhes_disciplina(request):
 
 @user_passes_test(_is_admin, login_url='/login/')
 def painel_admin(request):
-    """Página principal do Administrador (admin.html)"""
-    return render(request, 'core/admin.html')
+    """Página principal do Administrador (admin.html) alimentando os cards estatísticos"""
+    total_matriculas = Matricula.objects.count()
+    total_estudantes = Student.objects.count()
+    total_denuncias  = Denuncia.objects.count()
+    
+    solicitacoes = SolicitacaoDisciplina.objects.filter(status='PENDENTE').select_related('solicitante')[:5]
+    disciplinas_list = Disciplina.objects.all().order_by('codigo')[:5]
+
+    context = {
+        'total_matriculas': total_matriculas,
+        'total_estudantes': total_estudantes,
+        'total_denuncias': total_denuncias,
+        'solicitacoes': solicitacoes,
+        'disciplinas': disciplinas_list,
+    }
+    return render(request, 'core/admin.html', context)
 
 
 @user_passes_test(_is_admin, login_url='/login/')
@@ -625,7 +644,7 @@ def admin_curriculo_detalhe(request, cur_id):
         'tipo_choices': CurriculoItem.Tipo.choices,
         'periodos':      range(1, 9),
         'f_periodo':    f_periodo,
-        'f_tipo':       f_tipo,
+                'f_tipo':       f_tipo,
         'f_busca':      f_busca,
         'f_creditos':    f_creditos,
         'total_items':  curriculo.items.count(),
