@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Disciplinas - Academic Curator</title>
+    <link class="sheet" rel="stylesheet" href="/static/css/disciplinas_style.css">
+</head>
+<body>
+
+    <main class="container">
+        <a href="{% url 'painel_admin' %}" class="back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Painel
+        </a>
+
+        <header class="page-header">
+            <div>
+                <h1 class="page-title">Gerenciar Disciplinas</h1>
+                <p class="page-description">Visualização de disciplinas cadastradas no sistema institucional.</p>
+            </div>
+            <a href="{% url 'solicitar_disciplina' %}" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Nova Disciplina
+            </a>
+        </header>
+
+        <section class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>NOME DA DISCIPLINA</th>
+                        <th>CÓDIGO / DEPT</th>
+                        <th>CRÉDITOS</th>
+                        <th class="text-right">AÇÕES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for disciplina in disciplinas %}
+                    <tr>
+                        <td class="font-bold text-dark">
+                            <a href="{% url 'disciplina_detalhe' disciplina.pk %}" class="course-link">{{ disciplina.nome }}</a>
+                        </td>
+                        <td class="text-muted">{{ disciplina.departamento|default:"INF" }}</td>
+                        <td class="font-bold">{{ disciplina.creditos }}</td>
+                        <td class="text-right actions-cell">
+                            <a href="{% url 'admin_deletar_disciplina' disciplina.id %}" class="action-delete" onclick="return confirm('Tem certeza que deseja remover esta disciplina?');">Excluir</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 32px; color: #64748b;">
+                            Nenhuma disciplina cadastrada no sistema.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+</body>
+</html>
