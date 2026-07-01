@@ -5,77 +5,221 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Academic Curator{% endblock %}</title>
+
     <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
+
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
 
-    <header class="navbar">
-        <div class="navbar-inner">
-            <a href="{% url 'home' %}" class="navbar-brand">
-                <span class="brand-icon">📖</span>
-                <span class="brand-name">Academic Curator</span>
+<header class="navbar">
+    <div class="navbar-inner">
+
+        <a href="{% url 'home' %}" class="navbar-brand">
+            <span class="brand-icon">📖</span>
+            <span class="brand-name">Academic Curator</span>
+        </a>
+
+        <nav class="navbar-links">
+
+            <a href="{% url 'home' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                Início
             </a>
 
-            <nav class="navbar-links">
-                <a href="{% url 'home' %}"        class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Início</a>
-                <a href="{% url 'disciplinas' %}"  class="nav-link {% if request.resolver_match.url_name == 'disciplinas' %}active{% endif %}">Disciplinas</a>
-                <a href="{% url 'professores' %}"  class="nav-link {% if request.resolver_match.url_name == 'professores' %}active{% endif %}">Professores</a>
-                <a href="{% url 'Avaliações' %}"   class="nav-link {% if request.resolver_match.url_name == 'Avaliações' %}active{% endif %}">Avaliações</a>
-                {% if user.is_authenticated and user.is_staff %}
-                    <a href="{% url 'painel_admin' %}" class="nav-link {% if request.resolver_match.url_name == 'painel_admin' %}active{% endif %}">Painel</a>
-                {% endif %}
-            </nav>
+            <a href="{% url 'disciplinas' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'disciplinas' %}active{% endif %}">
+                Disciplinas
+            </a>
 
-            <div class="navbar-auth">
-                {% if user.is_authenticated %}
-                    <div class="nav-user-menu">
-                        <button class="nav-user-btn" type="button">
-                            <span class="nav-user-avatar">{{ user.get_full_name|default:user.username|slice:":1"|upper }}</span>
-                            <span class="nav-user-name">{{ user.get_full_name|default:user.username }}</span>
-                            <svg class="nav-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </button>
-                        <div class="nav-dropdown">
-                            {% if user.student %}
-                                <a href="{% url 'perfil' %}"               class="nav-drop-link">Perfil</a>
-                                <a href="{% url 'progressao_academica' %}" class="nav-drop-link">Progressão</a>
-                                <a href="{% url 'matricula' %}"            class="nav-drop-link">Matrícula</a>
-                                <a href="{% url 'grade' %}"                class="nav-drop-link">Grade Horária</a>
-                                <a href="{% url 'Nova Avaliação' %}"       class="nav-drop-link">Avaliar</a>
-                            {% elif user.professor %}
-                                <a href="{% url 'professor_perfil' %}"                          class="nav-drop-link">Meu Perfil</a>
-                                <a href="{% url 'minhas avaliações' user.professor.id %}"       class="nav-drop-link">Minhas Avaliações</a>
-                            {% elif user.is_staff %}
-                                <a href="{% url 'painel_admin' %}" class="nav-drop-link">Painel Admin</a>
-                            {% endif %}
-                            <div class="nav-drop-divider"></div>
-                            <form method="post" action="{% url 'logout' %}" style="margin:0;">
-                                {% csrf_token %}
-                                <button type="submit" class="nav-drop-logout">Sair</button>
-                            </form>
-                        </div>
-                    </div>
-                {% else %}
-                    <a href="{% url 'login' %}"    class="btn-nav-outline">Entrar</a>
-                    <a href="{% url 'register' %}" class="btn-nav-primary">Cadastrar</a>
-                {% endif %}
+            <a href="{% url 'professores' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'professores' %}active{% endif %}">
+                Professores
+            </a>
+
+            <a href="{% url 'Avaliações' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'Avaliações' %}active{% endif %}">
+                Avaliações
+            </a>
+
+            {% if user.is_authenticated and user.is_superuser %}
+
+            <div class="nav-admin-menu">
+
+                <button class="nav-link nav-admin-btn" type="button">
+                    ⚙️ Administração
+                </button>
+
+                <div class="nav-admin-dropdown">
+
+                    <span class="nav-admin-section-title">
+                        Painel
+                    </span>
+
+                    <a href="{% url 'admin_dashboard' %}" class="nav-drop-link">
+                        📊 Dashboard
+                    </a>
+
+                    <a href="{% url 'painel_admin' %}" class="nav-drop-link">
+                        📋 Painel Geral
+                    </a>
+
+                    <div class="nav-drop-divider"></div>
+
+                    <span class="nav-admin-section-title">
+                        Disciplinas
+                    </span>
+
+                    <a href="{% url 'admin_validar_disciplinas' %}" class="nav-drop-link">
+                        📝 Pedidos de Disciplinas
+                    </a>
+
+                    <a href="{% url 'admin_disciplinas' %}" class="nav-drop-link">
+                        📚 Gerenciar Disciplinas
+                    </a>
+
+                    <a href="{% url 'admin_denuncias_disciplinas' %}" class="nav-drop-link">
+                        🚩 Denúncias de Disciplinas
+                    </a>
+
+                    <div class="nav-drop-divider"></div>
+
+                    <span class="nav-admin-section-title">
+                        Avaliações
+                    </span>
+
+                    <a href="{% url 'admin_avaliacoes' %}" class="nav-drop-link">
+                        ⭐ Avaliações Denunciadas
+                    </a>
+
+                    <div class="nav-drop-divider"></div>
+
+                    <span class="nav-admin-section-title">
+                        Professores
+                    </span>
+
+                    <a href="{% url 'admin_validar_professores' %}" class="nav-drop-link">
+                        👨‍🏫 Solicitações de Professor
+                    </a>
+
+                    <div class="nav-drop-divider"></div>
+
+                    <span class="nav-admin-section-title">
+                        Sistema
+                    </span>
+
+                    <a href="/admin/" class="nav-drop-link">
+                        ⚙️ Django Admin
+                    </a>
+
+                </div>
+
             </div>
+
+            {% endif %}
+
+        </nav>
+
+        <div class="navbar-auth">
+
+            {% if user.is_authenticated %}
+
+            <div class="nav-user-menu">
+
+                <button class="nav-user-btn" type="button">
+
+                    <span class="nav-user-avatar">
+                        {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                    </span>
+
+                    <span class="nav-user-name">
+                        {{ user.get_full_name|default:user.username }}
+                    </span>
+
+                </button>
+
+                <div class="nav-dropdown">
+
+                    {% if user.student %}
+
+                        <a href="{% url 'perfil' %}" class="nav-drop-link">Perfil</a>
+                        <a href="{% url 'progressao_academica' %}" class="nav-drop-link">Progressão</a>
+                        <a href="{% url 'matricula' %}" class="nav-drop-link">Matrícula</a>
+                        <a href="{% url 'grade' %}" class="nav-drop-link">Grade Horária</a>
+                        <a href="{% url 'Nova Avaliação' %}" class="nav-drop-link">Nova Avaliação</a>
+
+                    {% elif user.professor %}
+
+                        <a href="{% url 'professor_perfil' %}" class="nav-drop-link">Meu Perfil</a>
+                        <a href="{% url 'minhas avaliações' user.professor.id %}" class="nav-drop-link">
+                            Minhas Avaliações
+                        </a>
+
+                    {% elif user.is_staff %}
+
+                        <a href="{% url 'painel_admin' %}" class="nav-drop-link">
+                            Painel Admin
+                        </a>
+
+                    {% endif %}
+
+                    <div class="nav-drop-divider"></div>
+
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-drop-logout">
+                            Sair
+                        </button>
+                    </form>
+
+                </div>
+
+            </div>
+
+            {% else %}
+
+                <a href="{% url 'login' %}" class="btn-nav-outline">
+                    Entrar
+                </a>
+
+                <a href="{% url 'register' %}" class="btn-nav-primary">
+                    Cadastrar
+                </a>
+
+            {% endif %}
+
         </div>
-    </header>
 
-    <main class="main-content">
-        {% block content %}{% endblock %}
-    </main>
+    </div>
+</header>
 
-    <footer class="site-footer">
-        <div class="footer-inner">
-            <span class="footer-brand">📖 Academic Curator</span>
-            <span class="footer-copy">&copy; 2026 — Projetado para a melhor experiência estudantil.</span>
-        </div>
-    </footer>
+<main class="main-content">
+    {% block content %}
+    {% endblock %}
+</main>
 
-    {% block extra_js %}{% endblock %}
+<footer class="site-footer">
+
+    <div class="footer-inner">
+
+        <span class="footer-brand">
+            📖 Academic Curator
+        </span>
+
+        <span class="footer-copy">
+            © 2026 — Projetado para a melhor experiência estudantil.
+        </span>
+
+    </div>
+
+</footer>
+
+{% block extra_js %}
+{% endblock %}
+
 </body>
 </html>
