@@ -1,0 +1,225 @@
+/* ==========================================================================
+   1. Reset e Tipografia
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #f8fafc;
+    color: #1e293b;
+    padding: 48px 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* ==========================================================================
+   2. Elementos Globais e Cabeçalhos
+   ========================================================================== */
+.page-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #0f2d59;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+}
+
+.page-description {
+    font-size: 16px;
+    color: #64748b;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    transition: color 0.2s ease;
+}
+
+.back-link:hover {
+    color: #0f2d59;
+}
+
+/* ==========================================================================
+   3. Filtros e Abas
+   ========================================================================== */
+.filter-group {
+    display: flex;
+    gap: 12px;
+    margin: 32px 0 24px 0;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 16px;
+}
+
+.filter-btn {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    background-color: #f1f5f9;
+    color: #0f2d59;
+}
+
+.filter-btn.active {
+    background-color: #0f2d59;
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   4. Estrutura de Cards de Conteúdo
+   ========================================================================== */
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.content-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: none; /* Escondido por padrão, JavaScript ativa com .show */
+}
+
+.content-card.show {
+    display: block;
+}
+
+.content-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.report-reason {
+    font-size: 14px;
+    color: #475569;
+}
+
+.card-body {
+    margin-bottom: 20px;
+}
+
+.review-text {
+    font-size: 16px;
+    color: #1e293b;
+    line-height: 1.6;
+    font-style: italic;
+    margin-bottom: 12px;
+}
+
+.review-meta {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.card-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 16px;
+}
+
+/* Variantes de Borda Lateral por Status */
+.status-pending { border-left: 4px solid #eab308; }
+.status-approved { border-left: 4px solid #22c55e; }
+.status-cancelled { border-left: 4px solid #ef4444; }
+
+.action-result {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.text-success { color: #16a34a; }
+.text-danger { color: #dc2626; }
+
+/* ==========================================================================
+   5. Componentes de Botão e Badges
+   ========================================================================== */
+.btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-approve {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #16a34a;
+}
+
+.btn-approve:hover {
+    background-color: #16a34a;
+    color: #ffffff;
+}
+
+.btn-reject {
+    background-color: #fef2f2;
+    border: 1px solid #fee2e2;
+    color: #dc2626;
+}
+
+.btn-reject:hover {
+    background-color: #dc2626;
+    color: #ffffff;
+}
+
+.badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-pending { background-color: #fef9c3; color: #854d0e; }
+.badge-approved { background-color: #dcfce7; color: #166534; }
+.badge-cancelled { background-color: #fee2e2; color: #991b1b; }
+
+/* Estado Vazio Dinâmico */
+.empty-state {
+    display: none;
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 48px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+.empty-state.show { display: block; }
+.empty-state-text { color: #64748b; font-size: 15px; font-weight: 500; }
