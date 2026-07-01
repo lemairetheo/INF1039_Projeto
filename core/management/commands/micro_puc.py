@@ -39,7 +39,7 @@ class Command(BaseCommand):
         driver = webdriver.Chrome(service=service, options=chrome_options)
 
         self.stdout.write(self.style.WARNING("Acessando a página do Microhorário da PUC..."))
-        url = "https://microhorario.rdc.puc-rio.br/WebMicroHorarioConsulta/MicroHorarioConsulta.aspx?sessao=U2lzdGVtYT1QVUNPTkxJTkVfQUxVTk8mQXBsaWNhY2FvPU1JQ1JPX0hPUkFSSU8mRnVuY2FvPUhPUkFSSU9fU0FMQSZJRD1iODk0ZjU2MmU5MjQ0ZTViYjk3Mzk2ZmFjNDg3ZDY4Yw__"
+        url = "https://microhorario.rdc.puc-rio.br/WebMicroHorarioConsulta/MicroHorarioConsulta.aspx?sessao=U2lzdGVtYT1QVUNPTkxJTkVfQUxVTk8mQXBsaWNhY2FvPU1JQ1JPX0hPUkFSSU8mRnVuY2FvPUNPTlNVTFRBJklEPTExMzA1NjhjZTA1ZjRmNWI4NmZlOWE0OWIxNWMxOWI1"
 
         driver.get(url)
         time.sleep(3)
