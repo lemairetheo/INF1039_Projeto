@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliações Denunciadas - Academic Curator</title>
+    <link rel="stylesheet" href="avaliacoes_style.css">
+</head>
+<body>
+
+    <main class="container">
+        <a href="/admin-dashboard/" class="back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Painel
+        </a>
+
+        <h1 class="page-title">Avaliações Denunciadas</h1>
+        <p class="page-description">Revise denúncias e decida se a avaliação deve permanecer publicada.</p>
+
+        <div class="filter-group">
+            <button class="filter-btn active" data-status="pending">Pendentes</button>
+            <button class="filter-btn" data-status="approved">Aprovadas</button>
+            <button class="filter-btn" data-status="cancelled">Canceladas</button>
+        </div>
+
+        {% if denuncias %}
+        <div class="reviews-list">
+            {% for denuncia in denuncias %}
+            <div class="content-card show status-pending" data-card-status="pending">
+                <div class="card-header">
+                    <span class="badge badge-pending">PENDENTE</span>
+                    <span class="report-reason">Motivo: {{ denuncia.motivo }}</span>
+                </div>
+                <div class="card-body">
+                    <p class="review-text">"{{ denuncia.avaliacao.comentario }}"</p>
+                    {% if denuncia.descricao %}
+                    <p class="review-meta">Descrição: {{ denuncia.descricao }}</p>
+                    {% endif %}
+                    <p class="review-meta">
+                        Disciplina: {{ denuncia.avaliacao.disciplina }} |
+                        Aluno: {{ denuncia.avaliacao.aluno }} |
+                        Data: {{ denuncia.data_denuncia|date:"d/m/Y" }}
+                    </p>
+                </div>
+                <div class="card-actions">
+                    <form method="post" action="/admin-avaliacoes/{{ denuncia.id }}/aprovar/" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-approve">Aprovar</button>
+                    </form>
+                    <form method="post" action="/admin-avaliacoes/{{ denuncia.id }}/rejeitar/" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-reject">Rejeitar</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="empty-state-text">Nenhuma avaliação nesta categoria.</p>
+        </div>
+        {% endif %}
+    </main>
+
+    <script src="avaliacoes_script.js"></script>
+</body>
+</html>

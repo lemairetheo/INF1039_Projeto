@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Administrador - Academic Curator</title>
+    <link rel="stylesheet" href="admin_style.css">
+</head>
+<body>
+
+    <main class="container">
+        <header class="dashboard-header">
+            <h1 class="page-title">Painel do Administrador</h1>
+            <p class="page-description">Visão geral institucional e controles administrativos.</p>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card card-blue">
+                <div class="card-content">
+                    <span class="stat-label">TOTAL DE MATRÍCULAS</span>
+                    <span class="stat-number">{{ total_matriculas }}</span>
+                </div>
+                <svg class="card-watermark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+                </svg>
+            </div>
+
+            <div class="stat-card card-white">
+                <span class="stat-label label-muted">TOTAL DE ESTUDANTES</span>
+                <span class="stat-number color-blue">{{ total_estudantes }}</span>
+            </div>
+
+            <div class="stat-card card-white card-border-left">
+                <span class="stat-label label-muted">AVALIAÇÃO MÉDIA</span>
+                <div class="stat-number-group">
+                    <span class="stat-number">{{ avaliacao_media }}</span>
+                    <svg class="star-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <h2 class="section-title">Solicitações de Professor</h2>
+            {% for sol in solicitacoes_recentes %}
+            <div class="info-card">
+                <div class="card-row">
+                    <div>
+                        <h3 class="item-name">{{ sol.solicitante.get_full_name|default:sol.solicitante.username }}</h3>
+                        <p class="item-sub">{{ sol.solicitante.email }}</p>
+                    </div>
+                    <span class="badge badge-{% if sol.status == 'aprovado' %}approved{% elif sol.status == 'rejeitado' %}danger{% else %}pending{% endif %}">
+                        {{ sol.get_status_display|upper }}
+                    </span>
+                </div>
+                <div class="card-footer-info">
+                    <p>Enviado em {{ sol.criado_em|date:"d/m/Y" }}</p>
+                    <p class="text-muted">{{ sol.nome }} ({{ sol.codigo }})</p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state-card">
+                <p class="empty-state-text">Nenhuma solicitação pendente.</p>
+            </div>
+            {% endfor %}
+        </section>
+
+        <section class="dashboard-section">
+            <div class="section-header-row">
+                <h2 class="section-title">Moderação de Avaliações</h2>
+                <span class="badge badge-danger">{{ avaliacoes_pendentes_count }} ocultas</span>
+            </div>
+            {% if avaliacoes_pendentes_count > 0 %}
+            <div class="info-card">
+                <p>{{ avaliacoes_pendentes_count }} avaliação(ões) aguardando moderação.</p>
+            </div>
+            {% else %}
+            <div class="empty-state-card">
+                <p class="empty-state-text">Nenhuma avaliação aguardando moderação.</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="dashboard-section">
+            <h2 class="section-title">Cursos Ativos</h2>
+            <div class="course-list">
+                {% for disc in disciplinas_ativas %}
+                <div class="info-card course-card">
+                    <div class="course-main">
+                        <div class="course-badge-row">
+                            <span class="badge badge-tag-{{ disc.codigo|slice:":3"|lower }}">{{ disc.codigo|slice:":3" }}</span>
+                            <span class="course-credits">{{ disc.creditos }} créditos</span>
+                        </div>
+                        <h3 class="course-name">{{ disc.nome }}</h3>
+                        {% if disc.turma_disciplina.first %}
+                        <p class="course-teacher">{{ disc.turma_disciplina.first.professor.nome }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="course-stats">
+                        <span class="ratio-number">{{ disc.alunos_matriculados }}/{{ disc.vagas_totais }}</span>
+                        <span class="ratio-label">estudantes</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state-card">
+                    <p class="empty-state-text">Nenhuma disciplina ativa.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <h2 class="section-title">Gerenciamento</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                <a href="/admin-validar-disciplinas/" class="info-card" style="text-decoration: none; color: inherit; transition: transform 0.2s;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #0f2d59;">Validar Disciplinas</h3>
+                    <p style="margin: 0; color: #64748b; font-size: 14px;">Aprove ou rejeite disciplinas pendentes</p>
+                </a>
+                <a href="/admin-denuncias-disciplinas/" class="info-card" style="text-decoration: none; color: inherit; transition: transform 0.2s;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #0f2d59;">Denúncias de Disciplinas</h3>
+                    <p style="margin: 0; color: #64748b; font-size: 14px;">Gerencie denúncias de disciplinas</p>
+                </a>
+                <a href="/admin-validar-professores/" class="info-card" style="text-decoration: none; color: inherit; transition: transform 0.2s;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #0f2d59;">Validar Professores</h3>
+                    <p style="margin: 0; color: #64748b; font-size: 14px;">Aprove ou rejeite professores</p>
+                </a>
+                <a href="/admin-disciplinas/" class="info-card" style="text-decoration: none; color: inherit; transition: transform 0.2s;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #0f2d59;">Gerenciar Disciplinas</h3>
+                    <p style="margin: 0; color: #64748b; font-size: 14px;">Veja e gerencie todas as disciplinas</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>

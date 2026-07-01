@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Disciplinas - Academic Curator</title>
+    <link rel="stylesheet" href="disciplinas_style.css">
+</head>
+<body>
+
+    <main class="container">
+        <a href="/admin-dashboard/" class="back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Painel
+        </a>
+
+        <header class="page-header">
+            <div>
+                <h1 class="page-title">Gerenciar Disciplinas</h1>
+                <p class="page-description">Cadastre, edite e remova disciplinas oferecidas.</p>
+            </div>
+            <button class="btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Nova disciplina
+            </button>
+        </header>
+
+        <section class="filter-card">
+            <form method="get">
+                <div class="filter-grid">
+                    <div class="form-group search-group">
+                        <label class="form-label">BUSCAR</label>
+                        <input type="text" name="search" class="form-input" placeholder="Título, professor ou departamento" value="{{ search_query }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">DEPARTAMENTO</label>
+                        <div class="select-wrapper">
+                            <select name="departamento" class="form-select">
+                                <option>Todos</option>
+                                {% for dept in departamentos %}
+                                <option value="{{ dept }}" {% if dept == dept_query %}selected{% endif %}>{{ dept }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">STATUS</label>
+                        <div class="select-wrapper">
+                            <select name="status" class="form-select">
+                                <option>Todos</option>
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if value == status_query %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <section class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>DISCIPLINA</th>
+                        <th>DEPARTAMENTO</th>
+                        <th>PROFESSOR</th>
+                        <th>CRÉDITOS</th>
+                        <th>ALUNOS</th>
+                        <th>STATUS</th>
+                        <th class="text-right">AÇÕES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for disc in disciplinas %}
+                    <tr>
+                        <td class="font-bold text-dark">{{ disc.nome }}</td>
+                        <td class="text-muted">{{ disc.codigo|slice:":3" }}</td>
+                        <td>
+                            {% if disc.turma_disciplina.first %}
+                                {{ disc.turma_disciplina.first.professor.nome }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="font-bold">{{ disc.creditos }}</td>
+                        <td>{{ disc.alunos_matriculados }}/{{ disc.vagas_totais }}</td>
+                        <td><span class="badge badge-active">{{ disc.get_status_display|upper }}</span></td>
+                        <td class="text-right actions-cell">
+                            <a href="#" class="action-edit">Editar</a>
+                            <form method="post" action="/admin-painel/deletar-disciplina/{{ disc.id }}/" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir?');">
+                                {% csrf_token %}
+                                <button type="submit" class="action-delete" style="background:none; border:none; cursor:pointer; padding:0; font:inherit;">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 32px; color: #94a3b8;">Nenhuma disciplina encontrada.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        {% if disciplinas.has_other_pages %}
+        <div style="margin-top: 24px; text-align: center; color: #64748b;">
+            {% if disciplinas.has_previous %}
+            <a href="?page={{ disciplinas.previous_page_number }}&search={{ search_query }}&departamento={{ dept_query }}&status={{ status_query }}" style="margin: 0 8px; color: #0f2d59;">&laquo; Anterior</a>
+            {% endif %}
+            
+            <span>Página {{ disciplinas.number }} de {{ disciplinas.paginator.num_pages }}</span>
+            
+            {% if disciplinas.has_next %}
+            <a href="?page={{ disciplinas.next_page_number }}&search={{ search_query }}&departamento={{ dept_query }}&status={{ status_query }}" style="margin: 0 8px; color: #0f2d59;">Próxima &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </main>
+
+</body>
+</html>

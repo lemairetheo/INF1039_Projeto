@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validar Professores - Academic Curator</title>
+    <link rel="stylesheet" href="disciplinas_style.css">
+</head>
+<body>
+
+    <main class="container">
+        <a href="/admin-dashboard/" class="back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Painel
+        </a>
+
+        <header class="page-header">
+            <div>
+                <h1 class="page-title">Validar Professores</h1>
+                <p class="page-description">Aprove ou rejeite professores que estão pendentes de validação.</p>
+            </div>
+        </header>
+
+        {% if messages %}
+        <div style="margin-bottom: 20px;">
+            {% for message in messages %}
+            <div style="padding: 12px 20px; border-radius: 8px; background-color: {% if message.tags == 'success' %}#d4edda{% else %}#f8d7da{% endif %}; color: {% if message.tags == 'success' %}#155724{% else %}#721c24{% endif %}; margin-bottom: 10px;">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <section class="filter-card">
+            <form method="get">
+                <div class="filter-grid">
+                    <div class="form-group search-group">
+                        <label class="form-label">BUSCAR</label>
+                        <input type="text" name="search" class="form-input" placeholder="Nome ou departamento" value="{{ search_query }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">DEPARTAMENTO</label>
+                        <div class="select-wrapper">
+                            <select name="departamento" class="form-select">
+                                <option value="">Todos</option>
+                                {% for dept in departamentos %}
+                                <option value="{{ dept }}" {% if dept == dept_query %}selected{% endif %}>{{ dept }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" style="margin-top: 16px; background: #0f2d59; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Filtrar</button>
+            </form>
+        </section>
+
+        {% if professores %}
+        <section class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>PROFESSOR</th>
+                        <th>EMAIL</th>
+                        <th>DEPARTAMENTO</th>
+                        <th>DATA DE CADASTRO</th>
+                        <th>DOCUMENTO</th>
+                        <th class="text-right">AÇÕES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prof in professores %}
+                    <tr>
+                        <td class="font-bold text-dark">{{ prof.nome }}</td>
+                        <td class="text-muted">{{ prof.user.email|default:"-" }}</td>
+                        <td>{{ prof.departamento }}</td>
+                        <td>{{ prof.criado_em|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if prof.documento %}
+                            <a href="{{ prof.documento.url }}" target="_blank" style="color: #0f2d59; text-decoration: none;">Ver documento</a>
+                            {% else %}
+                            <span class="text-muted">Não anexado</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right actions-cell">
+                            <form method="post" action="/admin-validar-professores/{{ prof.id }}/aprovar/" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="action-edit" style="background:none; border:none; cursor:pointer; padding:0; font:inherit;">Aprovar</button>
+                            </form>
+                            <form method="post" action="/admin-validar-professores/{{ prof.id }}/rejeitar/" style="display:inline; margin-left: 16px;" onsubmit="return confirm('Tem certeza que deseja rejeitar este professor?');">
+                                {% csrf_token %}
+                                <button type="submit" class="action-delete" style="background:none; border:none; cursor:pointer; padding:0; font:inherit;">Rejeitar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        {% if professores.has_other_pages %}
+        <div style="margin-top: 24px; text-align: center; color: #64748b;">
+            {% if professores.has_previous %}
+            <a href="?page={{ professores.previous_page_number }}&search={{ search_query }}&departamento={{ dept_query }}" style="margin: 0 8px; color: #0f2d59;">&laquo; Anterior</a>
+            {% endif %}
+            
+            <span>Página {{ professores.number }} de {{ professores.paginator.num_pages }}</span>
+            
+            {% if professores.has_next %}
+            <a href="?page={{ professores.next_page_number }}&search={{ search_query }}&departamento={{ dept_query }}" style="margin: 0 8px; color: #0f2d59;">Próxima &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state-card" style="background-color: #ffffff; border-radius: 16px; padding: 48px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-top: 24px;">
+            <p style="color: #64748b; font-size: 15px; font-weight: 500;">Nenhum professor pendente de validação.</p>
+        </div>
+        {% endif %}
+    </main>
+
+</body>
+</html>

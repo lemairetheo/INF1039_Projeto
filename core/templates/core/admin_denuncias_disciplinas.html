@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Denúncias de Disciplinas - Academic Curator</title>
+    <link rel="stylesheet" href="{% static 'admin/css/avaliacoes_style.css' %}">
+</head>
+<body>
+
+    <main class="container">
+        <a href="{% url 'admin_dashboard' %}" class="back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Painel
+        </a>
+
+        <h1 class="page-title">Denúncias de Disciplinas</h1>
+        <p class="page-description">Revise denúncias de disciplinas e decida se devem ser mantidas ou canceladas.</p>
+
+        {% if messages %}
+        <div style="margin-bottom: 20px;">
+            {% for message in messages %}
+            <div style="padding: 12px 20px; border-radius: 8px; background-color: {% if message.tags == 'success' %}#d4edda{% else %}#f8d7da{% endif %}; color: {% if message.tags == 'success' %}#155724{% else %}#721c24{% endif %}; margin-bottom: 10px;">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="filter-group">
+            <a href="?status=pendente" class="filter-btn {% if current_status == 'pendente' %}active{% endif %}">Pendentes</a>
+            <a href="?status=validado" class="filter-btn {% if current_status == 'validado' %}active{% endif %}">Validados</a>
+            <a href="?status=rejeitado" class="filter-btn {% if current_status == 'rejeitado' %}active{% endif %}">Rejeitados</a>
+        </div>
+
+        {% if denuncias %}
+        <div class="reviews-list">
+            {% for denuncia in denuncias %}
+            <div class="content-card show status-{% if denuncia.status == 'pendente' %}pending{% elif denuncia.status == 'validado' %}approved{% else %}cancelled{% endif %}" data-card-status="{{ denuncia.status }}">
+                <div class="card-header">
+                    <span class="badge badge-{% if denuncia.status == 'pendente' %}pending{% elif denuncia.status == 'validado' %}approved{% else %}cancelled{% endif %}">
+                        {{ denuncia.get_status_display|upper }}
+                    </span>
+                    <span class="report-reason">Motivo: {{ denuncia.get_motivo_display|default:denuncia.motivo }}</span>
+                </div>
+                <div class="card-body">
+                    <p class="review-text" style="font-style: normal; font-weight: 600; color: #0f2d59;">{{ denuncia.disciplina.nome }} ({{ denuncia.disciplina.codigo }})</p>
+                    {% if denuncia.descricao %}
+                    <p class="review-meta">Descrição: {{ denuncia.descricao }}</p>
+                    {% endif %}
+                    <p class="review-meta">
+                        Denunciante: {{ denuncia.denunciante.get_full_name|default:denuncia.denunciante.username }} |
+                        Data: {{ denuncia.data_denuncia|date:"d/m/Y H:i" }}
+                    </p>
+                </div>
+                {% if denuncia.status == 'pendente' %}
+                <div class="card-actions">
+                    <form method="post" action="{% url 'admin_validar_denuncia_disciplina' denuncia.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-approve">Validar (Manter)</button>
+                    </form>
+                    <form method="post" action="{% url 'admin_rejeitar_denuncia_disciplina' denuncia.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-reject">Rejeitar (Cancelar Disciplina)</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if denuncias.has_other_pages %}
+        <div style="margin-top: 24px; text-align: center;">
+            {% if denuncias.has_previous %}
+            <a href="?page={{ denuncias.previous_page_number }}&status={{ current_status }}" style="margin: 0 8px;">&laquo; Anterior</a>
+            {% endif %}
+            
+            <span>Página {{ denuncias.number }} de {{ denuncias.paginator.num_pages }}</span>
+            
+            {% if denuncias.has_next %}
+            <a href="?page={{ denuncias.next_page_number }}&status={{ current_status }}" style="margin: 0 8px;">Próxima &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="content-card show">
+            <p class="empty-state-text">Nenhuma denúncia nesta categoria.</p>
+        </div>
+        {% endif %}
+    </main>
+
+</body>
+</html>
